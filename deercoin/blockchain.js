@@ -18,6 +18,10 @@ class Blockchain {
       this.chain.push(this.genesisBlock);
     }
 
+    setChain(newChain){
+      this.chain = newChain;
+    }
+
     /*
     *calculated the hash of the a block using js-sha256 package from npm
     */
@@ -32,6 +36,10 @@ class Blockchain {
       this.chain.push(block);
     }
 
+
+    /*
+    * prints the chains
+    */
     printChain(){
       for(var i = 0;i<this.chain.length;i++){
         console.log(this.chain[i]);
