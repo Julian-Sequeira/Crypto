@@ -24,4 +24,6 @@ if(!file.doesExist()){
     data = file.readIO();
     deerChain.setChain(data['chain']);
 }
-deerChain.printChain();
+nb = deerChain.generateNextBlock("mona was here");
+console.log(deerChain.isChainValid(deerChain.chain));
+//deerChain.printChain();

@@ -65,14 +65,16 @@ class Blockchain {
       var nextTimestamp = new Date().getTime() / 1000;
       var nextHash = this.calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData);
       var newBlock = new Block(nextIndex, nextHash, previousBlock.hash, nextTimestamp, blockData);
-      this.addBlockToChain(newBlock);
+      return newBlock;
+      //this.addBlockToChain(newBlock);
     }
-    //TODO:no tested yet
+    
     /* 
     * returns the correct hash of new block(pending to be added to the chain)
     */
-    calculateHashForBlock(newBlock){
-      var previousBlock = this.getLatestBlock();
+    calculateHashForBlock(newBlock,previousBlock){
+      //var previousBlock = this.getOneToLastBlock();
+      console.log(previousBlock);
       var index = previousBlock.index + 1;
       var timestamp = newBlock.timestamp;
       var previousHash = previousBlock.hash;
@@ -80,7 +82,6 @@ class Blockchain {
 
       return this.calculateHash(index, previousHash, timestamp, blockData);
     }
-
 
     /*
     * checks the validity of a block
@@ -96,7 +97,7 @@ class Blockchain {
       }else if(previousBlock.hash !== newBlock.previousHash){
         console.log('invalid previoushash');
         return false;
-      }else if(this.calculateHashForBlock(newBlock) !== newBlock.hash){
+      }else if(this.calculateHashForBlock(newBlock, previousBlock) !== newBlock.hash){
         console.log('invalid hash');
         return false;
       }
@@ -104,6 +105,7 @@ class Blockchain {
 
     }
 
+    //TODO:no tested yet
     /*
     * checks if the genesis block of one chain is the same as our 
     */
