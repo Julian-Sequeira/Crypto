@@ -67,8 +67,8 @@ class Blockchain {
       var newBlock = new Block(nextIndex, nextHash, previousBlock.hash, nextTimestamp, blockData);
       this.addBlockToChain(newBlock);
     }
-
-    /* NOT TESTED
+    //TODO:no tested yet
+    /* 
     * returns the correct hash of new block(pending to be added to the chain)
     */
     calculateHashForBlock(newBlock){
@@ -82,7 +82,7 @@ class Blockchain {
     }
 
 
-    /* NOT TESTED
+    /*
     * checks the validity of a block
     * For a block to be valid the following must apply:
     *     The index of the block must be one number larger than the previous
@@ -102,6 +102,42 @@ class Blockchain {
       }
       return true;
 
+    }
+
+    /*
+    * checks if the genesis block of one chain is the same as our 
+    */
+    isGenesisValid(chain){
+      return JSON.stringify(this.genesisBlock) == JSON.stringify(chain[0]);
+    }
+
+
+    /*
+    * checks if the chain is valid
+    */
+    isChainValid(chain){
+      if(!this.isGenesisValid(chain)){
+        return false;
+      }
+
+      for(var i = 1;i<chain.length;i++){
+        if(!this.isValidNewBlock(chain[i],chain[i-1])){
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    /*
+    * checks the incoming chain to see if it is longer than ours
+    * if it is, it replaces it with ours
+    */
+    replaceChain(chain){
+      if(this.isChainValid(chain) && chain.length>this.chain.length){
+        this.chain = chain;
+        //TODO: broadcast to other nodes
+      }
     }
   }
 
