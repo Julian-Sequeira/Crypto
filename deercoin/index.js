@@ -1,4 +1,8 @@
 //import Block from "./Block";
+const express = require('express')
+const app = express()
+const port = process.env.PORT || 8085;
+
 const master = require('./blockchain');
 const fileIO = require('./fileIO');
 
@@ -27,3 +31,7 @@ if(!file.doesExist()){
 nb = deerChain.generateNextBlock("mona was here");
 console.log(deerChain.isChainValid(deerChain.chain));
 //deerChain.printChain();
+
+app.get('/', (req, res) => res.send('Hello World!'))
+
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
