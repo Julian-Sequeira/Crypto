@@ -2,6 +2,16 @@
 const express = require("express");
 const bodyParser = require('body-parser');
 const WebSocket = require("ws");
+const master = require('./blockchain');
+const fileIO = require('./fileIO');
+
+file = new fileIO.fileIO();
+deerChain = new master.blockchain();
+
+if(file.doesExist()){
+    data = file.readIO();
+    deerChain.setChain(data['chain']);
+}
 
 // Ports
 const http_port = 8001;
@@ -11,7 +21,7 @@ const p2p_port = 8002;
 let sockets = [];
 
 // HTTP API
-let initialHTTPServer = () => {
+let initialHTTPServer = (port) => {
 
     // Set up JSON parsing
     const app = express();
@@ -19,6 +29,26 @@ let initialHTTPServer = () => {
 
     // Get the blockchain here
     app.get('/blockchain', (req, res) => {
-        // I'm too fucking tired for this
-    })
+        res.send(deerchain.getChain());
+    });
+
+    // mine new blocks
+    app.post('/mineBlock',(req,res)=>{
+        var minedBlock = generateNextBlock(req.body.data);
+        res.send(minedBlock);
+    });
+
+    // get all the nodes
+    app.get('/peers',(req,res)=>{
+
+    });
+
+    // add new node to our network
+    app.post('/addPeer',(req,res)=>{
+
+    });
+
+    app.listen(port, ()=>{
+        console.log('Listening http on port: ' + port);
+    });
 }
