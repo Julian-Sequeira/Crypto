@@ -1,7 +1,8 @@
 // Node module imports
 const express = require("express");
 const bodyParser = require('body-parser');
-const WebSocket = require("ws");
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
 const master = require('./blockchain');
 const fileIO = require('./fileIO');
 
@@ -20,6 +21,16 @@ const p2p_port = 8002;
 // Array to store our connections
 let sockets = [];
 
+io.on('connection', function(socket){
+    console.log('a node connected');
+    socket.on('newBlock',function(block){
+        console.log('user disconnected');
+    });
+    socket.on('disconnect', function(){
+      console.log('user disconnected');
+    });
+  });
+
 // HTTP API
 let initialHTTPServer = (port) => {
 
@@ -35,9 +46,9 @@ let initialHTTPServer = (port) => {
     // mine new blocks
     app.post('/mineBlock',(req,res)=>{
         var minedBlock = generateNextBlock(req.body.data);
-        res.send(minedBlock);
+        io.emit('newBlock',minedBlock);
     });
-
+    /*
     // get all the nodes
     app.get('/peers',(req,res)=>{
 
@@ -47,7 +58,7 @@ let initialHTTPServer = (port) => {
     app.post('/addPeer',(req,res)=>{
 
     });
-
+    */
     app.listen(port, ()=>{
         console.log('Listening http on port: ' + port);
     });
