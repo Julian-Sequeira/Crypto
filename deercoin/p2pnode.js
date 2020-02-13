@@ -9,6 +9,12 @@ const uuidv4 = require('uuid/v4');
 const http_port = 8001;
 const p2p_port = 8002;
 
+const getDb = require('./database.js');
+let db = getDb();
+// db.test();
+db.addBlock();
+// db.close();
+
 // Array to store our connections
 let sockets = [];
 
