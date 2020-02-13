@@ -19,12 +19,12 @@ const PORT = process.env.PORT || 8085;
 const hostname = os.hostname();
 
 if(hostname !== 'dh2010pc44'){
-    const socket = ioClient('dh2010pc44:8085');
+    const socket = ioClient('http://dh2010pc44:8085');
     console.log("connecting");
     socket.on('connect', function () {
         // socket connected
         console.log('connected');
-        socket.emit('handshake', { hostname, port });
+        socket.emit('handshake', { hostname, PORT });
     });
 }
 
@@ -55,11 +55,12 @@ io.on('connection', function(socket){
         }
     });
     socket.on('handshake', function(data){
-        console.log(`handshake from ${data.address}`);
-        const address = `http://${data.hostname}:${data.port}`;
+        console.log(`handshake from ${data.hostname}`);
+        const address = `http://${data.hostname}:${data.PORT}`;
         peerAddresses.set(data.hostname, address);
     });
     socket.on('disconnect', function(){
+        // add
         console.log('user disconnected');
     });
 });
