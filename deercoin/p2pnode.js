@@ -4,6 +4,18 @@ const bodyParser = require('body-parser');
 const WebSocket = require("ws");
 const uuidv4 = require('uuid/v4');
 // import uuidv4 from 'uuid/v4';
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
+const master = require('./blockchain');
+const fileIO = require('./fileIO');
+
+file = new fileIO.fileIO();
+deerChain = new master.blockchain();
+
+if(file.doesExist()){
+    data = file.readIO();
+    deerChain.setChain(data['chain']);
+}
 
 // Ports
 const http_port = 8001;
@@ -18,6 +30,20 @@ let map = new Map();
 
 // HTTP API
 const initialHTTPServer = () => {
+io.on('connection', function(socket){
+    console.log('a node connected');
+    socket.on('newBlock',function(block){
+        if(deerchain.isValidNewBlock(block, deerchain.getLatestBlock())){
+            deerchain.addBlockToChain(block);
+        }
+    });
+    socket.on('disconnect', function(){
+      console.log('user disconnected');
+    });
+  });
+
+// HTTP API
+let initialHTTPServer = (port) => {
 
     // Set up JSON parsing
     const app = express();
@@ -30,7 +56,7 @@ const initialHTTPServer = () => {
 
     // Get the blockchain here
     app.get('/blockchain', (req, res) => {
-        res.send("get blockchain");
+        res.send(deercoin.getChain());
     })
 
     app.get('/peers', (req, res) => {
@@ -74,3 +100,4 @@ const initialHTTPServer = () => {
 }
 
 initialHTTPServer();
+}

@@ -22,6 +22,10 @@ class Blockchain {
       this.chain = newChain;
     }
 
+    getChain(){
+      return this.chain;
+    }
+
     /*
     *calculated the hash of the a block using js-sha256 package from npm
     */
