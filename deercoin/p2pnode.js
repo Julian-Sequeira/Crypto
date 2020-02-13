@@ -49,6 +49,7 @@ let peerAddresses = new Map();
 
 io.on('connection', function(socket){
     console.log('a node connected');
+    sockets.push(socket);
     socket.on('newBlock',function(block){
         if(deerchain.isValidNewBlock(block, deerchain.getLatestBlock())){
             deerchain.addBlockToChain(block);
@@ -58,6 +59,9 @@ io.on('connection', function(socket){
         console.log(`handshake from ${data.hostname}`);
         const address = `http://${data.hostname}:${data.PORT}`;
         peerAddresses.set(data.hostname, address);
+    });
+    socket.on('transaction', function(transaction){
+        console.log(transaction);
     });
     socket.on('disconnect', function(){
         // add
@@ -107,6 +111,13 @@ app.post('/addPeer', (req, res) => {
 
 app.post('/mine', (req, res) => {
     console.log("mine block");
+});
+
+app.post('/transaction', (req, res) => {
+    transaction = req.body.transaction;
+    sockets.foreach((socket)=>{
+        socket.emit("transaction",transaction);
+    });
 });
 
 // TODO: Use env var
