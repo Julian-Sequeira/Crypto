@@ -2,7 +2,8 @@
 const express = require("express");
 const bodyParser = require('body-parser');
 const WebSocket = require("ws");
-import uuidv4 from 'uuid/v4';
+const uuidv4 = require('uuid/v4');
+// import uuidv4 from 'uuid/v4';
 
 // Ports
 const http_port = 8001;
@@ -23,21 +24,26 @@ const initialHTTPServer = () => {
 
     // Default route
     app.get('/', (req, res) => {
-        console.log("hello world");
+        res.send("hello world");
     });
 
     // Get the blockchain here
     app.get('/blockchain', (req, res) => {
-        console.log("get blockchain");
+        res.send("get blockchain");
     })
 
-    app.get('peers', (req, res) => {
+    app.get('/peers', (req, res) => {
         console.log("get peers");
-        peerArray = Array.from(map.values());
-        res.send(peerArray);
+        const peers = Array.from(map.values());
+
+        const message = {
+            peers,
+        };
+
+        res.send(message);
     });
 
-    app.post('addPeer', (req, res) => {
+    app.post('/addPeer', (req, res) => {
         // uuidv4 generrates a unique identifier
         const id = uuidv4();
         const peer = req.body.peer;
@@ -47,18 +53,18 @@ const initialHTTPServer = () => {
             id,
             peer,
         };
-
-        message[id] = id;
-        message[peer] = peer;
-
+        
         res.send(message);
     });
 
-    app.post('mine', (req, res) => {
+    app.post('/mine', (req, res) => {
         console.log("mine block");
     });
 
-    app.listen(process.env.PORT, () =>
+    // TODO: Use env var
+    app.listen(8085, () =>
         console.log(`Example app listening on port ${process.env.PORT}!`),
     );
 }
+
+initialHTTPServer();
