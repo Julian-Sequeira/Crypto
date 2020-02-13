@@ -18,8 +18,8 @@ const os = require('os');
 const PORT = process.env.PORT || 8085;
 const hostname = os.hostname();
 
-if(hostname !== 'dh2010pc01'){
-    const socket = ioClient('http://localhost:8081');
+if(hostname !== 'dh2010pc44'){
+    const socket = ioClient('dh2010pc44');
     console.log("connecting");
     socket.on('connect', function () {
         // socket connected
