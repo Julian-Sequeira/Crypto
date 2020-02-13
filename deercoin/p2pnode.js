@@ -24,7 +24,9 @@ let sockets = [];
 io.on('connection', function(socket){
     console.log('a node connected');
     socket.on('newBlock',function(block){
-        console.log('user disconnected');
+        if(deerchain.isValidNewBlock(block, deerchain.getLatestBlock())){
+            deerchain.addBlockToChain(block);
+        }
     });
     socket.on('disconnect', function(){
       console.log('user disconnected');
@@ -41,12 +43,6 @@ let initialHTTPServer = (port) => {
     // Get the blockchain here
     app.get('/blockchain', (req, res) => {
         res.send(deerchain.getChain());
-    });
-
-    // mine new blocks
-    app.post('/mineBlock',(req,res)=>{
-        var minedBlock = generateNextBlock(req.body.data);
-        io.emit('newBlock',minedBlock);
     });
     /*
     // get all the nodes
