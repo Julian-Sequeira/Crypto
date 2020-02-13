@@ -13,6 +13,7 @@ const p2p_port = 8002;
 let sockets = [];
 
 // Temp storage for peers. {unique id, peer}
+// TODO: add inital peers to map
 let map = new Map();
 
 // HTTP API
@@ -46,14 +47,16 @@ const initialHTTPServer = () => {
     app.post('/addPeer', (req, res) => {
         // uuidv4 generrates a unique identifier
         const id = uuidv4();
-        const peer = req.body.peer;
-        map.set(id, peer);
+        let host = req.body.host;
+        let port = req.body.port;
+        map.set(id, host.concat(':', port));
 
         const message = {
             id,
-            peer,
+            host,
+            port,
         };
-        
+
         res.send(message);
     });
 
