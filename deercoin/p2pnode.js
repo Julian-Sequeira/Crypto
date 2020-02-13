@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const WebSocket = require("ws");
 const uuidv4 = require('uuid/v4');
 // import uuidv4 from 'uuid/v4';
-var http = require('http').createServer(app);
+var http = require('http').createServer(express);
 var io = require('socket.io')(http);
 const master = require('./blockchain');
 const fileIO = require('./fileIO');
@@ -28,22 +28,21 @@ let sockets = [];
 // TODO: add inital peers to map
 let map = new Map();
 
-// HTTP API
-const initialHTTPServer = () => {
-io.on('connection', function(socket){
-    console.log('a node connected');
-    socket.on('newBlock',function(block){
-        if(deerchain.isValidNewBlock(block, deerchain.getLatestBlock())){
-            deerchain.addBlockToChain(block);
-        }
-    });
-    socket.on('disconnect', function(){
-      console.log('user disconnected');
-    });
-  });
 
 // HTTP API
-let initialHTTPServer = (port) => {
+let initialHTTPServer = () => {
+
+    io.on('connection', function(socket){
+        console.log('a node connected');
+        socket.on('newBlock',function(block){
+            if(deerchain.isValidNewBlock(block, deerchain.getLatestBlock())){
+                deerchain.addBlockToChain(block);
+            }
+        });
+        socket.on('disconnect', function(){
+          console.log('user disconnected');
+        });
+      });
 
     // Set up JSON parsing
     const app = express();
@@ -75,9 +74,9 @@ let initialHTTPServer = (port) => {
         const id = uuidv4();
         let host = req.body.host;
         let port = req.body.port;
-        map.set(id, host.concat(':', port));
 
         const node = `http://${host}:${port}`;
+        map.set(id, node);
         // Add this node to socket
 
         const message = {
@@ -100,4 +99,3 @@ let initialHTTPServer = (port) => {
 }
 
 initialHTTPServer();
-}
