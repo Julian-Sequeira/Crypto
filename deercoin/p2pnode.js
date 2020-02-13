@@ -51,6 +51,9 @@ const initialHTTPServer = () => {
         let port = req.body.port;
         map.set(id, host.concat(':', port));
 
+        const node = `http://${host}:${port}`;
+        // Add this node to socket
+
         const message = {
             id,
             host,
