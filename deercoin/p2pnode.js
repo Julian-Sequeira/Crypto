@@ -17,13 +17,15 @@ const os = require('os');
 
 const PORT = process.env.PORT || 8085;
 const hostname = os.hostname();
+// Array to store our connections
+let sockets = [];
 
 if(hostname !== 'dh2010pc44'){
     const socket = ioClient('http://dh2010pc44:8085');
     console.log("connecting");
+    sockets.push(socket);
     socket.on('connect', function () {
         // socket connected
-        console.log('connected');
         socket.emit('handshake', { hostname, PORT });
     });
 }
@@ -40,16 +42,12 @@ if(file.doesExist()){
 const http_port = 8001;
 const p2p_port = 8002;
 
-// Array to store our connections
-let sockets = [];
-
 // Temp storage for peers. {unique id, peer}
 // TODO: add inital peers to map
 let peerAddresses = new Map();
 
 io.on('connection', function(socket){
     console.log('a node connected');
-    sockets.push(socket);
     socket.on('newBlock',function(block){
         if(deerchain.isValidNewBlock(block, deerchain.getLatestBlock())){
             deerchain.addBlockToChain(block);
@@ -114,10 +112,11 @@ app.post('/mine', (req, res) => {
 });
 
 app.post('/transaction', (req, res) => {
-    transaction = req.body.transaction;
-    sockets.foreach((socket)=>{
+    transaction = req.body;
+    sockets.forEach((socket)=>{
         socket.emit("transaction",transaction);
     });
+    res.send(transaction);
 });
 
 // TODO: Use env var
