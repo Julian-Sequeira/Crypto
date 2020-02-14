@@ -21,13 +21,59 @@ const hostname = os.hostname();
 // Array to store our connections
 let sockets = [];
 
+console.log(hostname);
+
+file = new fileIO.fileIO();
+deerChain = new master.blockchain();
+
+// Temp storage for peers. {unique id, peer}
+// TODO: add inital peers to map
+let peerAddresses = new Map();
+
+if(file.doesExist()){
+    data = file.readIO();
+    deerChain.setChain(data['chain']);
+}
+
+// TODO:  Check if peer is already connected before accepting or requesting a socket
+
+function initSocket(socket){
+    socket.on('newBlock',function(block){
+        if(deerchain.isValidNewBlock(block, deerchain.getLatestBlock())){
+            deerchain.addBlockToChain(block);
+        }
+    });
+    socket.on('handshake', function(data){
+        console.log(`handshake from ${data.hostname}`);
+        const address = {hostname: data.hostname, PORT: data.PORT};
+        peerAddresses.set(data.hostname, address);
+    });
+    socket.on('transaction', function(transaction){
+        console.log(transaction);
+    });
+    socket.on('disconnect', function(){
+        console.log('user disconnected');
+    });
+}
+
 if(hostname !== 'dh2020pc28'){
     request('http://dh2020pc28:8085/peers')
-    .then(function (peers) {
-        peers.push('http://dh2020pc28:8085');
-        peers.forEach(peer => {
-            const socket = ioClient(peer);
+    .then(function (data) {
+        peers = JSON.parse(data).peers;
+        console.log(peers);
+        peers.push({hostname: 'dh2020pc28', PORT: 8085});
+        console.log(peers);
+        peers.filter(peer => peer.hostname != hostname).forEach(peer => {
+            const peerAddress = `http://${peer.hostname}:${peer.PORT}`;
+            const address = {hostname: peer.hostname, PORT: peer.PORT};
+            console.log(peer.hostname);
+            console.log(address);
+            peerAddresses.set(peer.hostname, address);
+            console.log('conecting to ' + peer.hostname);
+            const socket = ioClient(peerAddress);
+            initSocket(socket);
             sockets.push(socket);
+            console.log('added to sockets');
             socket.on('connect', function () {
                 // socket connected
                 socket.emit('handshake', { hostname, PORT });
@@ -39,41 +85,15 @@ if(hostname !== 'dh2020pc28'){
     });
 }
 
-file = new fileIO.fileIO();
-deerChain = new master.blockchain();
-
-if(file.doesExist()){
-    data = file.readIO();
-    deerChain.setChain(data['chain']);
-}
 
 // Ports
 const http_port = 8001;
 const p2p_port = 8002;
 
-// Temp storage for peers. {unique id, peer}
-// TODO: add inital peers to map
-let peerAddresses = new Map();
-
 io.on('connection', function(socket){
     console.log('a node connected');
-    socket.on('newBlock',function(block){
-        if(deerchain.isValidNewBlock(block, deerchain.getLatestBlock())){
-            deerchain.addBlockToChain(block);
-        }
-    });
-    socket.on('handshake', function(data){
-        console.log(`handshake from ${data.hostname}`);
-        const address = `http://${data.hostname}:${data.PORT}`;
-        peerAddresses.set(data.hostname, address);
-    });
-    socket.on('transaction', function(transaction){
-        console.log(transaction);
-    });
-    socket.on('disconnect', function(){
-        // add
-        console.log('user disconnected');
-    });
+    initSocket(socket);
+    sockets.push(socket);
 });
 
 // Default route
@@ -103,8 +123,8 @@ app.post('/addPeer', (req, res) => {
     let host = req.body.host;
     let port = req.body.port;
 
-    const node = `http://${host}:${port}`;
-    peerAddresses.set(id, node);
+    const address = {hostname: host, PORT: port};
+    peerAddresses.set(id, address);
     // Add this node to socket
 
     const message = {
@@ -122,10 +142,12 @@ app.post('/mine', (req, res) => {
 
 app.post('/transaction', (req, res) => {
     transaction = req.body;
+    // console.log(sockets);
+    console.log('Received transaction.  Relaying to other nodes');
     sockets.forEach((socket)=>{
         socket.emit("transaction",transaction);
     });
-    io.emit('broadcast', transaction);
+    // io.emit('transaction', transaction);
     res.send(transaction);
 });
 
