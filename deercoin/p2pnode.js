@@ -14,20 +14,28 @@ const ioClient = require('socket.io-client');
 const master = require('./blockchain');
 const fileIO = require('./fileIO');
 const os = require('os');
+const request = require('request-promise');
 
 const PORT = process.env.PORT || 8085;
 const hostname = os.hostname();
 // Array to store our connections
 let sockets = [];
 
-if(hostname !== 'dh2010pc44'){
-    const socket = ioClient('http://dh2010pc44:8085');
-    console.log("connecting");
-    sockets.push(socket);
-    socket.on('connect', function () {
-        // socket connected
-        socket.emit('handshake', { hostname, PORT });
+if(hostname !== 'dh2020pc28'){
+    request('http://dh2020pc28:8085/peers')
+    .then(function (peers) {
+        console.log(peers);
+    })
+    .catch(function (err) {
+        // Crawling failed...
     });
+    // const socket = ioClient('http://dh2020pc28:8085');
+    // console.log("connecting");
+    // sockets.push(socket);
+    // socket.on('connect', function () {
+    //     // socket connected
+    //     socket.emit('handshake', { hostname, PORT });
+    // });
 }
 
 file = new fileIO.fileIO();
@@ -116,6 +124,7 @@ app.post('/transaction', (req, res) => {
     sockets.forEach((socket)=>{
         socket.emit("transaction",transaction);
     });
+    io.emit('broadcast', transaction);
     res.send(transaction);
 });
 
