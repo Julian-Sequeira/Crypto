@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node deercoin/p2pnode.js"
+    "start": "node src/main.js"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
