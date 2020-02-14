@@ -24,18 +24,19 @@ let sockets = [];
 if(hostname !== 'dh2020pc28'){
     request('http://dh2020pc28:8085/peers')
     .then(function (peers) {
-        console.log(peers);
+        peers.push('http://dh2020pc28:8085');
+        peers.forEach(peer => {
+            const socket = ioClient(peer);
+            sockets.push(socket);
+            socket.on('connect', function () {
+                // socket connected
+                socket.emit('handshake', { hostname, PORT });
+            });
+        })
     })
     .catch(function (err) {
         // Crawling failed...
     });
-    // const socket = ioClient('http://dh2020pc28:8085');
-    // console.log("connecting");
-    // sockets.push(socket);
-    // socket.on('connect', function () {
-    //     // socket connected
-    //     socket.emit('handshake', { hostname, PORT });
-    // });
 }
 
 file = new fileIO.fileIO();
