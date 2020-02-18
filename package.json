@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "nodemon src/main.js",
-    "release": "node src/main.js"
+    "release": "node src/main.js",
+    "miner": "npm start --prefix miner"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
