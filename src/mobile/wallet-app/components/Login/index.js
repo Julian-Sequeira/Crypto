@@ -1,45 +1,16 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import LoginForm from './loginForm';
 
-class Login extends React.Component {
 
-    state = {
-        username: "",
-        password: "",
-    }
-
-    handleNameChange = name => {
-        this.setState({ name });
-    }
-    
-    handlePasswordChange = password => {
-        this.setState({ password });
-    }
-
-    handleSubmit = () => {
-        //TODO
-    }
-
-    render() {
-        const {username, password} = this.state;
-        // TODO: style text inputs
-        return (
-            <View style={styles.container}>
-                <TextInput
-                    value={username}
-                    placeholder="Username"
-                    onChangeText={this.handleNameChange}
-                />
-                <TextInput
-                    value={password}
-                    placeholder="Password"
-                    onChangeText={this.handlePasswordChange}
-                />
-                <Button title="Login" onPress={this.handleSubmit} />
-            </View>
-        )
-    };
-}
+// TODO: onPress route to register screen
+const Login = () => (
+    <View style={styles.container}>
+        <Text>Welcome to DeerCoin</Text>
+        <Button title="Login" />
+        <Button title="Register" />
+    </View>
+);
 
 const styles = StyleSheet.create({
   container: {
