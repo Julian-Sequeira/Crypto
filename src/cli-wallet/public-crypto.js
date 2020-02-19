@@ -43,24 +43,35 @@ function genkeys() {
 
 
 /**
- * Sign a string with the private key 
- * How it works- hash the transaction (we'll use SHA256)
- * Then encrypt the hash (let Crypto.js worry about the encryption function)
+ * Sign a string with the private key. 
+ * How it works- hash the transaction (we'll use SHA256).
+ * Then encrypt the hash (let Crypto.js worry about the encryption function).
  */
 
 function signTransaction(transaction) {
     let signature = "";
     
-    // Load the private key from file
-    let privateKey = fs.readFile('privkey.pem', (err, key) => {
-        if (err) throw err;
+    // Load the encrypted private key from file
+    let encryptedKey = fs.readFileSync('privkey.pem');
 
-        // Using Crypto's sign object to make the signature
-        const sign = crypto.createSign('SHA256');
-        sign.write(transaction);
-        sign.end();
-        signature = sign.sign(privateKey, 'hex');
-    })
+    // Create a key object for Crypto to decrypt
+    // Using hardcoded passphrase for now
+    let keyObject = {
+        key: encryptedKey,
+        format: 'pem',
+        type: 'pkcs8',
+        passphrase: 'deercoin'
+    }
+
+    // Decrypt the private key
+    const privateKey = crypto.createPrivateKey(keyObject);
+    console.log(privateKey);
+
+    // Using Crypto's sign object to make the signature
+    const sign = crypto.createSign('SHA256');
+    sign.write(transaction);
+    sign.end();
+    signature = sign.sign(privateKey, 'hex');
     
     return signature;
 }
@@ -68,10 +79,10 @@ function signTransaction(transaction) {
 
 
 /**
- * Verify a transaction was signed properly using a public key
- * Take the transaction, hash it using SHA256
- * Take the signature, decrypt it using the public key
- * Compare the two strings for equality
+ * Verify a transaction was signed properly using a public key.
+ * Take the transaction, hash it using SHA256.
+ * Take the signature, decrypt it using the public key.
+ * Compare the two strings for equality.
  */
 
 function verifyTransaction(transaction, signature, publicKey) {
@@ -80,9 +91,6 @@ function verifyTransaction(transaction, signature, publicKey) {
     verify.end();
     return verify.verify(publicKey, signature, 'hex');
 }
-
-
-
 
 
 module.exports = { genkeys, signTransaction, verifyTransaction };
