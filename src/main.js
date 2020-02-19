@@ -9,7 +9,8 @@ var p2p_port = process.env.P2P_PORT || 6001;
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
 
 class Block {
-    constructor(index, previousHash, timestamp, data, hash) {
+    constructor(index, previousHash, timestamp, data, hash, work) {
+        this.work = work; //stores the total work of the branch upto the current block
         this.index = index;
         this.previousHash = previousHash.toString();
         this.timestamp = timestamp;
@@ -26,10 +27,14 @@ var MessageType = {
 };
 
 var getGenesisBlock = () => {
-    return new Block(0, "0", 1465154705, "my genesis block!!", "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7");
+    return new Block(0, "0", 1465154705, "my genesis block!!", "016534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7", 1);
 };
 
 var blockchain = [getGenesisBlock()];
+var blockchain2 = new Object();
+blockchain2[(getGenesisBlock()).hash] = [];
+
+var longest = (getGenesisBlock());//stores the leaf node of the longest chain
 
 var initHttpServer = () => {
     var app = express();
@@ -113,9 +118,18 @@ var calculateHash = (index, previousHash, timestamp, data) => {
     return CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
 };
 
+var checkMostWork = (newBlock) => {
+    return longest.work > newBlock.work;
+}
+
 var addBlock = (newBlock) => {
     if (isValidNewBlock(newBlock, getLatestBlock())) {
-        blockchain.push(newBlock);
+        blockchain2[newBlock.previousHash].push(newBlock);
+        //check to see if the new block is the most work done branch of blockchain
+        //if so, assign that as the longest
+        if (checkMostWork(newBlock)){
+            longest = newBlock;
+        }
     }
 };
 
