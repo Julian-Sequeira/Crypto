@@ -5,7 +5,7 @@ const crypto = require('crypto');
  * Generate public/private keys
  */ 
 
-function genkeys() {
+function genkeys(passphrase) {
     console.log("Generating a public/private key pair");
     crypto.generateKeyPair('rsa', {
         modulusLength: 4096,
@@ -17,7 +17,7 @@ function genkeys() {
             type: 'pkcs8',
             format: 'pem',
             cipher: 'aes-256-cbc',
-            passphrase: 'deercoin'    // to encrypt the private key with
+            passphrase: passphrase    // to encrypt the private key with
         }
     
     // Write both of the generated keys to a file    
@@ -48,7 +48,7 @@ function genkeys() {
  * Then encrypt the hash (let Crypto.js worry about the encryption function).
  */
 
-function signTransaction(transaction) {
+function signTrx(transaction, passphrase) {
     let signature = "";
     
     // Load the encrypted private key from file
@@ -60,12 +60,11 @@ function signTransaction(transaction) {
         key: encryptedKey,
         format: 'pem',
         type: 'pkcs8',
-        passphrase: 'deercoin'
+        passphrase: passphrase
     }
 
     // Decrypt the private key
     const privateKey = crypto.createPrivateKey(keyObject);
-    console.log(privateKey);
 
     // Using Crypto's sign object to make the signature
     const sign = crypto.createSign('SHA256');
@@ -82,10 +81,10 @@ function signTransaction(transaction) {
  * Verify a transaction was signed properly using a public key.
  * Take the transaction, hash it using SHA256.
  * Take the signature, decrypt it using the public key.
- * Compare the two strings for equality.
+ * Compare the two strings for equality (Crypto handles all of this).
  */
 
-function verifyTransaction(transaction, signature, publicKey) {
+function verifyTrx(transaction, signature, publicKey) {
     const verify = crypto.createVerify('SHA256');
     verify.write(transaction);
     verify.end();
@@ -93,4 +92,4 @@ function verifyTransaction(transaction, signature, publicKey) {
 }
 
 
-module.exports = { genkeys, signTransaction, verifyTransaction };
+module.exports = { genkeys, signTrx, verifyTrx };
