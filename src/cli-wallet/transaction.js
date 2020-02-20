@@ -1,27 +1,48 @@
 const crypto = require('crypto');
+const pubcrypto = require('public-crypto.js');
 
 
 class Transaction {
 
-    // Enclose all the important constructor data in a single JS object
-    // Makes it easily serializable, the id is generated from this
-    // In case any of this data is different, the trx id is different
-    constructor(previousID, publicKey, address, amount, fee) { 
-        this.data = {
+    // Need to make multiple serializable objects
+    // One to send over the network (data)
+    // One to make the transaction ID and signature (details)
+    // Serializing the whole class is a waste of bandwidth
+    constructor(previousID, publicKey, address, amount, fee, passphrase) { 
+        this.data = {}
+
+        // This object will be hashed to produce the transaction ID and then signature
+        // If anything here is different, the ID and signatures will also be different
+        this.data.details = {
             previousID: previousID,
             publicKey: publicKey,
             address: address,
             amount: amount,
             fee: fee
         }
+
+        // Create the transaction ID and signature
+        const serial = this.serialize(this.data.details);
+        this.data.id = this.calculateID(serial);
+        this.data.signature = pubcrypto.createSignature(serial, passphrase);    
     }
 
-    calculateID() {
-
+    // Modularizing this so that if we use a different serialization 
+    // strategy in the future, it can be changed here
+    serialize(jsObject) {
+        return JSON.stringify(jsObject);
     }
 
+    // Again, we might use a different hash function in the future, so change that here
+    calculateID(serial) {
+        const hash = crypto.createHash('sha256');
+        hash.update(serial);
+        return hash.digest('hex');    // **Encoding the ID in hex**
+    }
 }
 
+
+module.exports = Transaction;
 
 /**
  * - transaction ID 
