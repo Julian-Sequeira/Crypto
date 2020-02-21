@@ -8,9 +8,12 @@ var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
 
+//check to see the longest(most work)
+
 class Block {
     constructor(index, previousHash, timestamp, data, hash, work) {
         this.work = work; //stores the total work of the branch upto the current block
+        this.difficulty = 1;
         this.index = index;
         this.previousHash = previousHash.toString();
         this.timestamp = timestamp;
@@ -32,7 +35,7 @@ var getGenesisBlock = () => {
 
 var blockchain = [getGenesisBlock()];
 var blockchain2 = new Object();
-blockchain2[(getGenesisBlock()).hash] = [];
+blockchain2[(getGenesisBlock()).hash] = [(getGenesisBlock())];
 
 var longest = (getGenesisBlock());//stores the leaf node of the longest chain
 
@@ -40,7 +43,7 @@ var initHttpServer = () => {
     var app = express();
     app.use(bodyParser.json());
 
-    app.get('/blocks', (req, res) => res.send(JSON.stringify(blockchain)));
+    app.get('/blocks', (req, res) => res.send(JSON.stringify(blockchain2)));
     app.post('/mineBlock', (req, res) => {
         var newBlock = generateNextBlock(req.body.data);
         addBlock(newBlock);
@@ -119,16 +122,20 @@ var calculateHash = (index, previousHash, timestamp, data) => {
 };
 
 var checkMostWork = (newBlock) => {
-    return longest.work > newBlock.work;
+    return longest.work < newBlock.work;
 }
 
 var addBlock = (newBlock) => {
     if (isValidNewBlock(newBlock, getLatestBlock())) {
-        blockchain2[newBlock.previousHash].push(newBlock);
-        //check to see if the new block is the most work done branch of blockchain
-        //if so, assign that as the longest
-        if (checkMostWork(newBlock)){
-            longest = newBlock;
+        if(newBlock.previousHash in blockchain2){//check to see if this branch exist at all
+            newBlock.work += newBlock.work + blockchain2[newBlock.previousHash][0].difficulty;
+            blockchain2[newBlock.previousHash].push(newBlock);
+            blockchain2[newBlock.hash] = [newBlock];
+            //check to see if the new block is the most work done branch of blockchain
+            //if so, assign that as the longest
+            if (checkMostWork(newBlock)){
+                longest = newBlock;
+            }
         }
     }
 };
@@ -166,7 +173,7 @@ var handleBlockchainResponse = (message) => {
         console.log('blockchain possibly behind. We got: ' + latestBlockHeld.index + ' Peer got: ' + latestBlockReceived.index);
         if (latestBlockHeld.hash === latestBlockReceived.previousHash) {
             console.log("We can append the received block to our chain");
-            blockchain.push(latestBlockReceived);
+            addBlock(latestBlockReceived)
             broadcast(responseLatestMsg());
         } else if (receivedBlocks.length === 1) {
             console.log("We have to query the chain from our peer");
@@ -179,7 +186,7 @@ var handleBlockchainResponse = (message) => {
         console.log('received blockchain is not longer than current blockchain. Do nothing');
     }
 };
-
+//------------------------restart the whole thing from here
 var replaceChain = (newBlocks) => {
     if (isValidChain(newBlocks) && newBlocks.length > blockchain.length) {
         console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
@@ -205,7 +212,8 @@ var isValidChain = (blockchainToValidate) => {
     return true;
 };
 
-var getLatestBlock = () => blockchain[blockchain.length - 1];
+//var getLatestBlock = () => blockchain[blockchain.length - 1];
+var getLatestBlock = () => longest;
 var queryChainLengthMsg = () => ({'type': MessageType.QUERY_LATEST});
 var queryAllMsg = () => ({'type': MessageType.QUERY_ALL});
 var responseChainMsg = () =>({
