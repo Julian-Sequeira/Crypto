@@ -45,6 +45,7 @@ const getBlockTemplate = (publicKey) => {
   const header = {
     version: '1.0.0',
     preHash: 'b10b2168c8f76ea759ee6273c08d6fd6cb0b58746ef9cc37bfb01ef754babeab', // SHA256(DeerCoin)
+    timestamp: Date.now(),
     currHash,
     difficulty: 3, // TODO: difficulty may change
     nonce: null, // This will be the value for miner to change and get currect hash
@@ -56,6 +57,26 @@ const getBlockTemplate = (publicKey) => {
   };
 };
 
+
+const mineBlock = (block) => new Promise((resolve, reject) => {
+  const difficulty = block.header.difficulty;
+  let nonce = Number.MIN_SAFE_INTEGER;
+  let currHash = null;
+  let count = 0;
+  while (nonce <= Number.MAX_SAFE_INTEGER) {
+    block.header.nonce = nonce;
+    currHash = crypto.createHash('sha256').update(JSON.stringify(block)).digest('hex');
+    if (currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
+      console.log(currHash);
+      return resolve(block);
+    }
+    nonce++;
+    if (nonce % 2 ** 51 === 0) console.log(count++);
+  }
+  return reject('failed to find correct nounce');
+});
+
 module.exports = {
-  getBlockTemplate
+  getBlockTemplate,
+  mineBlock,
 };

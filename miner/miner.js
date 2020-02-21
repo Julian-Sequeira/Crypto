@@ -9,7 +9,14 @@ const {
 } = credential.loadKeyPair();
 
 const blockTemplate = block.getBlockTemplate(publicKey);
-console.log(blockTemplate);
+block.mineBlock(blockTemplate)
+  .then((newBlock) => {
+    // TODO: send the newly generated block to P2P nodes
+    // console.log(newBlock);
+  })
+  .catch((err) => {
+    console.log('error when mining block', err);
+  });
 
 // express middleware
 app.use(express.json());
