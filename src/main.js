@@ -50,6 +50,17 @@ var initHttpServer = () => {
         connectToPeers([req.body.peer]);
         res.send();
     });
+
+    // Get a transaction from a wallet or another node
+    app.post('/addTransaction', (req, res) => {
+        console.log(req.body.trxData);
+        res.status(200);
+        res.send({msg: "Transaction received"});
+    })
+
+
+
+
     app.listen(http_port, () => console.log('Listening http on port: ' + http_port));
 };
 
