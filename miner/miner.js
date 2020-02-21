@@ -68,12 +68,14 @@ if (!(fs.existsSync(PUBLIC_KEY_PATH) && fs.existsSync(PRIVATE_KEY_PATH))) {
 let publicKey = null, privateKey = null;
 try {
   publicKey = fs.readFileSync(PUBLIC_KEY_PATH);
+  // publicKey = publicKey.toString('utf8');
 } catch (error) {
   console.log('error when loading public key from file');
   throw error;
 }
 try {
   privateKey = fs.readFileSync(PRIVATE_KEY_PATH);
+  // privateKey = privateKey.toString('utf8');
 } catch (error) {
   console.log('error when loading private key from file');
   throw eroor;
