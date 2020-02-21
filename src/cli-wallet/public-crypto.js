@@ -6,7 +6,8 @@ const crypto = require('crypto');
  */ 
 
 function genkeys(passphrase) {
-    console.log("Generating a public/private key pair");
+    
+    // Generates keys using RSA with mod 4k
     crypto.generateKeyPair('rsa', {
         modulusLength: 4096,
         publicKeyEncoding: {
@@ -48,9 +49,8 @@ function genkeys(passphrase) {
  * Then encrypt the hash (let Crypto.js worry about the encryption function).
  */
 
-function signTrx(transaction, passphrase) {
-    let signature = "";
-    
+function createSignature(string, passphrase) {
+
     // Load the encrypted private key from file
     let encryptedKey = fs.readFileSync('privkey.pem');
 
@@ -68,11 +68,9 @@ function signTrx(transaction, passphrase) {
 
     // Using Crypto's sign object to make the signature
     const sign = crypto.createSign('SHA256');
-    sign.write(transaction);
+    sign.write(string);
     sign.end();
-    signature = sign.sign(privateKey, 'hex');
-    
-    return signature;
+    return sign.sign(privateKey, 'hex');    // ** The signature is encoded in hex **
 }
 
 
@@ -84,12 +82,12 @@ function signTrx(transaction, passphrase) {
  * Compare the two strings for equality (Crypto handles all of this).
  */
 
-function verifyTrx(transaction, signature, publicKey) {
+function verifySignature(string, signature, publicKey) {
     const verify = crypto.createVerify('SHA256');
-    verify.write(transaction);
+    verify.write(string);
     verify.end();
     return verify.verify(publicKey, signature, 'hex');
 }
 
 
-module.exports = { genkeys, signTrx, verifyTrx };
+module.exports = { genkeys, createSignature, verifySignature };
