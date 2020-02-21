@@ -11,23 +11,23 @@ class Transaction {
     // One to send over the network (data)
     // One to make the transaction ID and signature (details)
     // Serializing the whole class is a waste of bandwidth
-    constructor(opts) { 
+    constructor(args) { 
         this.data = {}
 
         // This object will be hashed to produce the transaction ID and then signature
         // If anything here is different, the ID and signatures will also be different
-        this.data.details = opts.details;
+        this.data.details = args.details;
 
         // Create the transaction ID and signature if this is a new transaction
-        if (opts.isNew) {
+        if (args.isNew) {
             const serial = this.serialize(this.data.details);
             this.data.id = this.calculateID();
-            this.data.signature = pubcrypto.createSignature(serial, opts.passphrase);
+            this.data.signature = pubcrypto.createSignature(serial, args.passphrase);
 
         // Otherwise, we're just dumping existing transaction data into a new object
         } else {
-            this.data.id = opts.id;
-            this.data.signature = opts.signature;
+            this.data.id = args.id;
+            this.data.signature = args.signature;
         }
             
     }
@@ -36,6 +36,12 @@ class Transaction {
     // strategy in the future, it can be changed here
     serialize(jsObject) {
         return JSON.stringify(jsObject);
+    }
+
+    // Return the serialized data object
+    // Don't know how getters work in ES6, too tired to learn right now
+    serializedData() {
+        return this.serialize(this.data);
     }
 
     // Again, we might use a different hash function in the future, so change that here
