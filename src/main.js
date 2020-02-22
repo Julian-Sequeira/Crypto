@@ -9,11 +9,12 @@ var p2p_port = process.env.P2P_PORT || 6001;
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
 
 //check to see the longest(most work)
+//TODO: calculate hash for block
 
 class Block {
-    constructor(index, previousHash, timestamp, data, hash, work) {
+    constructor(index, previousHash, timestamp, data, hash, difficulty, work) {
         this.work = work; //stores the total work of the branch upto the current block
-        this.difficulty = 1;
+        this.difficulty = difficulty;
         this.index = index;
         this.previousHash = previousHash.toString();
         this.timestamp = timestamp;
@@ -34,7 +35,10 @@ var getGenesisBlock = () => {
 };
 
 var blockchain = [getGenesisBlock()];
+
+//our blockchain is more like a tree. It will keep track of all the children
 var blockchain2 = new Object();
+blockchain2['genesis'] = getGenesisBlock();
 blockchain2[(getGenesisBlock()).hash] = [(getGenesisBlock())];
 
 var longest = (getGenesisBlock());//stores the leaf node of the longest chain
@@ -107,9 +111,11 @@ var initErrorHandler = (ws) => {
 var generateNextBlock = (blockData) => {
     var previousBlock = getLatestBlock();
     var nextIndex = previousBlock.index + 1;
+    var nextDifficulty = previousBlock.difficulty + 1;
+    var nextWork = previousBlock.work + nextDifficulty;
     var nextTimestamp = new Date().getTime() / 1000;
     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData);
-    return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash);
+    return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash, nextDifficulty, nextWork);
 };
 
 
@@ -144,7 +150,13 @@ var isValidNewBlock = (newBlock, previousBlock) => {
     if (previousBlock.index + 1 !== newBlock.index) {
         console.log('invalid index');
         return false;
-    } else if (previousBlock.hash !== newBlock.previousHash) {
+    }else if(previousBlock.difficulty + 1 !== newBlock.difficulty){
+        console.log('invalid difficulty');
+        return false;
+    }else if(previousBlock.work + newBlock.difficulty !== newBlock.work){
+        console.log('invalid work');
+        return false;
+    }else if (previousBlock.hash !== newBlock.previousHash) {
         console.log('invalid previoushash');
         return false;
     } else if (calculateHashForBlock(newBlock) !== newBlock.hash) {
@@ -198,18 +210,26 @@ var replaceChain = (newBlocks) => {
 };
 
 var isValidChain = (blockchainToValidate) => {
-    if (JSON.stringify(blockchainToValidate[0]) !== JSON.stringify(getGenesisBlock())) {
+    if (JSON.stringify(blockchainToValidate['genesis']) !== JSON.stringify(getGenesisBlock())) {
         return false;
     }
-    var tempBlocks = [blockchainToValidate[0]];
-    for (var i = 1; i < blockchainToValidate.length; i++) {
-        if (isValidNewBlock(blockchainToValidate[i], tempBlocks[i - 1])) {
-            tempBlocks.push(blockchainToValidate[i]);
-        } else {
-            return false;
+
+    var toCheck = [getGenesisBlock()];
+    while (toCheck.length > 0){//loop through every branch
+        var blockToCheck = toCheck[0];
+        var ChildrenList = blockchain2[blockToCheck.hash];
+        for(var i = 1;i<ChildrenList.length; i++){//loop through everychild
+            if (isValidNewBlock(ChildrenList[i], blockToCheck)) {
+                toCheck.push(ChildrenList[i]);
+            } else {
+                return false;
+            }
         }
+        //the parent block that was fully checked shall be removed
+        toCheck.shift();
     }
     return true;
+
 };
 
 //var getLatestBlock = () => blockchain[blockchain.length - 1];
