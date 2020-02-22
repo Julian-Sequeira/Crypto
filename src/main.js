@@ -18,6 +18,7 @@ class Block {
         this.timestamp = timestamp;
         this.data = data;
         this.hash = hash.toString();
+        this.nonce = 0;
     }
 }
 
@@ -29,7 +30,7 @@ var MessageType = {
 };
 
 var getGenesisBlock = () => {
-    return new Block(0, "0", 1465154705, "my genesis block!!", "016534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7", 1);
+    return new Block(0, "0", 1465154705, "my genesis block!!", "016534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7", 1, 1);
 };
 
 var blockchain = [getGenesisBlock()];
@@ -118,11 +119,24 @@ var generateNextBlock = (blockData) => {
 
 
 var calculateHashForBlock = (block) => {
-    return calculateHash(block.index, block.previousHash, block.timestamp, block.data);
+    var newHash = null;
+
+    do{
+        block.nonce += 1;
+        newHash = calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.difficulty, block.work, block.nonce);
+    } while (!checkHashFormat(newHash, block.difficulty));
+    
+    return newHash;
 };
 
-var calculateHash = (index, previousHash, timestamp, data) => {
-    return CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
+var checkHashFormat = (hash, difficulty) => {
+    var regex = RegExp(`[0]{${difficulty}}.*`,"g");
+    return regex.test(hash);
+};
+
+
+var calculateHash = (index, previousHash, timestamp, data, difficulty, work, nonce) => {
+    return CryptoJS.SHA256(index + previousHash + timestamp + data + difficulty + work + nonce).toString();
 };
 
 var checkMostWork = (newBlock) => {
@@ -196,7 +210,7 @@ var handleBlockchainResponse = (message) => {
         console.log('received blockchain is not longer than current blockchain. Do nothing');
     }
 };
-//------------------------restart the whole thing from here
+
 var replaceChain = (newBlocks) => {
     if (isValidChain(newBlocks) && HasMoreWork(newBlocks)) {
         console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
@@ -271,3 +285,7 @@ var broadcast = (message) => sockets.forEach(socket => write(socket, message));
 connectToPeers(initialPeers);
 initHttpServer();
 initP2PServer();
+
+//----------------------------------------------testing area
+/* */
+console.log(blockchain2);
