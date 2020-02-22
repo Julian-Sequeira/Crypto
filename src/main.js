@@ -7,8 +7,6 @@ var WebSocket = require("ws");
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
-
-//check to see the longest(most work)
 //TODO: calculate hash for block
 
 class Block {
@@ -200,7 +198,7 @@ var handleBlockchainResponse = (message) => {
 };
 //------------------------restart the whole thing from here
 var replaceChain = (newBlocks) => {
-    if (isValidChain(newBlocks) && newBlocks.length > blockchain.length) {
+    if (isValidChain(newBlocks) && HasMoreWork(newBlocks)) {
         console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
         blockchain = newBlocks;
         broadcast(responseLatestMsg());
@@ -231,6 +229,29 @@ var isValidChain = (blockchainToValidate) => {
     return true;
 
 };
+
+var HasMoreWork = (blockchain) => {
+    var suggestedThickestBranch = findThickestBranch(blockchain);
+    return suggestedThickestBranch.work > longest.work;
+}
+
+var findThickestBranch = (blockchain) => {
+    var thickestBranch = blockchain['genesis'];
+    var toCheck = [thickestBranch];
+    while (toCheck.length > 0){//loop through every branch
+        var blockToCheck = toCheck[0];
+        var ChildrenList = blockchain[blockToCheck.hash];
+        for(var i = 1;i<ChildrenList.length; i++){//loop through everychild
+            if (thickestBranch.work < ChildrenList[i].work) {
+                thickestBranch = ChildrenList[i];
+            }
+            toCheck.push(ChildrenList[i]);
+        }
+        //the parent block that was fully checked shall be removed
+        toCheck.shift();
+    }
+    return thickestBranch;
+}
 
 //var getLatestBlock = () => blockchain[blockchain.length - 1];
 var getLatestBlock = () => longest;
