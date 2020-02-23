@@ -17,7 +17,7 @@ class Login extends React.Component {
     }
 
     handleSubmit = () => {
-        //TODO
+        //TODO: authenticate the user here and navigate to main dashbaord
     }
 
     handleRegistration = () => {

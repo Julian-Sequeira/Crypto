@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Login from "./components/Login";
 import Register from "./components/Register";
+import Dashboard from "./components/Dashboard";
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
       >
         <Stack.Screen name="Login" component={Login} options={{ title: 'Welcome' }}/>
         <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen name="Dashboard" component={Dashboard} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -18,7 +18,7 @@ class Register extends React.Component {
     }
 
     handleSubmit = () => {
-        //TODO: Code executes when the login button is tapped
+        //TODO: Create user here and go to login screen
     }
 
     handleGoBack = () => {
