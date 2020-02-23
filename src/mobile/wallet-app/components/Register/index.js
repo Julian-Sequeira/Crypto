@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
 
 
 class Register extends React.Component {
@@ -19,6 +19,16 @@ class Register extends React.Component {
 
     handleSubmit = () => {
         //TODO: Create user here and go to login screen
+      this.storeUserInformation();
+    }
+
+    storeUserInformation = async () => {
+      try {
+        await AsyncStorage.setItem(this.state.username, this.state.password);
+        this.props.navigation.goBack();
+      } catch (error) {
+        console.log("error saving data");
+      }
     }
 
     handleGoBack = () => {

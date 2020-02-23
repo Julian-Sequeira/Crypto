@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
 
 class Login extends React.Component {
 
@@ -18,6 +18,25 @@ class Login extends React.Component {
 
     handleSubmit = () => {
         //TODO: authenticate the user here and navigate to main dashbaord
+        this.getUserInformation();
+    }
+
+    getUserInformation = async () => {
+      try {
+        const {username, password} = this.state;
+        const val = await AsyncStorage.getItem(username);
+        if (val == password) {
+          this.props.navigation.reset({
+            index: 0,
+            routes: [{name: "Dashboard"}],
+          });
+          // this.props.navigation.navigate("Dashboard");
+        } else {
+          console.log("Invalid password");
+        }
+      } catch (error) {
+        console.log("Invalid username or password");
+      }
     }
 
     handleRegistration = () => {
