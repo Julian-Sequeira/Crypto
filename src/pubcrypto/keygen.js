@@ -49,7 +49,7 @@ function genkeys(passphrase) {
         
         // Write the public key to a file
         try {
-            fs.writeFileSync(PUBLIC_KEY_PATH, publicKey);
+            fs.writeFileSync(PUBKEY_PATH, publicKey);
             // console.log('public key has been saved.');
         } catch (error) {
             console.log('error when saving public key', error);
@@ -58,7 +58,7 @@ function genkeys(passphrase) {
 
         // Write the private key to a file
         try {
-            fs.writeFileSync(PRIVATE_KEY_PATH, privateKey);
+            fs.writeFileSync(PRIVKEY_PATH, privateKey);
             // console.log('private key has been saved.');
         } catch (error) {
             console.log('error when saving public key', error);
