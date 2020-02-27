@@ -1,12 +1,12 @@
 const express = require('express');
 const app = express();
-const credential = require('./credential');
+const { loadKeyPair } = require('./pubcrypto');
 const block = require('./block');
 
 const {
   publicKey,
   // privateKey,
-} = credential.loadKeyPair();
+} = loadKeyPair();
 
 const blockTemplate = block.getBlockTemplate(publicKey);
 block.mineBlock(blockTemplate)

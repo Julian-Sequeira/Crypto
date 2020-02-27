@@ -1,5 +1,5 @@
 const fs = require('fs');
-const crypto = require('crypto');
+const genkeys = require('./keygen.js');
 
 // Where we store the generated keys
 const KEYS_DIRECTORY = '../keys';
@@ -25,8 +25,8 @@ function loadKeyPairs() {
     // Check whether the key files exist
     if (!(fs.existsSync(PUBKEY_PATH) && fs.existsSync(PRIVKEY_PATH))) {
         // TODO: Add prompt for passphrase input
-        //genkeys(KEYS_DIRECTORY, 'password');
-        console.log("Keys don't exist");
+        console.log("Keys don't exist yet");
+        genkeys(KEYS_DIRECTORY, 'password');    
     }
 
     // Load public key
@@ -50,4 +50,4 @@ function loadKeyPairs() {
     return { publicKey, privateKeyEncrypted };
 };
 
-export default loadKeyPairs;
+export default loadKeyPair;

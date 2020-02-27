@@ -26,14 +26,12 @@ const options = getopts(process.argv, {
     }
 })
 
-
-
 // Help message - gives information on what flags to use in cmd line
 // Start: generate a public/private key pair
 // -m: Money to send, -f: Processing fee, -a: Address to send to
-const usage = "\tUsage: ./wallet.js [--start | -m amount -f fee -a address]"
+const USAGE = "\tUSAGE: ./wallet.js [--start | -m amount -f fee -a address]"
 if (options.help) {
-    console.log(usage);
+    console.log(USAGE);
 }
 
 // Prompt the user for their passphrase
@@ -53,7 +51,7 @@ if (options.start) {
 // Or create and send a transaction
 } else {
     if (!options.amount || !options.fee || !options.address) {
-        console.log(usage);
+        console.log(USAGE);
     } else {
 
         // Prepare all the necessary transaction ingredients
