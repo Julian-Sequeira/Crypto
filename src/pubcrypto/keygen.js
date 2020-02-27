@@ -11,6 +11,8 @@ const PRIVKEY_PATH = `${KEYS_DIRECTORY}/privkey.pem`;
  */ 
 
 function genkeys(passphrase) {
+
+    console.log("generating");
     
     // Generates keys using RSA with mod 4k
     crypto.generateKeyPair('rsa', {
@@ -65,4 +67,4 @@ function genkeys(passphrase) {
     });
 }
 
-export default genkeys;
+module.exports = genkeys;
