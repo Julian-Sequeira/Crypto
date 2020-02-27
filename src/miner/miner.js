@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const { loadKeyPair } = require('../pubcrypto');
+const { loadKeyPair } = require('./credential');
 const block = require('./block');
 
 const {
