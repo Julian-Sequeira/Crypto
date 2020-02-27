@@ -14,4 +14,4 @@ function verifySignature(string, signature, publicKey) {
     return verify.verify(publicKey, signature, 'hex');
 }
 
-export default verifySignature;
+module.exports = verifySignature;

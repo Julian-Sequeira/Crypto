@@ -35,4 +35,4 @@ function createSignature(string, passphrase) {
     return sign.sign(privateKey, 'hex');    // ** The signature is encoded in hex **
 }
 
-export default createSignature;
+module.exports = createSignature;

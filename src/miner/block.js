@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const Transaction = require('../src/cli-wallet/transaction');
+const Transaction = require('../cli-wallet/transaction');
 
 /**
  * We use fake transactions here

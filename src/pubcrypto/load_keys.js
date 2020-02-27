@@ -10,7 +10,7 @@ const PRIVKEY_PATH = `${KEYS_DIRECTORY}/privkey.pem`;
  * Load the public and private keys from a file
  */
 
-function loadKeyPairs() {
+function loadKeyPair() {
 
     // First, check whether keys diretory exists
     fs.stat(KEYS_DIRECTORY, (err, _) => {
@@ -50,4 +50,4 @@ function loadKeyPairs() {
     return { publicKey, privateKeyEncrypted };
 };
 
-export default loadKeyPair;
+module.exports = loadKeyPair;
