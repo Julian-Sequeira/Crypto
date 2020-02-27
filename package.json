@@ -2,7 +2,9 @@
   "scripts": {
     "start": "nodemon src/main.js",
     "release": "node src/main.js",
-    "miner": "npm start --prefix miner"
+    "miner": "npm start --prefix miner",
+    "react-start": "react-scripts start",
+    "react-build": "react-scripts build"
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -13,10 +15,25 @@
     "getopts": "^2.2.5",
     "js-sha256": "^0.9.0",
     "nodemon": "^2.0.2",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-scripts": "^3.4.0",
     "readline-sync": "^1.4.10",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "uuid": "^3.4.0",
     "ws": "^1.1.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
