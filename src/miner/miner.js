@@ -12,7 +12,7 @@ const blockTemplate = block.getBlockTemplate(publicKey);
 block.mineBlock(blockTemplate)
   .then((newBlock) => {
     // TODO: send the newly generated block to P2P nodes
-    // console.log(newBlock);
+    console.log(JSON.stringify(newBlock));
   })
   .catch((err) => {
     console.log('error when mining block', err);

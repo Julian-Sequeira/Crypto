@@ -19,6 +19,7 @@ const options = getopts(process.argv, {
         address: "a",
         fee: "f",
         amount: "m",
+        prevId: "i",
     },
     default: {
         start: false,
@@ -50,14 +51,13 @@ if (options.start) {
 
 // Or create and send a transaction
 } else {
-    if (!options.amount || !options.fee || !options.address) {
+    if (!options.amount || !options.fee || !options.address || !options.prevId) {
         console.log(USAGE);
     } else {
-
         // Prepare all the necessary transaction ingredients
         const publicKeyBuffer = fs.readFileSync('pubkey.pem');
         const publicKey = publicKeyBuffer.toString('hex');
-        const previousID = null;
+        const previousID = options.prevId;
         const amount = options.amount;
         const fee = options.fee;
         const address = options.address;
@@ -78,6 +78,6 @@ if (options.start) {
                 console.error(err);
                 console.log("Sending transaction failed");
             });
-    }
+        }
 }
 

@@ -2,7 +2,7 @@
   "scripts": {
     "start": "nodemon src/main.js",
     "release": "node src/main.js",
-    "miner": "npm start --prefix miner"
+    "miner": "npm start --prefix src/miner"
   },
   "dependencies": {
     "axios": "^0.19.2",

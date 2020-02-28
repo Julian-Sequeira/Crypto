@@ -3,20 +3,11 @@ var CryptoJS = require("crypto-js");
 var express = require("express");
 var bodyParser = require('body-parser');
 var WebSocket = require("ws");
+var genesisBlock = require("./genesisBlock.json");
 
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
-
-class Block {
-    constructor(index, previousHash, timestamp, data, hash) {
-        this.index = index;
-        this.previousHash = previousHash.toString();
-        this.timestamp = timestamp;
-        this.data = data;
-        this.hash = hash.toString();
-    }
-}
 
 var sockets = [];
 var MessageType = {
@@ -26,10 +17,27 @@ var MessageType = {
 };
 
 var getGenesisBlock = () => {
-    return new Block(0, "0", 1465154705, "my genesis block!!", "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7");
+    return genesisBlock;
 };
 
 var blockchain = [getGenesisBlock()];
+
+var memPool = [];
+
+function validateTransaction(transaction) {
+    for (const block of blockchain) {
+        for (const confTransaction of block.body) {
+            if (confTransaction.details.previousID == transaction.details.previousID){
+                return false;
+            }
+            if (confTransaction.id == transaction.details.previousID
+                && confTransaction.details.amount == transaction.details.amount){
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 var initHttpServer = () => {
     var app = express();
@@ -50,17 +58,23 @@ var initHttpServer = () => {
         connectToPeers([req.body.peer]);
         res.send();
     });
-
+    app.get('/transactions', (req, res) => res.send(JSON.stringify(memPool)));
     // Get a transaction from a wallet or another node
     app.post('/addTransaction', (req, res) => {
-        console.log(req.body.trxData);
-        res.status(200);
-        res.send({msg: "Transaction received"});
-    })
-
-
-
-
+        // console.log(req.body.trxData);
+        // TODO: check if trans is valid
+        const transaction = JSON.parse(req.body.trxData);
+        const isValidTransaction = validateTransaction(transaction);
+        if (isValidTransaction) {
+            memPool.push(transaction);
+            res.status(200);
+            res.send({msg: "Transaction received"});
+        } else {
+            res.status(400);
+            res.send({msg: "Transaction rejected"});
+        }
+    });
+    
     app.listen(http_port, () => console.log('Listening http on port: ' + http_port));
 };
 
@@ -107,13 +121,13 @@ var initErrorHandler = (ws) => {
 };
 
 
-var generateNextBlock = (blockData) => {
-    var previousBlock = getLatestBlock();
-    var nextIndex = previousBlock.index + 1;
-    var nextTimestamp = new Date().getTime() / 1000;
-    var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData);
-    return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash);
-};
+// var generateNextBlock = (blockData) => {
+//     var previousBlock = getLatestBlock();
+//     var nextIndex = previousBlock.index + 1;
+//     var nextTimestamp = new Date().getTime() / 1000;
+//     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData);
+//     return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash);
+// };
 
 
 var calculateHashForBlock = (block) => {

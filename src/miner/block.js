@@ -47,8 +47,8 @@ const getBlockTemplate = (publicKey) => {
     preHash: 'b10b2168c8f76ea759ee6273c08d6fd6cb0b58746ef9cc37bfb01ef754babeab', // SHA256(DeerCoin)
     timestamp: Date.now(),
     currHash,
-    difficulty: 3, // TODO: difficulty may change
-    nonce: null, // This will be the value for miner to change and get currect hash
+    difficulty: 0, // TODO: difficulty may change
+    nonce: 0, // This will be the value for miner to change and get currect hash
   }
 
   return {
@@ -67,7 +67,7 @@ const mineBlock = (block) => new Promise((resolve, reject) => {
     block.header.nonce = nonce;
     currHash = crypto.createHash('sha256').update(JSON.stringify(block)).digest('hex');
     if (currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
-      console.log(currHash);
+      // console.log(currHash);
       return resolve(block);
     }
     nonce++;
