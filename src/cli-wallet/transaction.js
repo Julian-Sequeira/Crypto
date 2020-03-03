@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const pubcrypto = require('./public-crypto.js');
+const transactions = require("../miner/transactions.json");
 
 /**
  * Transaction class, built for transactions between 1 sender and 1 receiver currently
@@ -82,24 +83,42 @@ class Transaction {
     }
 
     //checks to see if the transaction has not been spent multiple times
-    checkUnspent(){
-        this.duplicates = 0;
-        fetch("../miner/transactions.json")
-            .then(response => response.json())
-            .then(json => {
-                for(var transaction = 0; transaction < json.length; transaction++){
-                    const address = json[transaction].data.details.address;
-                    if (address === this.data.details.publicKey) {
-                        this.duplicates++;
-                    }
-                }
-            });
-        return this.duplicates == 1;
+    checkSingleSpent(){
+        var duplicates = 0;
+        for(var transaction = 0; transaction < transactions.length; transaction++){
+            const address = transactions[transaction].data.details.address;
+            if (address === this.data.details.publicKey) {
+                duplicates++;
+            }
+        }
+        return duplicates == 1;
+    }
+
+    //find the previous transaction of the current transaction
+    findPrev(){
+        for(var transaction = 0; transaction < transactions.length; transaction++){
+            const address = transactions[transaction].data.details.address;
+            if (address === this.data.details.publicKey) {
+                return transactions[transaction];
+            }
+        }
     }
 
 
     //check to see if the all the transactions in the block are valid
-    //CheckBlockTransactions(){}
+    CheckBlockTransactions(){
+        for(var transaction = 0; transaction < transactions.length; transaction++){
+            if(transactions[transaction].verifyTrxSignature() && transactions[transaction].verifyID() && transactions[transaction].checkSingleSpent()){
+                var prevTransaction = findPrev();
+                if(!verifyFromPrevious(prevTransaction)){
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 
