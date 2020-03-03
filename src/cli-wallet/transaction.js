@@ -80,6 +80,26 @@ class Transaction {
         }
         return false;
     }
+
+    //checks to see if the transaction has not been spent multiple times
+    checkUnspent(){
+        this.duplicates = 0;
+        fetch("../miner/transactions.json")
+            .then(response => response.json())
+            .then(json => {
+                for(var transaction = 0; transaction < json.length; transaction++){
+                    const address = json[transaction].data.details.address;
+                    if (address === this.data.details.publicKey) {
+                        this.duplicates++;
+                    }
+                }
+            });
+        return this.duplicates == 1;
+    }
+
+
+    //check to see if the all the transactions in the block are valid
+    //CheckBlockTransactions(){}
 }
 
 
