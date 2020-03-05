@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const Transaction = require('../cli-wallet/transaction');
 const axios = require('axios').default;
+const CryptoJS = require('crypto');
 
 /**
  * We use fake transactions here
@@ -21,6 +22,21 @@ const getTransactions = async () => {
     console.log(e);
   }
   return transactions;
+}
+
+const getLastBlock = async () => {
+  let lastblock = null;
+  try{
+    // TODO: get peer list and request from peer list
+    lastblock = (await axios.get('http://localhost:3001/lastBlock')).data;
+  } catch (e) {
+    console.log(e);
+  }
+  return lastblock;
+}
+
+function getBlockHash(block) {
+  return CryptoJS.createHash('sha256').update(JSON.stringify(block.header)).digest('HEX');
 }
 
 // TODO: verify that all transaction are valid for this block
@@ -55,16 +71,28 @@ const getBlockTemplate = async (publicKey) => {
     return;
   }
 
+  console.log(transactions);
+
   // body will be an array of transactions
   const body = [];
-  body.push(JSON.stringify(transaction));
-  transactions.forEach(t => body.push(JSON.stringify(t)));
+  body.push(transaction.data);
+  transactions.forEach(t => body.push(t));
   const currHash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('HEX');
+
+  let lastBlock;
+  try{
+    lastBlock = await getLastBlock();
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+
+  // console.log(lastBlock);
 
   // TODO: construct block template here, need to update block structure and fields
   const header = {
     version: '1.0.0',
-    preHash: 'b10b2168c8f76ea759ee6273c08d6fd6cb0b58746ef9cc37bfb01ef754babeab', // SHA256(DeerCoin)
+    preHash: getBlockHash(lastBlock),
     timestamp: Date.now(),
     currHash,
     difficulty: 0, // TODO: difficulty may change

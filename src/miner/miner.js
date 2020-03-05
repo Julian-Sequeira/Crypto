@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const { loadKeyPair } = require('./credential');
 const block = require('./block');
+const axios = require('axios');
 
 const {
   publicKey,
@@ -11,9 +12,19 @@ const {
 async function mine(){
   const blockTemplate = await block.getBlockTemplate(publicKey);
   block.mineBlock(blockTemplate)
-    .then((newBlock) => {
+    .then(async (newBlock) => {
       // TODO: send the newly generated block to P2P nodes
       console.log(JSON.stringify(newBlock));
+      try{
+        await axios({
+          method: 'post',
+          url: 'http://localhost:3001/addBlock',
+          data: { newBlock }
+        });
+      }
+      catch (e) {
+        console.log(e);
+      }
     })
     .catch((err) => {
       console.log('error when mining block', err);

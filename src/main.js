@@ -20,6 +20,22 @@ function getBlockHash(block) {
     return CryptoJS.createHash('sha256').update(JSON.stringify(block.header)).digest('HEX');
 }
 
+function validateTransaction(transaction) {
+    // TODO: check if signing is correct
+    // for (const block of blockchain) {
+    //     for (const confTransaction of block.body) {
+    //         if (confTransaction.details.previousID == transaction.details.previousID){
+    //             return false;
+    //         }
+    //         if (confTransaction.id == transaction.details.previousID
+    //             && confTransaction.details.amount == transaction.details.amount){
+    //             return true;
+    //         }
+    //     }
+    // }
+    return true;
+}
+
 //our blockchain is more like a tree. It will keep track of all the children
 var blockchain = {};
 blockchain['genesis'] = genesisBlock;
@@ -33,7 +49,8 @@ var initHttpServer = () => {
     var app = express();
     app.use(bodyParser.json());
 
-    app.get('/allBlocks', (req, res) => res.send(JSON.stringify(blockchain)));
+    app.get('/allBlocks', (req, res) => res.send(blockchain));
+    app.get('/lastBlock', (req, res) => res.send(blockchain['longest']));
     app.get('/getNewBlocks', (req,res) => {
         var blockHash = req.body.hash;
         var foundBlock = null;
@@ -44,6 +61,8 @@ var initHttpServer = () => {
         }
     });
     app.post('/addBlock', (req, res) => {
+        console.log('got new block');
+        console.log(req.body.newBlock);
         addBlock(req.body.newBlock);
         broadcast(responseLatestMsg());
         res.send();
@@ -58,6 +77,7 @@ var initHttpServer = () => {
     app.get('/transactions', (req, res) => res.send(JSON.stringify(memPool)));
     // Get a transaction from a wallet or another node
     app.post('/addTransaction', (req, res) => {
+        console.log('got new transaction');
         const transaction = JSON.parse(req.body.trxData);
         const isValidTransaction = validateTransaction(transaction);
         if (isValidTransaction) {
@@ -145,9 +165,9 @@ var addBlock = (newBlock) => {
             blockchain[newBlockHash] = [newBlock];
             //check to see if the new block is the most work done branch of blockchain
             //if so, assign that as the longest
-            if (checkMostWork(newBlock)){
+            // if (checkMostWork(newBlock)){
                 blockchain["longest"]= newBlock;
-            }
+            // }
         }
     }
 };
