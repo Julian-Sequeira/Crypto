@@ -54,6 +54,7 @@ if (options.start) {
     if (!options.amount || !options.fee || !options.address || !options.prevId) {
         console.log(USAGE);
     } else {
+        
         // Prepare all the necessary transaction ingredients
         const publicKeyBuffer = fs.readFileSync('pubkey.pem');
         const publicKey = publicKeyBuffer.toString('hex');
