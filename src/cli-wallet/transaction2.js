@@ -2,16 +2,16 @@ const crypto = require('crypto');
 const pubcrypto = require('./public-crypto.js');
 
 /**
- * Transaction class, built for transactions between 1 sender and 1 receiver currently
+ * Transaction2 class, built for transactions between 1 sender and 1 receiver currently
  * Includes (static?) functions for verifying transactions as well
  */
-class Transaction {
+class Transaction2 {
 
     // Need to make multiple serializable objects
     // One to send over the network (data)
     // One to make the transaction ID and signature (details)
     // Serializing the whole class is a waste of bandwidth
-    constructor(args) { 
+    constructor(args, encryptedKey) { 
         this.data = {
             details: null,
             id: null,
@@ -35,13 +35,15 @@ class Transaction {
         if (args.isNew) {
             const serial = this.serialize(this.data.details);
             this.data.id = this.calculateID();
-            this.data.signature = pubcrypto.createSignature(serial, args.passphrase);
+            this.data.signature = pubcrypto.createSignatureMem(serial, args.passphrase, encryptedKey);
 
         // Otherwise, we're just dumping existing transaction data into a new object
         } else {
             this.data.id = args.id;
             this.data.signature = args.signature;
         }       
+
+        this.encryptedKey = encryptedKey;
     }
 
     // Modularizing this so that if we use a different serialization 
@@ -95,7 +97,7 @@ class Transaction {
 }
 
 
-module.exports = Transaction;
+module.exports = Transaction2;
 
 /**
  * - transaction ID 

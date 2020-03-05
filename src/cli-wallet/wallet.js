@@ -81,6 +81,6 @@ if (options.start) {
                 console.error(err);
                 console.log("Sending transaction failed");
             });
-        }
+    }
 }
 
