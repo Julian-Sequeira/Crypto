@@ -24,13 +24,15 @@ const options = getopts(process.argv, {
     default: {
         start: false,
         s: false,
+        new: false,
+        n: false
     }
 })
 
 // Help message - gives information on what flags to use in cmd line
 // Start: generate a public/private key pair
 // -m: Money to send, -f: Processing fee, -a: Address to send to
-const USAGE = "\tUSAGE: ./wallet.js [--start | -m amount -f fee -a address]"
+const USAGE = "\tUSAGE: ./wallet.js [--start | -i prevId -m amount -f fee -a address]"
 if (options.help) {
     console.log(USAGE);
 }
@@ -41,7 +43,7 @@ let passphrase = reader.question('Passphrase: ', {
 })
 
 
-// Generate key pairs to instantiate the waller
+// Generate key pairs to instantiate the wallet
 if (options.start) {
     console.log("Generating key pairs...");
     pubcrypto.genkeys(passphrase);
