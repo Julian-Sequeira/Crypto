@@ -112,7 +112,8 @@ function genkeysMem(passphrase) {
     
     // Write both of the generated keys to a file    
     });
-    return { "publicKey" : publicKey, "encryptedKey": privateKey };
+    const publicKeyHex = Buffer.from(publicKey, 'utf8').toString('hex');
+    return { "publicKey" : publicKeyHex, "encryptedKey": privateKey };
 }
 
 /** Create a signature,

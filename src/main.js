@@ -8,6 +8,9 @@ var genesisBlock = require("./genesisBlock.json");
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
+
+
+const Transaction = require("./cli-wallet/transaction.js");
 //TODO: calculate hash for block
 
 // class Block {
@@ -84,16 +87,21 @@ var initHttpServer = () => {
     app.post('/addTransaction', (req, res) => {
         // console.log(req.body.trxData);
         // TODO: check if trans is valid
-        const transaction = JSON.parse(req.body.trxData);
-        const isValidTransaction = validateTransaction(transaction);
-        if (isValidTransaction) {
-            memPool.push(transaction);
-            res.status(200);
-            res.send({msg: "Transaction received"});
-        } else {
-            res.status(400);
-            res.send({msg: "Transaction rejected"});
-        }
+        // const transaction = JSON.parse(req.body.trxData);
+        // const isValidTransaction = validateTransaction(transaction);
+        // if (isValidTransaction) {
+        //     memPool.push(transaction);
+        //     res.status(200);
+        //     res.send({msg: "Transaction received"});
+        // } else {
+        //     res.status(400);
+        //     res.send({msg: "Transaction rejected"});
+        // }
+
+        console.log(req.body.trxData);
+        let transaction = new Transaction(JSON.parse(req.body.trxData));
+        memPool.push(transaction);
+        console.log(memPool);
     });
     
     app.listen(http_port, () => console.log('Listening http on port: ' + http_port));
