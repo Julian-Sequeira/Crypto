@@ -8,15 +8,19 @@ const {
   // privateKey,
 } = loadKeyPair();
 
-const blockTemplate = block.getBlockTemplate(publicKey);
-block.mineBlock(blockTemplate)
-  .then((newBlock) => {
-    // TODO: send the newly generated block to P2P nodes
-    console.log(JSON.stringify(newBlock));
-  })
-  .catch((err) => {
-    console.log('error when mining block', err);
-  });
+async function mine(){
+  const blockTemplate = await block.getBlockTemplate(publicKey);
+  block.mineBlock(blockTemplate)
+    .then((newBlock) => {
+      // TODO: send the newly generated block to P2P nodes
+      console.log(JSON.stringify(newBlock));
+    })
+    .catch((err) => {
+      console.log('error when mining block', err);
+    });
+}
+
+mine();
 
 // express middleware
 app.use(express.json());

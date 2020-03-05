@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const Transaction = require('../cli-wallet/transaction');
+const axios = require('axios').default;
 
 /**
  * We use fake transactions here
@@ -11,11 +12,25 @@ const getFakeTransactions = () => {
   return transactions;
 }
 
+const getTransactions = async () => {
+  let transactions = null;
+  try{
+    // TODO: get peer list and request from peer list
+    transactions = (await axios.get('http://localhost:3001/transactions')).data;
+  } catch (e) {
+    console.log(e);
+  }
+  return transactions;
+}
+
+// TODO: verify that all transaction are valid for this block
+// only use the transactions that are valid
+
 /**
  * Get a block of transactions, with the first one being miner's reward.
  * The block body will be later used in mining function (calculate hash value).
  */
-const getBlockTemplate = (publicKey) => {
+const getBlockTemplate = async (publicKey) => {
   // crete the first transaction in the block body which is the reward for miner
   const details = {
     publicKey: null,
@@ -32,8 +47,13 @@ const getBlockTemplate = (publicKey) => {
   };
   transaction = new Transaction(args);
 
-  // TODO: update this when get transactions API call is completed
-  const transactions = getFakeTransactions();
+  let transactions;
+  try{
+    transactions = await getTransactions();
+  } catch (e) {
+    console.log(e);
+    return;
+  }
 
   // body will be an array of transactions
   const body = [];
