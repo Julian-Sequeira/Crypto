@@ -98,7 +98,11 @@ var initHttpServer = () => {
     app.post('/getBalance', (req, res) => {
         // get balance of a wallet user
         const address = req.body.address;
-        // console.log(`address: ${address}`);
+        const branch = findThickestBranch(blockchain);
+        console.log(branch.header.preHash);
+        const preHash = branch.header.preHash;
+        console.log(blockchain);
+        console.log(blockchain[preHash]);
         res.status(200).send({ balance: 100 });
     });
 
