@@ -2,7 +2,8 @@
   "scripts": {
     "start": "nodemon src/main.js",
     "release": "node src/main.js",
-    "miner": "npm start --prefix src/miner"
+    "miner": "npm start --prefix src/miner",
+    "wallet": "cd src/cli-wallet && ./wallet.js"
   },
   "dependencies": {
     "axios": "^0.19.2",
