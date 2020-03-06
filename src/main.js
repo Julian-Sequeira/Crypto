@@ -5,6 +5,8 @@ var bodyParser = require('body-parser');
 var WebSocket = require("ws");
 var genesisBlock = require("./genesisBlock.json");
 
+const Transaction = require('./cli-wallet/transaction.js');
+
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
@@ -94,6 +96,8 @@ var initHttpServer = () => {
         let transaction = new Transaction(JSON.parse(req.body.trxData));
         memPool.push(transaction);
         console.log(memPool);
+        res.status(200);
+        res.send();
     });
     
     app.listen(http_port, () => console.log('Listening http on port: ' + http_port));
@@ -164,9 +168,9 @@ var initErrorHandler = (ws) => {
 adds the block to the longest branch of the blockchain
 */
 var addBlock = (newBlock) => {
-    if(newBlock.header.preHash in blockchain){//check to see if this branch exist at all
-        if (isValidNewBlock(newBlock, blockchain[newBlock.header.preHash][0])) {
-            blockchain[newBlock.header.preHash].push(newBlock);
+    // if(newBlock.header.preHash in blockchain){//check to see if this branch exist at all
+    //     if (isValidNewBlock(newBlock, blockchain[newBlock.header.preHash][0])) {
+            // blockchain[newBlock.header.preHash].push(newBlock);
             const newBlockHash = getBlockHash(newBlock); // TODO
             blockchain[newBlockHash] = [newBlock];
             //check to see if the new block is the most work done branch of blockchain
@@ -174,8 +178,8 @@ var addBlock = (newBlock) => {
             // if (checkMostWork(newBlock)){
                 blockchain["longest"]= newBlock;
             // }
-        }
-    }
+    //     }
+    // }
 };
 
 /*

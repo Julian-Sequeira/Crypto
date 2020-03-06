@@ -65,6 +65,7 @@ const getBlockTemplate = async (publicKey) => {
 
   let transactions;
   try{
+    // transactions = getFakeTransactions();
     transactions = await getTransactions();
   } catch (e) {
     console.log(e);
@@ -92,6 +93,7 @@ const getBlockTemplate = async (publicKey) => {
   // TODO: construct block template here, need to update block structure and fields
   const header = {
     version: '1.0.0',
+    // preHash: 'b10b2168c8f76ea759ee627c08d6fd6cb0b58746ef9cc37bfb01ef754babeab',
     preHash: getBlockHash(lastBlock),
     timestamp: Date.now(),
     currHash,

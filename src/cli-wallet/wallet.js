@@ -16,9 +16,11 @@ const options = getopts(process.argv, {
         help: "h",
         start: "s",
         passphrase: "p",
+        totalAmt: "t",
         address: "a",
         fee: "f",
         amount: "m",
+        prevIdx: "x",
         prevId: "i",
     },
     default: {
@@ -32,7 +34,7 @@ const options = getopts(process.argv, {
 // Help message - gives information on what flags to use in cmd line
 // Start: generate a public/private key pair
 // -m: Money to send, -f: Processing fee, -a: Address to send to
-const USAGE = "\tUSAGE: ./wallet.js [--start | -i prevId -m amount -f fee -a address]"
+const USAGE = "\tUSAGE: ./wallet.js [--start | -i prevId -x previousIdx -t totalAmt -m amount -f fee -a address]"
 if (options.help) {
     console.log(USAGE);
 }
@@ -53,7 +55,8 @@ if (options.start) {
 
 // Or create and send a transaction
 } else {
-    if (!options.amount || !options.fee || !options.address || !options.prevId) {
+    if (options.amount === undefined || options.fee === undefined || options.address === undefined || options.prevId === undefined || options.prevIdx === undefined || options.totalAmt === undefined) {
+        console.log(options);
         console.log(USAGE);
     } else {
         
@@ -64,7 +67,15 @@ if (options.start) {
         const amount = options.amount;
         const fee = options.fee;
         const address = options.address;
-        const details = {publicKey, previousID, amount, fee, address}
+        const totalAmt = options.totalAmt;
+        const sendToSelf = totalAmt - amount - fee;
+        const previousIdx = options.prevIdx;
+
+        const recipients = [
+            {'index': 0, 'address': address,'amount': amount}, 
+            {'index': 1, 'address': publicKey, 'amount': sendToSelf}
+        ];
+        const details = {publicKey, previousID, previousIdx, fee, recipients}
 
         // Generating a new transaction- isNew variable tells the constructor to generate an id and signature
         const isNew = true;
