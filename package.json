@@ -2,7 +2,8 @@
   "scripts": {
     "start": "nodemon src/main.js",
     "release": "node src/main.js",
-    "miner": "npm start --prefix src/miner"
+    "miner": "npm start --prefix src/miner",
+    "wallet": "cd src/cli-wallet && node wallet.js"
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -17,6 +18,7 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "uuid": "^3.4.0",
-    "ws": "^1.1.0"
+    "ws": "^1.1.0",
+    "yarn": "^1.22.0"
   }
 }
