@@ -18,7 +18,6 @@ class Register extends React.Component {
     }
 
     handleSubmit = () => {
-        //TODO: Create user here and go to login screen
       this.storeUserInformation();
     }
 

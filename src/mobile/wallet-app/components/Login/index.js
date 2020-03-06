@@ -6,6 +6,7 @@ class Login extends React.Component {
     state = {
         username: "",
         password: "",
+        error: "",
     }
 
     handleNameChange = username => {
@@ -17,7 +18,6 @@ class Login extends React.Component {
     }
 
     handleSubmit = () => {
-        //TODO: authenticate the user here and navigate to main dashbaord
         this.getUserInformation();
     }
 
@@ -26,16 +26,21 @@ class Login extends React.Component {
         const {username, password} = this.state;
         const val = await AsyncStorage.getItem(username);
         if (val == password) {
-          this.props.navigation.reset({
-            index: 0,
-            routes: [{name: "Dashboard"}],
+          // TODO: this is double loading the dashboard, find a way to pass params while reseting!!
+          this.props.navigation.navigate('Dashboard', {
+            user: username,
           });
-          // this.props.navigation.navigate("Dashboard");
+          /*this.props.navigation.reset({
+            index: 0,
+            routes: [{name: 'Dashboard'}],
+          });*/
+          console.log("hello");
         } else {
+          this.setState({ error: 'Invalid Username or Password' });
           console.log("Invalid password");
         }
       } catch (error) {
-        console.log("Invalid username or password");
+        console.log(error);
       }
     }
 
@@ -44,12 +49,12 @@ class Login extends React.Component {
     }
 
     render() {
-        const {username, password} = this.state;
+        const {username, password, error} = this.state;
         const isInvalid = password === '' || username === '';
 
         return (
             <View style={styles.container}>
-                <Text style={styles.logo}>Welcome to the DeerCoin App</Text>
+                <Text style={styles.logo}>DeerCoin Wallet</Text>
                 <View style={styles.inputView}>
                     <TextInput
                         style={styles.TextInput}
@@ -75,6 +80,9 @@ class Login extends React.Component {
                 <TouchableOpacity>
                     <Text style={styles.loginText} onPress={this.handleRegistration}>Register</Text>
                 </TouchableOpacity>
+                <Text style={styles.errorText}>
+                  {error}
+                </Text>
             </View>
         )
     };
@@ -122,7 +130,10 @@ const styles = StyleSheet.create({
     },
     loginText:{
       color:"white"
-    }
+    },
+    errorText: {
+      color: 'red',
+    },
   });
 
 
