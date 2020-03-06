@@ -37,10 +37,14 @@ var initHttpServer = () => {
     app.get('/getNewBlocks', (req,res) => {
         var blockHash = req.body.hash;
         var foundBlock = null;
-        if(foundBlock = isInLongest(blockHash)){
+        if(foundBlock = isInLongest(blockHash)){ // checks to see if the requested hash is in the longest chain
             res.send(JSON.stringify(cutBlockchain(foundBlock)));
-        }else{
-
+        }else{ // the reqested hash is in the other chains
+            //find if the hash exists in the blockchain
+            if(doesExist(blockHash)){
+                //send the whole longest chain 
+                res.send(JSON.stringify(cutBlockchain(blockchain['genesis'])));
+            }
         }
     });
     app.post('/addBlock', (req, res) => {
@@ -87,9 +91,45 @@ var isInLongest = (hash) => {
     return false;
 }
 
+/*
+    returns a list of blocks that the miner may need
+    ex, the current chain is 1 -> 2 -> 3 -> 4
+    the miner sends a new block from 2 -> 5
+    this function will return {2,3,4} in an object
+
+*/
 var cutBlockchain = (foundBlock) => {
-    var cutted_blockchain = {};
-    
+    var current_block = blockchain['longest']
+    var cutted_blockchain = [];
+    cutted_blockchain.push(blockchain['longest']);
+    while(current_block != foundBlock){
+        cutted_blockchain.push(current_block);
+        current_block = blockchain[current_block.header.preHash];
+    }
+    cutted_blockchain.push(foundBlock);
+}
+
+/*
+    find which chain this block's hash belongs to
+*/
+var doesExist = (hash) => {
+    var toCheck = [blockchain['genesis']];
+    if(hash == blockchain['genesis'].header.currHash){
+        return true;
+    }
+    while (toCheck.length > 0){//loop through every branch
+        var blockToCheck = toCheck[0];
+        var ChildrenList = blockchain[getBlockHash(blockToCheck)];
+        for(var i = 1;i<ChildrenList.length; i++){//loop through everychild
+            if(ChildrenList[i].header.currHash == hash){
+                return true;
+            }
+            toCheck.push(ChildrenList[i]);//if valid, add the branch to list to further check
+        }
+        //the parent block that was fully checked shall be removed
+        toCheck.shift();
+    }
+    return false;
 }
 
 var initP2PServer = () => {
