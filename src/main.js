@@ -95,7 +95,13 @@ var initHttpServer = () => {
             res.send({msg: "Transaction rejected"});
         }
     });
-    
+    app.post('/getBalance', (req, res) => {
+        // get balance of a wallet user
+        const address = req.body.address;
+        // console.log(`address: ${address}`);
+        res.status(200).send({ balance: 100 });
+    });
+
     app.listen(http_port, () => console.log('Listening http on port: ' + http_port));
 };
 
@@ -141,7 +147,7 @@ var initErrorHandler = (ws) => {
     ws.on('error', () => closeConnection(ws));
 };
 
-/* 
+/*
 Given the blockData, it will create a new block and add it to the longest branch
 */
 // var generateNextBlock = (blockData) => {
@@ -180,7 +186,7 @@ Given the blockData, it will create a new block and add it to the longest branch
 // /*
 // Checks if the hash has certain difficulty
 // By difficulty, we mean the number of zeroes at the beginning of the hash
-// For example, a hash with difficulty 2 must have a format 00xxxxxxxxx 
+// For example, a hash with difficulty 2 must have a format 00xxxxxxxxx
 // */
 // var checkHashFormat = (hash, difficulty) => {
 //     var regex = RegExp(`^[0]{${difficulty}}.+`,"i");
@@ -233,7 +239,7 @@ var isValidNewBlock = (newBlock, previousBlock) => {
     // }else if(previousBlock.work + newBlock.difficulty !== newBlock.work){//checks if newBlock's work makes sense
     //     console.log('invalid work');
     //     return false;
-    // }else 
+    // }else
     if (getBlockHash(previousBlock) !== newBlock.header.preHash) {//checks if newBlock's previous hash is the previousBlock's hash
         console.log('invalid previoushash');
         return false;

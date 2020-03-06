@@ -25,7 +25,7 @@ const options = getopts(process.argv, {
     s: false,
     new: false,
     n: false,
-    balance: false,
+    balance: false
   }
 });
 
@@ -63,16 +63,8 @@ if (options.start) {
   try {
     publicKeyBuffer = fs.readFileSync("pubkey.pem");
   } catch (error) {
-    console.log("error when loading public key");
     if (error.errno == -2) {
-      console.log("no public key file found, generating one...");
-      const passphrase = askPassphrase(
-        "Please enter a passphrase for your new key pairs: "
-      );
-      pubcrypto.genkeys(passphrase);
-      process.on("exit", () => {
-        console.log("Key pairs generated! Your wallet has been instantiated");
-      });
+      console.log("can't find public key file");
       return;
     } else {
       console.log("encountered unknown error while reading public key");
@@ -81,11 +73,19 @@ if (options.start) {
   }
   const publicKey = publicKeyBuffer.toString("hex");
 
-  console.log(`options: ${JSON.stringify(options)}`);
-
   if (options.balance) {
     // Get the current balance
     console.log("Getting the current balance...");
+    axios
+      .post("http://localhost:3001/getBalance", { address: publicKey })
+      .then(res => {
+        const balance = res.data.balance;
+        console.log(`the current balance is: ${balance}`);
+      })
+      .catch(err => {
+        console.error(err);
+        console.log("getting balance failed");
+      });
   } else {
     // create and send a transaction
     if (
