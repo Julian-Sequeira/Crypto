@@ -1,11 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, Modal, TouchableOpacity, Alert, TextInput } from 'react-native';
 
 class Dashboard extends React.Component {
     
     state = {
         user: '',
         balance: '1000',
+        // Send money modal
+        modalVisible: false,
+        // recipient public key
+        sendTo: '',
     }
 
     componentDidMount() {
@@ -24,6 +28,13 @@ class Dashboard extends React.Component {
         console.log(this.props.route);
     }
 
+    handlePubKeyChange = sendTo => {
+        this.setState({ sendTo });
+    }
+
+    setModalVisible = visible => {
+        this.setState({modalVisible: visible});
+    }
 
     goToLogin = () => {
         this.props.navigation.reset({
@@ -51,18 +62,74 @@ class Dashboard extends React.Component {
         );
     }
 
+    handleTransaction = () => {
+        
+        Alert.alert(
+            'Transaction',
+            'Money sent',
+            [
+                {
+                    text: 'OK', 
+                    onPress: () => console.log("sent transaction"),
+                },
+            ],
+        );
+    }
+
     render() {
-        const { user, balance } = this.state;
+        const { user, balance, sendTo } = this.state;
         return (
             <View style={styles.container}>
                 <Text style={styles.nameText}>{user}</Text>
                 <Text style={styles.nameText}>Balance: {balance} coins</Text>
-                <TouchableOpacity onPress={this.sendMoney}>
+                <TouchableOpacity onPress={() => this.setModalVisible(true)}>
                     <Text style={styles.loginText}>Send Money</Text>
                 </TouchableOpacity>
+                <View>
+                    <Modal
+                        animationType="slide"
+                        transparent={false}
+                        visible={this.state.modalVisible}
+                    >
+                        <View style={styles.container}>
+                            <Text style={styles.logo}>Create a Transaction</Text>
+                            <View style={styles.inputView}>
+                                <TextInput
+                                    style={styles.inputText}
+                                    value={sendTo}
+                                    placeholder="Enter Recipient's Public Key"
+                                    placeholderTextColor="#003f5c"
+                                    onChangeText={this.handlePubKeyChange}
+                                />
+                            </View>
+                            <TouchableOpacity style={[styles.buttonContainer, styles.loginButton]} onPress={this.handleTransaction}>
+                                <Text>Send</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => this.setModalVisible(false)}>
+                                <Text>Go back</Text>
+                            </TouchableOpacity>
+                        </View>
+                        </Modal>
+                    </View>
             </View>
         );
     }
+}
+
+class TransactionList extends React.Component {
+
+    state = {
+
+    }
+
+    render() {
+        return (
+            <View>
+                <Text>TransactionList</Text>
+            </View>
+        );
+    }
+
 }
 
 const styles = StyleSheet.create({
@@ -82,6 +149,44 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 30,
     },
+    logo:{
+        fontWeight:"bold",
+        fontSize:40,
+        color:"#00b5ec",
+        marginBottom:40
+      },
+      inputView: {
+        borderBottomColor: '#F5FCFF',
+        backgroundColor: '#FFFFFF',
+        borderRadius:30,
+        borderBottomWidth: 1,
+        width:250,
+        height:45,
+        marginBottom:20,
+        flexDirection: 'row',
+        alignItems:'center'
+      },
+      inputText:{
+        height:45,
+        marginLeft:16,
+        borderBottomColor: '#FFFFFF',
+        flex:1,
+      },
+      buttonContainer: {
+        height:45,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom:20,
+        width:250,
+        borderRadius:30,
+      },
+      loginButton: {
+        backgroundColor: "#00b5ec",
+      },
+      loginText:{
+        color:"white"
+      },
   });
 
 export default Dashboard;
