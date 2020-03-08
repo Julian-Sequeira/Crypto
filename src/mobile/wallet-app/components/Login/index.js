@@ -57,7 +57,7 @@ class Login extends React.Component {
                 <Text style={styles.logo}>DeerCoin Wallet</Text>
                 <View style={styles.inputView}>
                     <TextInput
-                        style={styles.TextInput}
+                        style={styles.inputText}
                         value={username}
                         placeholder="Username"
                         placeholderTextColor="#003f5c"
@@ -66,7 +66,7 @@ class Login extends React.Component {
                 </View>
                 <View style={styles.inputView}>
                     <TextInput
-                        style={styles.TextInput}
+                        style={styles.inputText}
                         secureTextEntry
                         value={password}
                         placeholder="Password"
@@ -74,11 +74,11 @@ class Login extends React.Component {
                         onChangeText={this.handlePasswordChange}
                     />
                 </View>
-                <TouchableOpacity style={styles.loginBtn} onPress={this.handleSubmit} disabled={isInvalid}>
+                <TouchableOpacity style={[styles.buttonContainer, styles.loginButton]} onPress={this.handleSubmit} disabled={isInvalid}>
                     <Text style={styles.loginText}>LOGIN</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
-                    <Text style={styles.loginText} onPress={this.handleRegistration}>Register</Text>
+                <TouchableOpacity style={styles.buttonContainer}>
+                    <Text onPress={this.handleRegistration}>Register</Text>
                 </TouchableOpacity>
                 <Text style={styles.errorText}>
                   {error}
@@ -91,42 +91,44 @@ class Login extends React.Component {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#003f5c',
+      backgroundColor: '#DCDCDC',
       alignItems: 'center',
       justifyContent: 'center',
     },
     logo:{
       fontWeight:"bold",
-      fontSize:50,
-      color:"#fb5b5a",
+      fontSize:40,
+      color:"#00b5ec",
       marginBottom:40
     },
-    inputView:{
-      width:"80%",
-      backgroundColor:"#465881",
-      borderRadius:25,
-      height:50,
+    inputView: {
+      borderBottomColor: '#F5FCFF',
+      backgroundColor: '#FFFFFF',
+      borderRadius:30,
+      borderBottomWidth: 1,
+      width:250,
+      height:45,
       marginBottom:20,
-      justifyContent:"center",
-      padding:20
+      flexDirection: 'row',
+      alignItems:'center'
     },
     inputText:{
-      height:50,
-      color:"white"
+      height:45,
+      marginLeft:16,
+      borderBottomColor: '#FFFFFF',
+      flex:1,
     },
-    forgot:{
-      color:"white",
-      fontSize:11
+    buttonContainer: {
+      height:45,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom:20,
+      width:250,
+      borderRadius:30,
     },
-    loginBtn:{
-      width:"80%",
-      backgroundColor:"#fb5b5a",
-      borderRadius:25,
-      height:50,
-      alignItems:"center",
-      justifyContent:"center",
-      marginTop:40,
-      marginBottom:10
+    loginButton: {
+      backgroundColor: "#00b5ec",
     },
     loginText:{
       color:"white"

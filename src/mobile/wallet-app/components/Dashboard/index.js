@@ -67,18 +67,18 @@ class Dashboard extends React.Component {
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: '#003f5c',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
+        flex: 1,
+        backgroundColor: '#DCDCDC',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
     headerRight: {
-        color: '#ffffff',
+        color: 'black',
         fontWeight: 'bold',
         paddingHorizontal: 20,
     },
     nameText: {
-        color: '#ffffff',
+        color: 'black',
         fontWeight: 'bold',
         fontSize: 30,
     },

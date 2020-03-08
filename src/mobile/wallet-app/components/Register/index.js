@@ -66,7 +66,7 @@ class Register extends React.Component {
                 <Text style={styles.logo}>Registration</Text>
                 <View style={styles.inputView}>
                     <TextInput
-                        style={styles.TextInput}
+                        style={styles.inputText}
                         value={username}
                         placeholder="Username"
                         placeholderTextColor="#003f5c"
@@ -75,7 +75,7 @@ class Register extends React.Component {
                 </View>
                 <View style={styles.inputView}>
                     <TextInput
-                        style={styles.TextInput}
+                        style={styles.inputText}
                         secureTextEntry
                         value={password}
                         placeholder="Password"
@@ -85,7 +85,7 @@ class Register extends React.Component {
                 </View>
                 <View style={styles.inputView}>
                     <TextInput
-                        style={styles.TextInput}
+                        style={styles.inputText}
                         secureTextEntry
                         value={confirmedPassword}
                         placeholder="Confirm Password"
@@ -93,11 +93,11 @@ class Register extends React.Component {
                         onChangeText={this.handleConfirmedPasswordChange}
                     />
                 </View>
-                <TouchableOpacity style={styles.loginBtn} onPress={this.handleSubmit} disabled={isInvalid}>
+                <TouchableOpacity style={[styles.buttonContainer, styles.loginButton]} onPress={this.handleSubmit} disabled={isInvalid}>
                     <Text style={styles.loginText}>Register</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={this.handleGoBack}>
-                    <Text style={styles.loginText}>Go back</Text>
+                    <Text>Go back</Text>
                 </TouchableOpacity>
                 <Text style={styles.errorText}>
                   {error}
@@ -108,52 +108,54 @@ class Register extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#003f5c',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    logo:{
-      fontWeight:"bold",
-      fontSize:50,
-      color:"#fb5b5a",
-      marginBottom:40
-    },
-    inputView:{
-      width:"80%",
-      backgroundColor:"#465881",
-      borderRadius:25,
-      height:50,
-      marginBottom:20,
-      justifyContent:"center",
-      padding:20
-    },
-    inputText:{
-      height:50,
-      color:"white"
-    },
-    forgot:{
-      color:"white",
-      fontSize:11
-    },
-    loginBtn:{
-      width:"80%",
-      backgroundColor:"#fb5b5a",
-      borderRadius:25,
-      height:50,
-      alignItems:"center",
-      justifyContent:"center",
-      marginTop:40,
-      marginBottom:10
-    },
-    loginText:{
-      color:"white"
-    },
-    errorText: {
-      color: 'red',
-    },
-  });
+  container: {
+    flex: 1,
+    backgroundColor: '#DCDCDC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo:{
+    fontWeight:"bold",
+    fontSize:40,
+    color:"#00b5ec",
+    marginBottom:40
+  },
+  inputView: {
+    borderBottomColor: '#F5FCFF',
+    backgroundColor: '#FFFFFF',
+    borderRadius:30,
+    borderBottomWidth: 1,
+    width:250,
+    height:45,
+    marginBottom:20,
+    flexDirection: 'row',
+    alignItems:'center'
+  },
+  inputText:{
+    height:45,
+    marginLeft:16,
+    borderBottomColor: '#FFFFFF',
+    flex:1,
+  },
+  buttonContainer: {
+    height:45,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom:20,
+    width:250,
+    borderRadius:30,
+  },
+  loginButton: {
+    backgroundColor: "#00b5ec",
+  },
+  loginText:{
+    color:"white"
+  },
+  errorText: {
+    color: 'red',
+  },
+});
 
 
 export default Register;

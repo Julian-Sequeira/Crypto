@@ -6,7 +6,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const Stack = createStackNavigator();
 
@@ -17,15 +16,16 @@ export default function App() {
         initialRouteName="Login"
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#003f5c',
+            backgroundColor: '#DCDCDC',
           },
-          headerTintColor: '#fff',
+          headerTintColor: 'black',
           headerTitleStyle: {
             fontWeight: 'bold',
+            color: 'black',
           },
         }}
       >
-        <Stack.Screen name="Login" component={Login} options={{ title: 'Welcome' }}/>
+        <Stack.Screen name="Login" component={Login} options={{ title: 'Wallet' }}/>
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
       </Stack.Navigator>
