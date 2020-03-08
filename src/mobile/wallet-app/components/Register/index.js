@@ -7,6 +7,8 @@ class Register extends React.Component {
     state = {
         username: "",
         password: "",
+        confirmedPassword: "",
+        error: "",
     }
 
     handleNameChange = username => {
@@ -17,11 +19,32 @@ class Register extends React.Component {
         this.setState({ password });
     }
 
+    handleConfirmedPasswordChange = confirmedPassword => {
+      this.setState({ confirmedPassword });
+    }
+
     handleSubmit = () => {
-      this.storeUserInformation();
+      const { password, confirmedPassword } = this.state;
+      if (password == confirmedPassword) {
+        this.storeUserInformation();
+      } else {
+        this.setState({ error: 'Passwords do not match' });
+      }
     }
 
     storeUserInformation = async () => {
+      try {
+        const user = await AsyncStorage.getItem(this.state.username);
+        console.log(user);
+        if (user !== null) {
+          this.setState({ error: 'User exists' });
+          console.log("user exists");
+          return;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      console.log(this.state.username, this.state.password);
       try {
         await AsyncStorage.setItem(this.state.username, this.state.password);
         this.props.navigation.goBack();
@@ -35,8 +58,8 @@ class Register extends React.Component {
     }
 
     render() {
-        const {username, password} = this.state;
-        const isInvalid = username === '' || password === '';
+        const {username, password, confirmedPassword, error} = this.state;
+        const isInvalid = username === '' || password === '' || confirmedPassword === '';
 
         return (
             <View style={styles.container}>
@@ -60,12 +83,25 @@ class Register extends React.Component {
                         onChangeText={this.handlePasswordChange}
                     />
                 </View>
+                <View style={styles.inputView}>
+                    <TextInput
+                        style={styles.TextInput}
+                        secureTextEntry
+                        value={confirmedPassword}
+                        placeholder="Confirm Password"
+                        placeholderTextColor="#003f5c"
+                        onChangeText={this.handleConfirmedPasswordChange}
+                    />
+                </View>
                 <TouchableOpacity style={styles.loginBtn} onPress={this.handleSubmit} disabled={isInvalid}>
                     <Text style={styles.loginText}>Register</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
-                    <Text style={styles.loginText} onPress={this.handleGoBack}>Go back</Text>
+                <TouchableOpacity onPress={this.handleGoBack}>
+                    <Text style={styles.loginText}>Go back</Text>
                 </TouchableOpacity>
+                <Text style={styles.errorText}>
+                  {error}
+                </Text>
             </View>
         )
     };
@@ -113,7 +149,10 @@ const styles = StyleSheet.create({
     },
     loginText:{
       color:"white"
-    }
+    },
+    errorText: {
+      color: 'red',
+    },
   });
 
 
