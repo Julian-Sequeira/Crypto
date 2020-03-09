@@ -84,15 +84,25 @@ class Transaction {
     // Takes in the previous transaction object
     // Verifies that the public keys of the last recipient and current sender match
     // Verifies that the amounts all much up
-    verifyFromPrevious(prevTransaction) {
-        const address = prevTransaction.data.address;
-        const prevAmount = prevTransaction.data.amount;
-        if (address === this.data.details.publicKey) {
-            if (prevAmount === this.data.amount + this.data.fee) {
-                return true;
-            }
+    verifyFromPrevious(prevTransaction, previousIdx) {
+
+        // Check the public keys match the recpient of the previous transaction
+        const prevRecipient = prevTransaction.data.recipients[previousIdx];
+        const address = prevRecipient.address;
+        if (address !== this.data.publicKey) {
+            return false;
         }
-        return false;
+
+        // Check that the money sent matches the money from the previous transaction
+        const prevAmount = prevRecipient.amount;
+        let sentAmount = this.data.fee;
+        for (recipient in this.data.recipients) {
+            sentAmount += recipient.amount;
+        }
+        if (sentAmount > prevAmount) {
+            return false
+        }
+        return true;
     }
 }
 
