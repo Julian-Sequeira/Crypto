@@ -3,44 +3,46 @@ const pubcrypto = require('./public-crypto.js');
 
 /**
  * Transaction class, built for transactions between 1 sender and 1 receiver currently
- * Includes (static?) functions for verifying transactions as well
+ * Includes functions for verifying the transaction as well
  */
 class Transaction {
 
-    // Need to make multiple serializable objects
-    // One to send over the network (data)
-    // One to make the transaction ID and signature (details)
-    // Serializing the whole class is a waste of bandwidth
-    constructor(args) { 
-        this.data = {
-            details: null,
-            id: null,
-            signature: null
-        }
+    // args = {
+    //     data: {publicKey, previousID, previousIdx, fee, recipients: [{ index, address, amount }]},       
+    //     id: transaction ID (not needed if new transaction),
+    //     signature: transaction signature (not needed if new transaction),
+    //     isNew: boolean to indicate new transaction or not,
+    //     passphrase: use this to decrypt the encrypted private key stored on file,
+    //     directory: folder where the encrypted private key is stored
+    // }
 
-        this.data.details = {
+    constructor(args) { 
+
+        this.data = {
+            publicKey: null,
             previousID: null,
             previousIdx: null,
             fee: null,
             recipients: null
         }
 
-        // Recipients: [{ index:  ,address:  ,amount:  }]
+        this.id = null;
+        this.signature = null;
 
         // This object will be hashed to produce the transaction ID and then signature
         // If anything here is different, the ID and signatures will also be different
-        this.data.details = args.details;
+        this.data = args.data;
 
         // Create the transaction ID and signature if this is a new transaction
         if (args.isNew) {
-            const serial = this.serialize(this.data.details);
+            const serial = this.serialize(this.data);
             this.data.id = this.calculateID();
-            this.data.signature = pubcrypto.createSignature(serial, args.passphrase);
+            this.data.signature = pubcrypto.createSignature(serial, args.passphrase, args.directory);
 
         // Otherwise, we're just dumping existing transaction data into a new object
         } else {
-            this.data.id = args.id;
-            this.data.signature = args.signature;
+            this.id = args.id;
+            this.signature = args.signature;
         }       
     }
 
@@ -52,13 +54,13 @@ class Transaction {
 
     // Return the serialized data object
     // Don't know how getters work in ES6, too tired to learn right now
-    serializedData() {
-        return this.serialize(this.data);
+    serializeTransaction() {
+        return this.serialize(this);
     }
 
     // Again, we might use a different hash function in the future, so change that here
     calculateID() {
-        const serial = this.serialize(this.data.details);
+        const serial = this.serialize(this.data);
         const hash = crypto.createHash('sha256');
         hash.update(serial);
         return hash.digest('hex');    // **Encoding the ID in hex**
@@ -66,27 +68,27 @@ class Transaction {
 
     // Verify that a transaction's data contents hash to its id
     verifyID() {
-        const serial = this.serialize(this.data.details);
+        const serial = this.serialize(this.data);
         const calculatedID = this.calculateID(serial);
-        return (calculatedID === this.data.id);
+        return (calculatedID === this.id);
     }
 
     // Verify that a transaction's signature corresponds to the public key provided
     verifyTrxSignature() {
-        const publicKey = this.data.details.publicKey;
+        const publicKey = this.data.publicKey;
         const publicKeyBuffer = Buffer.from(publicKey, 'hex');    // Need to use a JS buffer object for Crypto's verify function
-        const serial = this.serialize(this.data.details);
-        return pubcrypto.verifySignature(serial, this.data.signature, publicKeyBuffer);
+        const serial = this.serialize(this.data);
+        return pubcrypto.verifySignature(serial, this.signature, publicKeyBuffer);
     }
 
     // Takes in the previous transaction object
     // Verifies that the public keys of the last recipient and current sender match
     // Verifies that the amounts all much up
     verifyFromPrevious(prevTransaction) {
-        const address = prevTransaction.data.details.address;
-        const prevAmount = prevTransaction.data.details.amount;
+        const address = prevTransaction.data.address;
+        const prevAmount = prevTransaction.data.amount;
         if (address === this.data.details.publicKey) {
-            if (prevAmount === this.data.details.amount + this.data.details.fee) {
+            if (prevAmount === this.data.amount + this.data.fee) {
                 return true;
             }
         }

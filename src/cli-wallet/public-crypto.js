@@ -5,7 +5,7 @@ const crypto = require('crypto');
  * Generate public/private keys
  */ 
 
-function genkeys(passphrase) {
+function genkeys(passphrase, dir) {
     
     // Generates keys using RSA with mod 4k
     crypto.generateKeyPair('rsa', {
@@ -26,7 +26,7 @@ function genkeys(passphrase) {
         if (err) throw err; 
     
         // Write the public key to a file (fd = file descriptor)
-        fs.open('pubkey.pem', 'w', (err, fd) => {
+        fs.open(`${dir}/pubkey.pem`, 'w', (err, fd) => {
             if (err) throw err;
             fs.write(fd, publicKey, (err, written, string) => { if (err) throw err; })
             fs.close(fd, (err) => { if (err) throw err; })
@@ -34,7 +34,7 @@ function genkeys(passphrase) {
     
         // Write the private key to a file 
         // Should be fine if done asynchronously since they aren't logically dependent
-        fs.open('privkey.pem', 'w', (err, fd) => {
+        fs.open(`${dir}/privkey.pem`, 'w', (err, fd) => {
             if (err) throw err;
             fs.write(fd, privateKey, (err, written, string) => { if (err) throw err; })
             fs.close(fd, (err) => { if (err) throw err; }) 
@@ -49,10 +49,10 @@ function genkeys(passphrase) {
  * Then encrypt the hash (let Crypto.js worry about the encryption function).
  */
 
-function createSignature(string, passphrase) {
+function createSignature(string, passphrase, dir) {
 
     // Load the encrypted private key from file
-    let encryptedKey = fs.readFileSync('privkey.pem');
+    let encryptedKey = fs.readFileSync(`${dir}/pubkey.pem`);
 
     // Create a key object for Crypto to decrypt
     // Using hardcoded passphrase for now
