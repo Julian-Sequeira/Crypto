@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, Modal, TouchableOpacity, Alert, TextInput } from 'react-native';
 
+import TransactionList from './transactionList.js'
+
 class Dashboard extends React.Component {
     
     state = {
@@ -110,26 +112,11 @@ class Dashboard extends React.Component {
                             </TouchableOpacity>
                         </View>
                         </Modal>
+                        <TransactionList />
                     </View>
             </View>
         );
     }
-}
-
-class TransactionList extends React.Component {
-
-    state = {
-
-    }
-
-    render() {
-        return (
-            <View>
-                <Text>TransactionList</Text>
-            </View>
-        );
-    }
-
 }
 
 const styles = StyleSheet.create({
@@ -137,7 +124,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#DCDCDC',
         alignItems: 'center',
-        justifyContent: 'center',
+        // justifyContent: 'center',
       },
     headerRight: {
         color: 'black',
