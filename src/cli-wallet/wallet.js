@@ -79,21 +79,33 @@ if (options.start) {
         // Prepare all the necessary transaction ingredients
         const publicKeyBuffer = fs.readFileSync('keys/pubkey.pem');
         const publicKey = publicKeyBuffer.toString('hex');
+
         const previousID = options.prevId;
-        const amount = options.amount;
-        const fee = options.fee;
-        const directory = "keys";
+        const previousIdx = options.prevIdx;
+        const previous = [{previousID, previousIdx}]
+
         const address = options.address;
         const totalAmt = options.totalAmt;
+        const fee = options.fee;
+        const amount = options.amount;
         const sendToSelf = totalAmt - amount - fee;
-        const previousIdx = options.prevIdx;
+
+
+        // Check that the keys directory exists
+        try {
+            const stat = fs.statSync('keys');
+        } catch (e) {
+            console.log("Keys directory does not exist!");
+            process.exit(1);
+        }
+        const directory = "keys";
 
         const recipients = [
             {'index': 0, 'address': address,'amount': amount}, 
             {'index': 1, 'address': publicKey, 'amount': sendToSelf}
         ];
         
-        const data = {publicKey, previousID, previousIdx, fee, recipients}
+        const data = {publicKey, previous, fee, recipients}
 
         // Generating a new transaction- isNew variable tells the constructor to generate an id and signature
         const isNew = true;

@@ -11,15 +11,18 @@ const fs = require('fs');
 
 const NUMWALLETS = 20;
 
-// Wallets folder
-let stat = fs.statSync('wallets');
-if (!stat.isDirectory()) {
-    fs.mkdirSync('wallets');
+// Make a folder for all the wallets
+let stat;
+try { 
+    stat = fs.statSync('wallets/first');
+} catch (e) {
+    fs.mkdirSync('wallets/first');
 }
 
 // Make the starting wallet
-stat = fs.statSync('wallets/first');
-if (!stat.isDirectory()) {
+try { 
+    stat = fs.statSync('wallets/first');
+} catch (e) {
     fs.mkdirSync('wallets/first');
 }
 pubcrypto.genkeys('first', 'wallets/first')
@@ -27,9 +30,12 @@ pubcrypto.genkeys('first', 'wallets/first')
 // Make the other NUMWALLETS wallets
 for (let i = 0; i < NUMWALLETS; i++) {
     let name = 'wallet' + i.toString();
-    let folder = 'wallets' + name;
-    stat = fs.statSync(folder);
-    if (!stat.isDirectory()) fs.mkdirSync(folder);
+    let folder = 'wallets/' + name;
+    try { 
+        stat = fs.statSync(folder);
+    } catch (e) {
+        fs.mkdirSync(folder);
+    }
     pubcrypto.genkeys(name, folder);
 }
 
