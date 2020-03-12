@@ -105,8 +105,51 @@ var initHttpServer = () => {
         console.log(blockchain[preHash]);
         res.status(200).send({ balance: 100 });
     });
+    app.post('/getTransactions', (req, res) => {
+        // get transactions of a wallet user
+        const address = req.body.address;
+        const transactions = getTransactions(address);
+        res.status(200).send({ transactions });
+    });
 
     app.listen(http_port, () => console.log('Listening http on port: ' + http_port));
+};
+
+const getTransactions = (address) => {
+    const transactions = [];
+    let currBlock = findThickestBranch(blockchain);
+    let preHash = currBlock.header.preHash;
+    while (true) {
+        // go through all transactions in currBlock
+        currBlock.body.forEach((transaction) => {
+            // sending money
+            if (transaction.details.publicKey === address) {
+                transaction.details.recipients.forEach((recipient) => {
+                    if (recipient.address === address) return;
+                    transactions.push({
+                        sender: address,
+                        recipient: recipient.address,
+                        amount: recipient.amount,
+                    });
+                });
+                return;
+            }
+            // receiving money
+            transaction.details.recipients.forEach((recipient) => {
+                if (recipient.address === address) {
+                    transactions.push({
+                        sender: transaction.details.publicKey,
+                        recipient: address,
+                        amount: recipient.amount,
+                    });
+                }
+            });
+        });
+        if (preHash in blockchain === false) break;
+        currBlock = blockchain[preHash];
+        preHash = currBlock.preHash;
+    }
+    return transactions;
 };
 
 

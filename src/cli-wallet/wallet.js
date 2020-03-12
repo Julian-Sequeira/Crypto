@@ -18,7 +18,8 @@ const options = getopts(process.argv, {
     fee: "f",
     amount: "m",
     prevId: "i",
-    balance: "b"
+    balance: "b",
+    transactions: "t"
   },
   default: {
     start: false,
@@ -85,6 +86,19 @@ if (options.start) {
       .catch(err => {
         console.error(err);
         console.log("getting balance failed");
+      });
+  } else if (options.transactions) {
+    // Get transactions
+    console.log("Getting transactions...");
+    axios
+      .post("http://localhost:3001/getTransactions", { address: publicKey })
+      .then(res => {
+        const transactions = res.data.transactions;
+        console.log(`transactions: ${transactions}`);
+      })
+      .catch(err => {
+        console.error(err);
+        console.log("getting transactions failed");
       });
   } else {
     // create and send a transaction
