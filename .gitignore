@@ -3,4 +3,5 @@ node_modules/
 src/cli-wallet/privkey.pem
 src/cli-wallet/pubkey.pem
 src/keys/
+build/
 yarn.lock

@@ -66,7 +66,7 @@ if (options.start) {
         options.prevId === undefined || 
         options.prevIdx === undefined || 
         options.totalAmt === undefined ||
-        options.folder === undefined
+        options.directory === undefined
     ) {
         console.log(USAGE);
     } else {
