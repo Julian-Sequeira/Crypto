@@ -5,6 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Data from './data.js';
 import { FlatList, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import Constants from 'expo-constants';
+import { List, ListItem } from 'react-native-elements';
+
+// TODO: try this https://shoutem.github.io/docs/ui-toolkit/components/list-view, https://shoutem.github.io/docs/ui-toolkit/introduction
 
 const Item = ({ title }) => {
     return (
@@ -27,24 +30,40 @@ export default class TransactionList extends React.Component {
         // TODO: Fetch data
     }
 
+    renderSeparator = () => {
+        return (
+          <View
+            style={{
+              height: 1,
+              width: "86%",
+              backgroundColor: "#CED0CE",
+              marginLeft: "14%"
+            }}
+          />
+        );
+      };
+
     // TODO: add list refresh
 
     render() {
         const { data } = this.state;
 
         return (
-            <SafeAreaView style={styles.container}>
-                <Text>Transaction History</Text>
+            <View style={styles.container}>
                 <FlatList 
                     data={data}
                     renderItem={({ item }) => (
-                        <Item 
-                            id={item.id}
+                        <ListItem
                             title={item.title}
+                            //containerStyle={{ borderBottomWidth: 0 }}
+                            bottomDivider
+                            // contentContainerStyle={styles.item}
                         />
                     )}
+                    keyExtractor={item => item.id}
+                    ItemSeparatorComponent={this.renderSeparator}
                 />
-            </SafeAreaView>
+            </View>
         );
     }
 
@@ -53,7 +72,7 @@ export default class TransactionList extends React.Component {
 const styles = StyleSheet.create({
     container: {
       backgroundColor: 'white',
-      flex: 1,
+       //flex: 5,
       marginTop: Constants.statusBarHeight,
     },
     item: {

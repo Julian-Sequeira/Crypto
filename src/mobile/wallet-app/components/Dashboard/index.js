@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, Modal, TouchableOpacity, Alert, TextInput } from 'react-native';
 
 import TransactionList from './transactionList.js'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 class Dashboard extends React.Component {
     
@@ -81,19 +82,21 @@ class Dashboard extends React.Component {
     render() {
         const { user, balance, sendTo } = this.state;
         return (
-            <View style={styles.container}>
-                <Text style={styles.nameText}>{user}</Text>
-                <Text style={styles.nameText}>Balance: {balance} coins</Text>
-                <TouchableOpacity onPress={() => this.setModalVisible(true)}>
-                    <Text style={styles.loginText}>Send Money</Text>
-                </TouchableOpacity>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.modal}>
+                    <Text style={styles.nameText}>{user}</Text>
+                    <Text style={styles.nameText}>Balance: {balance} coins</Text>
+                    <TouchableOpacity style={[styles.buttonContainer, styles.sendButton]} onPress={() => this.setModalVisible(true)}>
+                        <Text style={styles.loginText}>Send Coins</Text>
+                    </TouchableOpacity>
+                </View>
                 <View>
                     <Modal
                         animationType="slide"
                         transparent={false}
                         visible={this.state.modalVisible}
                     >
-                        <View style={styles.container}>
+                        <View style={[styles.container, styles.modal]}>
                             <Text style={styles.logo}>Create a Transaction</Text>
                             <View style={styles.inputView}>
                                 <TextInput
@@ -112,9 +115,10 @@ class Dashboard extends React.Component {
                             </TouchableOpacity>
                         </View>
                         </Modal>
-                        <TransactionList />
                     </View>
-            </View>
+                    <TransactionList />
+            </SafeAreaView>
+
         );
     }
 }
@@ -123,8 +127,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#DCDCDC',
+        // alignItems: 'center',
+        justifyContent: 'center',
+      },
+      modal: {
         alignItems: 'center',
-        // justifyContent: 'center',
       },
     headerRight: {
         color: 'black',
@@ -173,6 +180,19 @@ const styles = StyleSheet.create({
       },
       loginText:{
         color:"white"
+      },
+      buttonContainer: {
+        marginTop: 20,
+        height:45,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom:20,
+        width:250,
+        borderRadius:30,
+      },
+      sendButton: {
+        backgroundColor: "green",
       },
   });
 
