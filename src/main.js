@@ -97,13 +97,17 @@ var initHttpServer = () => {
     });
     app.post('/getBalance', (req, res) => {
         // get balance of a wallet user
+        let balance = 0
         const address = req.body.address;
-        const branch = findThickestBranch(blockchain);
-        console.log(branch.header.preHash);
-        const preHash = branch.header.preHash;
-        console.log(blockchain);
-        console.log(blockchain[preHash]);
-        res.status(200).send({ balance: 100 });
+        const transactions = getTransactions(address);
+        transactions.forEach((transaction) => {
+            if (transaction.sender === address) {
+                balance += transaction.amount;
+            } else {
+                balance -= transaction.amount;
+            }
+        })
+        res.status(200).send({ balance });
     });
     app.post('/getTransactions', (req, res) => {
         // get transactions of a wallet user
