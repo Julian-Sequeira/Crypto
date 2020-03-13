@@ -68,7 +68,89 @@ class Transaction {
         return pubcrypto.verifySignature(serial, this.data.signature, publicKeyBuffer);
     }
 
-    // Takes in the previous transaction object
+    //-------------------------------------------------
+    
+
+    //[DODO]checks to see if the transaction has not been spent multiple times
+    checkSingleSpent(block, transactionID){
+        //#get the blockchain
+        var thickestBranch = blockchain['genesis'];
+        var toCheck = [thickestBranch];
+        while (toCheck.length > 0){//loop through every branch
+            var blockToCheck = toCheck[0];
+            var ChildrenList = blockchain[getBlockHash(blockToCheck)];
+            for(var i = 1;i<ChildrenList.length; i++){//loop through everychild
+                if(ChildrenList[i]==block){
+                    continue;
+                }
+                var address = ChildrenList[i].details.publicKey;
+                if(this.addressInTransaction(transactionID,address)){
+                    return false;
+                }
+                toCheck.push(ChildrenList[i]);
+            }
+            //the parent block that was fully checked shall be removed
+            toCheck.shift();
+        }
+        return true;
+    }
+
+    //[DODO]checks if all the transactions are not overspent when bundled up together
+    overallSpent(block){
+        var total_amount = 0;
+        //all the partial transactions which belongs to the same transaction must have the same previous-id
+        for(var transaction = 0; transaction < block.body.length; transaction++){
+            if(this.overSpent(block, JSON.stringify(block.details[transaction].previousID)) == false){
+                return false
+            }
+       }
+       return true; //TODO: check if the transaction does not go over the required amount
+    }
+
+    //[DODO]checks if all the partial transaction in one block adds up
+    overSpent(block,transactionID){
+        var total_amount = 0;
+        //all the partial transactions which belongs to the same transaction must have the same previous-id
+        for(var transaction = 0; transaction < block.body.length; transaction++){
+            if(JSON.stringify(block.body[transaction].previousID)==transactionID){
+               total_amount += block.body[transaction].details.amount;
+           }
+       }
+       return total_amount <= 10; //TODO: check if the transaction does not go over the required amount
+    }
+
+    //[DOD]checks if the address exists in the list of transactions
+    addressInTransaction(transactions,address){
+        for(var transaction = 0; transaction < transactions.length; transaction++){
+             if (address === this.data.details.publicKey) {
+                return transactions[transaction];
+            }
+        }
+        return false;
+    }
+
+    //[DOD]find the previous transaction of the current transaction
+    doesExist(blockchain,address){
+        //#get the blockchain
+        var thickestBranch = blockchain['genesis'];
+        var toCheck = [thickestBranch];
+        while (toCheck.length > 0){//loop through every branch
+            var blockToCheck = toCheck[0];
+            var ChildrenList = blockchain[getBlockHash(blockToCheck)];
+            for(var i = 1;i<ChildrenList.length; i++){//loop through everychild
+                var transaction = ChildrenList.body;
+                if(this.addressInTransaction(transaction,address)){
+                    return true;
+                }
+                toCheck.push(ChildrenList[i]);
+            }
+            //the parent block that was fully checked shall be removed
+            toCheck.shift();
+        }
+        return false;
+    }
+
+    // [DOD]Takes in the previous transaction object
     // Verifies that the public keys of the last recipient and current sender match
     // Verifies that the amounts all much up
     verifyFromPrevious(prevTransaction) {
@@ -82,31 +164,9 @@ class Transaction {
         return false;
     }
 
-    //checks to see if the transaction has not been spent multiple times
-    checkSingleSpent(){
-        var duplicates = 0;
-        for(var transaction = 0; transaction < transactions.length; transaction++){
-            const address = transactions[transaction].data.details.address;
-            if (address === this.data.details.publicKey) {
-                duplicates++;
-            }
-        }
-        return duplicates == 1;
-    }
 
-    //find the previous transaction of the current transaction
-    findPrev(){
-        for(var transaction = 0; transaction < transactions.length; transaction++){
-            const address = transactions[transaction].data.details.address;
-            if (address === this.data.details.publicKey) {
-                return transactions[transaction];
-            }
-        }
-    }
-
-
-    //check to see if the all the transactions in the block are valid
-    CheckBlockTransactions(){
+    //[DOD]check to see if the all the transactions in the block are valid
+    CheckBlockTransactions(transactions){
         for(var transaction = 0; transaction < transactions.length; transaction++){
             if(transactions[transaction].verifyTrxSignature() && transactions[transaction].verifyID() && transactions[transaction].checkSingleSpent()){
                 var prevTransaction = findPrev();
