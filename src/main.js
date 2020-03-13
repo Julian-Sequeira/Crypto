@@ -5,23 +5,11 @@ var bodyParser = require('body-parser');
 var WebSocket = require("ws");
 var genesisBlock = require("./genesisBlock.json");
 
+const Transaction = require('./cli-wallet/transaction.js');
+
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
-//TODO: calculate hash for block
-
-// class Block {
-//     constructor(index, previousHash, timestamp, data, hash, difficulty, work, nonce) {
-//         this.work = work; //stores the total work of the branch upto the current block
-//         this.difficulty = difficulty;
-//         this.index = index;
-//         this.previousHash = previousHash.toString();
-//         this.timestamp = timestamp;
-//         this.data = data;
-//         this.hash = hash.toString();
-//         this.nonce = nonce; //helps us to get a hash with a desired difficulty
-//     }
-// }
 
 var sockets = [];
 var MessageType = {
@@ -33,16 +21,6 @@ var MessageType = {
 function getBlockHash(block) {
     return CryptoJS.createHash('sha256').update(JSON.stringify(block.header)).digest('HEX');
 }
-
-//our blockchain is more like a tree. It will keep track of all the children
-var blockchain = {};
-blockchain['genesis'] = genesisBlock;
-const genesisHash = getBlockHash(genesisBlock);
-blockchain[genesisHash] = [genesisBlock];
-
-var longest = genesisBlock;//stores the leaf node of the longest chain
-
-var memPool = [];
 
 function validateTransaction(transaction) {
     // TODO: check if signing is correct
@@ -60,16 +38,35 @@ function validateTransaction(transaction) {
     return true;
 }
 
+//our blockchain is more like a tree. It will keep track of all the children
+var blockchain = {};
+blockchain['genesis'] = genesisBlock;
+const genesisHash = getBlockHash(genesisBlock);
+blockchain[genesisHash] = [genesisBlock];
+blockchain['longest'] = genesisBlock; //stores the leaf node of the longest chain
+
+var memPool = [];//use priority queo
+
 var initHttpServer = () => {
     var app = express();
     app.use(bodyParser.json());
 
-    app.get('/blocks', (req, res) => res.send(JSON.stringify(blockchain)));
-    app.post('/mineBlock', (req, res) => {
-        var newBlock = generateNextBlock(req.body.data);
-        addBlock(newBlock);
+    app.get('/allBlocks', (req, res) => res.send(blockchain));
+    app.get('/lastBlock', (req, res) => res.send(blockchain['longest']));
+    app.get('/getNewBlocks', (req,res) => {
+        var blockHash = req.body.hash;
+        var foundBlock = null;
+        if(foundBlock = isInLongest(blockHash)){
+            res.send(JSON.stringify(cutBlockchain(foundBlock)));
+        }else{
+
+        }
+    });
+    app.post('/addBlock', (req, res) => {
+        console.log('got new block');
+        console.log(req.body.newBlock);
+        addBlock(req.body.newBlock);
         broadcast(responseLatestMsg());
-        console.log('block added: ' + JSON.stringify(newBlock));
         res.send();
     });
     app.get('/peers', (req, res) => {
@@ -84,16 +81,23 @@ var initHttpServer = () => {
     app.post('/addTransaction', (req, res) => {
         // console.log(req.body.trxData);
         // TODO: check if trans is valid
-        const transaction = JSON.parse(req.body.trxData);
-        const isValidTransaction = validateTransaction(transaction);
-        if (isValidTransaction) {
-            memPool.push(transaction);
-            res.status(200);
-            res.send({msg: "Transaction received"});
-        } else {
-            res.status(400);
-            res.send({msg: "Transaction rejected"});
-        }
+        // const transaction = JSON.parse(req.body.trxData);
+        // const isValidTransaction = validateTransaction(transaction);
+        // if (isValidTransaction) {
+        //     memPool.push(transaction);
+        //     res.status(200);
+        //     res.send({msg: "Transaction received"});
+        // } else {
+        //     res.status(400);
+        //     res.send({msg: "Transaction rejected"});
+        // }
+
+        console.log(req.body.trxData);
+        let transaction = new Transaction(JSON.parse(req.body.trxData));
+        memPool.push(transaction);
+        console.log(memPool);
+        res.status(200);
+        res.send();
     });
     app.post('/getBalance', (req, res) => {
         // get balance of a wallet user
@@ -102,9 +106,11 @@ var initHttpServer = () => {
         const transactions = getTransactions(address);
         transactions.forEach((transaction) => {
             if (transaction.sender === address) {
+                balance -= transaction.amount;
+            } else if (transaction.recipient === address) {
                 balance += transaction.amount;
             } else {
-                balance -= transaction.amount;
+                console.log('encountered unknown sender/recipient');
             }
         })
         res.status(200).send({ balance });
@@ -129,7 +135,9 @@ const getTransactions = (address) => {
             // sending money
             if (transaction.details.publicKey === address) {
                 transaction.details.recipients.forEach((recipient) => {
-                    if (recipient.address === address) return;
+                    if (recipient.address === address) {
+                        return;
+                    }
                     transactions.push({
                         sender: address,
                         recipient: recipient.address,
@@ -158,6 +166,24 @@ const getTransactions = (address) => {
     return transactions;
 };
 
+/*
+    checks to see if one chain is a sublist of another.
+*/
+var isInLongest = (hash) => {
+    var current_block = blockchain['longest'];
+    while(current_block != blockchain['genesis']){
+        if(blockchain[hash] == current_block){
+            return current_block;
+        }
+        current_block = blockchain[current_block.header.preHash];
+    }
+    return false;
+}
+
+var cutBlockchain = (foundBlock) => {
+    var cutted_blockchain = {};
+
+}
 
 var initP2PServer = () => {
     var server = new WebSocket.Server({port: p2p_port});
@@ -265,18 +291,18 @@ Given the blockData, it will create a new block and add it to the longest branch
 adds the block to the longest branch of the blockchain
 */
 var addBlock = (newBlock) => {
-    if(newBlock.header.preHash in blockchain){//check to see if this branch exist at all
-        if (isValidNewBlock(newBlock, blockchain[newBlock.header.preHash][0])) {
-            blockchain[newBlock.header.preHash].push(newBlock);
+    // if(newBlock.header.preHash in blockchain){//check to see if this branch exist at all
+    //     if (isValidNewBlock(newBlock, blockchain[newBlock.header.preHash][0])) {
+            // blockchain[newBlock.header.preHash].push(newBlock);
             const newBlockHash = getBlockHash(newBlock); // TODO
             blockchain[newBlockHash] = [newBlock];
             //check to see if the new block is the most work done branch of blockchain
             //if so, assign that as the longest
-            if (checkMostWork(newBlock)){
-                longest = newBlock;
-            }
-        }
-    }
+            // if (checkMostWork(newBlock)){
+                blockchain["longest"]= newBlock;
+            // }
+    //     }
+    // }
 };
 
 /*
@@ -297,13 +323,6 @@ var isValidNewBlock = (newBlock, previousBlock) => {
         console.log('invalid previoushash');
         return false;
     }
-    //  else if (calculateHashForBlock(newBlock) !== newBlock.hash) {//checks if newBlock has correct hash
-    //     console.log(typeof (newBlock.hash) + ' ' + typeof calculateHashForBlock(newBlock));
-    //     console.log('invalid hash: ' + calculateHashForBlock(newBlock) + ' ' + newBlock.hash);
-    //     return false;
-    // }
-
-    // TODO: check all transactions are valid
     return true;
 };
 
@@ -383,7 +402,7 @@ checks if the given blockchain has more work than the one we already have
 */
 var HasMoreWork = (blockchain) => {
     var suggestedThickestBranch = findThickestBranch(blockchain);
-    return suggestedThickestBranch.work > longest.work;
+    return suggestedThickestBranch.work > blockchain['longest'].work;
 }
 
 /*
@@ -407,7 +426,7 @@ var findThickestBranch = (blockchain) => {
     return thickestBranch;
 }
 
-var getLatestBlock = () => longest;
+var getLatestBlock = () => blockchain['longest'];
 var queryChainLengthMsg = () => ({'type': MessageType.QUERY_LATEST});
 var queryAllMsg = () => ({'type': MessageType.QUERY_ALL});
 var responseChainMsg = () =>({

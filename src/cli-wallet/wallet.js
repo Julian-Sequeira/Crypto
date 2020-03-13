@@ -14,32 +14,22 @@ const options = getopts(process.argv, {
     help: "h",
     start: "s",
     passphrase: "p",
+    totalAmt: "t",
     address: "a",
     fee: "f",
     amount: "m",
+    prevIdx: "x",
     prevId: "i",
     balance: "b",
-    transactions: "t"
+    transactions: "r"
   },
   default: {
     start: false,
     s: false,
     new: false,
-    n: false,
-    balance: false
+    n: false
   }
 });
-
-// console.log(`options: ${JSON.stringify(options)}`);
-
-// Help message - gives information on what flags to use in cmd line
-// Start: generate a public/private key pair
-// -m: Money to send, -f: Processing fee, -a: Address to send to
-const USAGE =
-  "\tUSAGE: ./wallet.js [--start | -i prevId -m amount -f fee -a address | -b]";
-if (options.help) {
-  console.log(USAGE);
-}
 
 // Prompt the user for their passphrase
 const askPassphrase = (question = "Passphrase: ") => {
@@ -48,7 +38,15 @@ const askPassphrase = (question = "Passphrase: ") => {
   });
 };
 
-if (options.start) {
+// Help message - gives information on what flags to use in cmd line
+// Start: generate a public/private key pair
+// -m: Money to send, -f: Processing fee, -a: Address to send to
+const USAGE =
+  "\tUSAGE: ./wallet.js [--start | -i prevId -x previousIdx -t totalAmt -m amount -f fee -a address]";
+
+if (options.help) {
+  console.log(USAGE);
+} else if (options.start) {
   // Generate key pairs to instantiate the wallet
   console.log("Generating key pairs...");
   const passphrase = askPassphrase(
@@ -73,7 +71,6 @@ if (options.start) {
     }
   }
   const publicKey = publicKeyBuffer.toString("hex");
-
   if (options.balance) {
     // Get the current balance
     console.log("Getting the current balance...");
@@ -106,8 +103,11 @@ if (options.start) {
       !options.amount ||
       !options.fee ||
       !options.address ||
-      !options.prevId
+      !options.prevId ||
+      !options.prevIdx ||
+      !options.totalAmt
     ) {
+      console.log(options);
       console.log(USAGE);
     } else {
       // Prepare all the necessary transaction ingredients
@@ -116,7 +116,14 @@ if (options.start) {
       const amount = options.amount;
       const fee = options.fee;
       const address = options.address;
-      const details = { publicKey, previousID, amount, fee, address };
+      const totalAmt = options.totalAmt;
+      const sendToSelf = totalAmt - amount - fee;
+      const previousIdx = options.prevIdx;
+      const recipients = [
+        { index: 0, address: address, amount: amount },
+        { index: 1, address: publicKey, amount: sendToSelf }
+      ];
+      const details = { publicKey, previousID, previousIdx, fee, recipients };
 
       // Generating a new transaction- isNew variable tells the constructor to generate an id and signature
       const isNew = true;
