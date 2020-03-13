@@ -52,7 +52,7 @@ function genkeys(passphrase, dir) {
 function createSignature(string, passphrase, dir) {
 
     // Load the encrypted private key from file
-    let encryptedKey = fs.readFileSync(`${dir}/pubkey.pem`);
+    let encryptedKey = fs.readFileSync(`${dir}/privkey.pem`);
 
     // Create a key object for Crypto to decrypt
     // Using hardcoded passphrase for now

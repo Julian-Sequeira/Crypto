@@ -44,7 +44,7 @@ var blockchain = {};
 const genesisHash = getBlockHash(genesisBlock);
 blockchain['genesisHash'] = genesisHash;
 blockchain[genesisHash] = { block: genesisBlock, nextHashes: []};
-// blockchain['longest'] = genesisBlock; //stores the leaf node of the longest chain
+blockchain['longestHash'] = genesisHash; //stores the leaf node of the longest chain
 let latestBlock = genesisBlock;
 
 var memPool = [{
@@ -99,7 +99,7 @@ var initHttpServer = () => {
     });
     app.post('/addBlock', (req, res) => {
         console.log('got new block');
-        console.log(req.body.newBlock);
+        // console.log(req.body.newBlock);
         addBlock(req.body.newBlock);
         broadcast(responseLatestMsg());
         res.send();
@@ -208,6 +208,7 @@ var addBlock = (newBlock) => {
             const newBlockHash = getBlockHash(newBlock); // TODO
             blockchain[newBlock.header.preHash].nextHashes.push(newBlockHash);
             blockchain[newBlockHash] = {block: newBlock, nextHashes: []};
+            blockchain['longestHash'] = newBlockHash;
             latestBlock = newBlock;
             //check to see if the new block is the most work done branch of blockchain
             //if so, assign that as the longest

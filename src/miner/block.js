@@ -72,7 +72,7 @@ const getBlockTemplate = async (publicKey) => {
     return;
   }
 
-  console.log(transactions);
+  // console.log(transactions);
 
   // body will be an array of transactions
   const body = [];
@@ -97,7 +97,7 @@ const getBlockTemplate = async (publicKey) => {
     preHash: getBlockHash(lastBlock),
     timestamp: Date.now(),
     currHash,
-    difficulty: 0, // TODO: difficulty may change
+    difficulty: 4, // TODO: difficulty may change
     nonce: 0, // This will be the value for miner to change and get currect hash
   }
 
@@ -116,6 +116,7 @@ const mineBlock = (block) => new Promise((resolve, reject) => {
   while (nonce <= Number.MAX_SAFE_INTEGER) {
     block.header.nonce = nonce;
     currHash = crypto.createHash('sha256').update(JSON.stringify(block)).digest('hex');
+    // console.log(currHash);
     if (currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
       // console.log(currHash);
       return resolve(block);

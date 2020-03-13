@@ -97,7 +97,7 @@ class BlockTree extends Component {
         <Tree 
           data={this.state.treeData} 
           translate={{x: 100, y: 200}} 
-          nodeSize={{x: 200, y:0}}
+          nodeSize={{x: 200, y:100}}
         />
       </div>
     );

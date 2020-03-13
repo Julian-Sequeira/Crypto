@@ -8,7 +8,11 @@ const pubcrypto = require('./public-crypto.js');
 class Transaction {
 
     // args = {
-    //     data: {publicKey, previousID, previousIdx, fee, recipients: [{ index, address, amount }]},       
+    //     data:{publicKey, 
+    //     previous: [{ index, previousID, previousIdx }] 
+    //     fee, 
+    //     recipients: [{ index, address, amount }]
+    // },       
     //     id: transaction ID (not needed if new transaction),
     //     signature: transaction signature (not needed if new transaction),
     //     isNew: boolean to indicate new transaction or not,
@@ -36,8 +40,9 @@ class Transaction {
         // Create the transaction ID and signature if this is a new transaction
         if (args.isNew) {
             const serial = this.serialize(this.data);
-            this.data.id = this.calculateID();
-            this.data.signature = pubcrypto.createSignature(serial, args.passphrase, args.directory);
+            this.id = this.calculateID();
+            console.log(args.directory);
+            this.signature = pubcrypto.createSignature(serial, args.passphrase, args.directory);
 
         // Otherwise, we're just dumping existing transaction data into a new object
         } else {
@@ -54,7 +59,7 @@ class Transaction {
 
     // Return the serialized data object
     // Don't know how getters work in ES6, too tired to learn right now
-    serializeTransaction() {
+    serializedData() {
         return this.serialize(this);
     }
 
@@ -84,7 +89,7 @@ class Transaction {
     // Takes in the previous transaction object
     // Verifies that the public keys of the last recipient and current sender match
     // Verifies that the amounts all much up
-    verifyFromPrevious(prevTransaction, previousIdx) {
+    verifyFromPrevious(prevTransaction) {
 
         // Check the public keys match the recpient of the previous transaction
         const prevRecipient = prevTransaction.data.recipients[previousIdx];
