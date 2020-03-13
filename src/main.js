@@ -134,6 +134,7 @@ const getTransactions = (address) => {
                         sender: address,
                         recipient: recipient.address,
                         amount: recipient.amount,
+                        date: new Date(currBlock.header.timestamp * 1000)
                     });
                 });
                 return;
@@ -145,6 +146,7 @@ const getTransactions = (address) => {
                         sender: transaction.details.publicKey,
                         recipient: address,
                         amount: recipient.amount,
+                        date: new Date(currBlock.header.timestamp * 1000)
                     });
                 }
             });
