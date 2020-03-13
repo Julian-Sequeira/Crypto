@@ -82,24 +82,32 @@ class Transaction {
 
     //-------------------------------------------------
     
+    checkSingleTransaction(address,transactionIDs){
+        for(var transaction = 0;transaction<transactionIDs.length;Transaction++){
+            if(this.addressInTransaction(transactionIDs[transaction],address)){
+                return false;
+            }
+        }
+        return true;
+    }
 
     //[DODO]checks to see if the transaction has not been spent multiple times
-    checkSingleSpent(block, transactionID){
+    checkSingleSpent(block, transactionIDs){
         //#get the blockchain
-        var thickestBranch = blockchain['genesis'];
+        var thickestBranch = blockchain['genesisHash'];
         var toCheck = [thickestBranch];
         while (toCheck.length > 0){//loop through every branch
             var blockToCheck = toCheck[0];
-            var ChildrenList = blockchain[getBlockHash(blockToCheck)];
+            var ChildrenList = blockToCheck.nextHash;
             for(var i = 1;i<ChildrenList.length; i++){//loop through everychild
                 if(ChildrenList[i]==block){
                     continue;
                 }
-                var address = ChildrenList[i].details.publicKey;
-                if(this.addressInTransaction(transactionID,address)){
+                var address = blockchain[ChildrenList[i]].details.publicKey;
+                if(this.checkSingleTransaction(address,transactionIDs)==false){
                     return false;
                 }
-                toCheck.push(ChildrenList[i]);
+                toCheck.push(blockchain[ChildrenList[i]]);
             }
             //the parent block that was fully checked shall be removed
             toCheck.shift();
@@ -117,20 +125,29 @@ class Transaction {
         return false;
     }
 
+    checkAddress(transaction, addresses){
+        for(var address = 0;address<addresses.length;address++){
+            if(!this.addressInTransaction(transaction,addresses[address])){
+                return false;
+            }
+        }
+        return true;
+    }
+
     //[DOD]checks if the transaction exist in the blockchain
-    doesExist(blockchain,address){
+    doesExist(blockchain,addresses){
         //#get the blockchain
-        var thickestBranch = blockchain['genesis'];
+        var thickestBranch = blockchain['genesisHash'];
         var toCheck = [thickestBranch];
         while (toCheck.length > 0){//loop through every branch
             var blockToCheck = toCheck[0];
-            var ChildrenList = blockchain[getBlockHash(blockToCheck)];
+            var ChildrenList = blockToCheck.nextHash;
             for(var i = 1;i<ChildrenList.length; i++){//loop through everychild
-                var transaction = ChildrenList.body;
-                if(this.addressInTransaction(transaction,address)){
+                var transaction = blockchain[ChildrenList[i]].body;
+                if(this.checkAddress(transaction,addresses)){
                     return true;
                 }
-                toCheck.push(ChildrenList[i]);
+                toCheck.push(blockchain[ChildrenList[i]]);
             }
             //the parent block that was fully checked shall be removed
             toCheck.shift();
