@@ -107,41 +107,17 @@ class Transaction {
         return true;
     }
 
-    //[DODO]checks if all the transactions are not overspent when bundled up together
-    overallSpent(block){
-        var total_amount = 0;
-        //all the partial transactions which belongs to the same transaction must have the same previous-id
-        for(var transaction = 0; transaction < block.body.length; transaction++){
-            if(this.overSpent(block, JSON.stringify(block.details[transaction].previousID)) == false){
-                return false
-            }
-       }
-       return true; //TODO: check if the transaction does not go over the required amount
-    }
-
-    //[DODO]checks if all the partial transaction in one block adds up
-    overSpent(block,transactionID){
-        var total_amount = 0;
-        //all the partial transactions which belongs to the same transaction must have the same previous-id
-        for(var transaction = 0; transaction < block.body.length; transaction++){
-            if(JSON.stringify(block.body[transaction].previousID)==transactionID){
-               total_amount += block.body[transaction].details.amount;
-           }
-       }
-       return total_amount <= 10; //TODO: check if the transaction does not go over the required amount
-    }
-
     //[DOD]checks if the address exists in the list of transactions
     addressInTransaction(transactions,address){
         for(var transaction = 0; transaction < transactions.length; transaction++){
-             if (address === this.data.details.publicKey) {
+             if (address === this.details.publicKey) {
                 return transactions[transaction];
             }
         }
         return false;
     }
 
-    //[DOD]find the previous transaction of the current transaction
+    //[DOD]checks if the transaction exist in the blockchain
     doesExist(blockchain,address){
         //#get the blockchain
         var thickestBranch = blockchain['genesis'];
@@ -162,14 +138,25 @@ class Transaction {
         return false;
     }
 
+    //[DODO]gets the total amount we are sending to people
+    getTotal(transaction){
+        var total = 0;
+        for(var i = 0;i<transaction.details.recipients.length;i++){
+            total += transaction.details.recipients[i].amount;
+        }
+
+        return total + transaction.details.fee;
+    }
+
+
     // [DOD]Takes in the previous transaction object
     // Verifies that the public keys of the last recipient and current sender match
     // Verifies that the amounts all much up
     verifyFromPrevious(prevTransaction) {
-        const address = prevTransaction.data.details.address;
-        const prevAmount = prevTransaction.data.details.amount;
-        if (address === this.data.details.publicKey) {
-            if (prevAmount === this.data.details.amount + this.data.details.fee) {
+        const address = prevTransaction.details.publicKey;
+        const prevAmount = this.getTotal(prevTransaction);
+        if (address === this.details.publicKey) {
+            if (prevAmount === this.details.amount + this.details.fee) {
                 return true;
             }
         }
@@ -182,7 +169,7 @@ class Transaction {
         for(var transaction = 0; transaction < transactions.length; transaction++){
             if(transactions[transaction].verifyTrxSignature() && transactions[transaction].verifyID() && transactions[transaction].checkSingleSpent()){
                 var prevTransaction = findPrev();
-                if(!verifyFromPrevious(prevTransaction)){
+                if(!this.verifyFromPrevious(prevTransaction)){
                     return false;
                 }
             }else{
