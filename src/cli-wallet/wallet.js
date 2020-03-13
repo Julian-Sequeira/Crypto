@@ -32,7 +32,7 @@ const options = getopts(process.argv, {
 // Help message - gives information on what flags to use in cmd line
 // Start: generate a public/private key pair
 // -m: Money to send, -f: Processing fee, -a: Address to send to
-const USAGE = "\tUSAGE: ./wallet.js [--start -d keys_dir | -i prevId -x previousIdx -t totalAmt -m amount -f fee -a address]"
+const USAGE = "\tUSAGE: ./wallet.js [--start | -i prevId -x previousIdx -t totalAmt -m amount -f fee -a address]"
 if (options.help) {
     console.log(USAGE);
 }
@@ -90,6 +90,9 @@ if (options.start) {
         const amount = options.amount;
         const sendToSelf = totalAmt - amount - fee;
 
+        const type = "normal";
+        const timestamp = Date.now();
+
 
         // Check that the keys directory exists
         try {
@@ -105,7 +108,7 @@ if (options.start) {
             {'index': 1, 'address': publicKey, 'amount': sendToSelf}
         ];
         
-        const data = {publicKey, previous, fee, recipients}
+        const data = {publicKey, previous, fee, recipients, type, timestamp}
 
         // Generating a new transaction- isNew variable tells the constructor to generate an id and signature
         const isNew = true;

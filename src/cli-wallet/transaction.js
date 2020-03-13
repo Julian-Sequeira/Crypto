@@ -8,10 +8,13 @@ const pubcrypto = require('./public-crypto.js');
 class Transaction {
 
     // args = {
-    //     data:{publicKey, 
+    //     data:{
+    //     publicKey, 
     //     previous: [{ index, previousID, previousIdx }] 
     //     fee, 
-    //     recipients: [{ index, address, amount }]
+    //     recipients: [{ index, address, amount }],
+    //     type,
+    //     timestamp
     // },       
     //     id: transaction ID (not needed if new transaction),
     //     signature: transaction signature (not needed if new transaction),

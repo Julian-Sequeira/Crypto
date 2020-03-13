@@ -14,9 +14,9 @@ const NUMWALLETS = 20;
 // Make a folder for all the wallets
 let stat;
 try { 
-    stat = fs.statSync('wallets/first');
+    stat = fs.statSync('wallets');
 } catch (e) {
-    fs.mkdirSync('wallets/first');
+    fs.mkdirSync('wallets');
 }
 
 // Make the starting wallet
@@ -30,24 +30,59 @@ pubcrypto.genkeys('first', 'wallets/first')
 // Make the other NUMWALLETS wallets
 for (let i = 0; i < NUMWALLETS; i++) {
     let name = 'wallet' + i.toString();
-    let folder = 'wallets/' + name;
+    let walletFolder = 'wallets/' + name;
     try { 
-        stat = fs.statSync(folder);
+        stat = fs.statSync(walletFolder);
     } catch (e) {
-        fs.mkdirSync(folder);
+        fs.mkdirSync(walletFolder);
     }
-    pubcrypto.genkeys(name, folder);
+    pubcrypto.genkeys(name, walletFolder);
 }
 
 // Prepare a transaction where each wallet gets $100 using previous transaction id 0
+// Prepare the transaction ingredients for the sender
+const amount = 100;
+const fee = 1;
+
+let publicKeyBuffer = fs.readFileSync('wallets/first/pubkey.pem');
+const publicKey = publicKeyBuffer.toString('hex');
+
+const previousID = 0;
+const previousIdx = 0;
+const previous = [{previousID, previousIdx}]
+
+const isNew = true;
+const passphrase = "first";
+const directory = "wallets/first";
+
+const type = "normal";
+const timestamp = Date.now();
+
+// Prepare the recipients list for this transaction
+const recipients = [];
+for (let i = 0; i < NUMWALLETS; i++) {
+    let name = 'wallet' + i.toString();
+    let walletFolder = 'wallets/' + name + "/";
+    publicKeyBuffer = fs.readFileSync(walletFolder + 'pubkey.pem');
+    let address = publicKeyBuffer.toString('hex');
+    recipients.push({
+        'index': i.toString(),
+        'address': address,
+        'amount': amount
+    })
+}
+
+// Make a transaction object
+const data = {publicKey, previous, fee, recipients, type, timestamp}
+const args = {data, isNew, passphrase, directory}
+const transaction = new Transaction(args);
+console.log(transaction);
 
 
+// Function
+function makeTransaction(folder, amount, fee, previousID, previousIdx) {
 
-
-
-
-
-
+}
 
 
 
