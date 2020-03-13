@@ -16,21 +16,25 @@ const options = getopts(process.argv, {
         help: "h",
         start: "s",
         passphrase: "p",
+        totalAmt: "t",
         address: "a",
         fee: "f",
         amount: "m",
+        prevIdx: "x",
         prevId: "i",
     },
     default: {
         start: false,
         s: false,
+        new: false,
+        n: false
     }
 })
 
 // Help message - gives information on what flags to use in cmd line
 // Start: generate a public/private key pair
 // -m: Money to send, -f: Processing fee, -a: Address to send to
-const USAGE = "\tUSAGE: ./wallet.js [--start | -m amount -f fee -a address]"
+const USAGE = "\tUSAGE: ./wallet.js [--start | -i prevId -x previousIdx -t totalAmt -m amount -f fee -a address]"
 if (options.help) {
     console.log(USAGE);
 }
@@ -41,7 +45,7 @@ let passphrase = reader.question('Passphrase: ', {
 })
 
 
-// Generate key pairs to instantiate the waller
+// Generate key pairs to instantiate the wallet
 if (options.start) {
     console.log("Generating key pairs...");
     pubcrypto.genkeys(passphrase);
@@ -51,9 +55,11 @@ if (options.start) {
 
 // Or create and send a transaction
 } else {
-    if (!options.amount || !options.fee || !options.address || !options.prevId) {
+    if (options.amount === undefined || options.fee === undefined || options.address === undefined || options.prevId === undefined || options.prevIdx === undefined || options.totalAmt === undefined) {
+        console.log(options);
         console.log(USAGE);
     } else {
+        
         // Prepare all the necessary transaction ingredients
         const publicKeyBuffer = fs.readFileSync('pubkey.pem');
         const publicKey = publicKeyBuffer.toString('hex');
@@ -61,7 +67,15 @@ if (options.start) {
         const amount = options.amount;
         const fee = options.fee;
         const address = options.address;
-        const details = {publicKey, previousID, amount, fee, address}
+        const totalAmt = options.totalAmt;
+        const sendToSelf = totalAmt - amount - fee;
+        const previousIdx = options.prevIdx;
+
+        const recipients = [
+            {'index': 0, 'address': address,'amount': amount}, 
+            {'index': 1, 'address': publicKey, 'amount': sendToSelf}
+        ];
+        const details = {publicKey, previousID, previousIdx, fee, recipients}
 
         // Generating a new transaction- isNew variable tells the constructor to generate an id and signature
         const isNew = true;
@@ -78,6 +92,6 @@ if (options.start) {
                 console.error(err);
                 console.log("Sending transaction failed");
             });
-        }
+    }
 }
 

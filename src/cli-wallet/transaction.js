@@ -13,7 +13,20 @@ class Transaction {
     // One to make the transaction ID and signature (details)
     // Serializing the whole class is a waste of bandwidth
     constructor(args) { 
-        this.data = {}
+        this.data = {
+            details: null,
+            id: null,
+            signature: null
+        }
+
+        this.data.details = {
+            previousID: null,
+            previousIdx: null,
+            fee: null,
+            recipients: null
+        }
+
+        // Recipients: [{ index:  ,address:  ,amount:  }]
 
         // This object will be hashed to produce the transaction ID and then signature
         // If anything here is different, the ID and signatures will also be different
@@ -29,8 +42,7 @@ class Transaction {
         } else {
             this.data.id = args.id;
             this.data.signature = args.signature;
-        }
-            
+        }       
     }
 
     // Modularizing this so that if we use a different serialization 
