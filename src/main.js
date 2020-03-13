@@ -99,8 +99,71 @@ var initHttpServer = () => {
         res.status(200);
         res.send();
     });
-    
+    app.post('/getBalance', (req, res) => {
+        // get balance of a wallet user
+        let balance = 0
+        const address = req.body.address;
+        const transactions = getTransactions(address);
+        transactions.forEach((transaction) => {
+            if (transaction.sender === address) {
+                balance -= transaction.amount;
+            } else if (transaction.recipient === address) {
+                balance += transaction.amount;
+            } else {
+                console.log('encountered unknown sender/recipient');
+            }
+        })
+        res.status(200).send({ balance });
+    });
+    app.post('/getTransactions', (req, res) => {
+        // get transactions of a wallet user
+        const address = req.body.address;
+        const transactions = getTransactions(address);
+        res.status(200).send({ transactions });
+    });
+
     app.listen(http_port, () => console.log('Listening http on port: ' + http_port));
+};
+
+const getTransactions = (address) => {
+    const transactions = [];
+    let currBlock = findThickestBranch(blockchain);
+    let preHash = currBlock.header.preHash;
+    while (true) {
+        // go through all transactions in currBlock
+        currBlock.body.forEach((transaction) => {
+            // sending money
+            if (transaction.details.publicKey === address) {
+                transaction.details.recipients.forEach((recipient) => {
+                    if (recipient.address === address) {
+                        return;
+                    }
+                    transactions.push({
+                        sender: address,
+                        recipient: recipient.address,
+                        amount: recipient.amount,
+                        date: new Date(currBlock.header.timestamp * 1000)
+                    });
+                });
+                return;
+            }
+            // receiving money
+            transaction.details.recipients.forEach((recipient) => {
+                if (recipient.address === address) {
+                    transactions.push({
+                        sender: transaction.details.publicKey,
+                        recipient: address,
+                        amount: recipient.amount,
+                        date: new Date(currBlock.header.timestamp * 1000)
+                    });
+                }
+            });
+        });
+        if (preHash in blockchain === false) break;
+        currBlock = blockchain[preHash];
+        preHash = currBlock.preHash;
+    }
+    return transactions;
 };
 
 /*
@@ -119,7 +182,7 @@ var isInLongest = (hash) => {
 
 var cutBlockchain = (foundBlock) => {
     var cutted_blockchain = {};
-    
+
 }
 
 var initP2PServer = () => {
@@ -163,6 +226,66 @@ var initErrorHandler = (ws) => {
     ws.on('error', () => closeConnection(ws));
 };
 
+/*
+Given the blockData, it will create a new block and add it to the longest branch
+*/
+// var generateNextBlock = (blockData) => {
+//     var previousBlock = getLatestBlock();
+//     var nextIndex = previousBlock.index + 1;
+//     var nextDifficulty = previousBlock.difficulty + 1;
+//     var nextWork = previousBlock.work + nextDifficulty;
+//     var nextTimestamp = new Date().getTime() / 1000;
+//     var nextNonce = getNonceForDifficultry(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextDifficulty, nextWork);
+//     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextDifficulty, nextWork ,nextNonce);
+//     return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash, nextDifficulty, nextWork, nextNonce);
+// };
+
+// /*
+// Returns a nonce value that can give us a hash with certain difficulty
+//  */
+// var getNonceForDifficultry = (index, previousHash, timestamp, data, difficulty, work) => {
+//     var newHash = null;
+//     var nonce = -1;
+//     do{
+//         nonce += 1;//adds one to the nonce everytime the hash difficulty is not correct
+//         newHash = calculateHash(index, previousHash, timestamp, data, difficulty, work, nonce);
+//     } while (!checkHashFormat(newHash, difficulty));//checks hash difficulty
+//     return nonce;
+// }
+
+
+// /*
+// returns a hash for the given block given its attributes
+// This function is used for check the hash validity of a block
+// */
+// var calculateHashForBlock = (block) => {
+//     return calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.difficulty, block.work, block.nonce);
+// };
+
+// /*
+// Checks if the hash has certain difficulty
+// By difficulty, we mean the number of zeroes at the beginning of the hash
+// For example, a hash with difficulty 2 must have a format 00xxxxxxxxx
+// */
+// var checkHashFormat = (hash, difficulty) => {
+//     var regex = RegExp(`^[0]{${difficulty}}.+`,"i");
+//     return regex.test(hash);
+// };
+
+
+// /*
+// calculates hash of a block given all its attributes
+// */
+// var calculateHash = (index, previousHash, timestamp, data, difficulty, work, nonce) => {
+//     return CryptoJS.SHA256(index + previousHash + timestamp + data + difficulty + work + nonce).toString();
+// };
+
+// /*
+// checks if a block has more work than the current longest
+// */
+// var checkMostWork = (newBlock) => {
+//     return longest.work < newBlock.work;
+// }
 
 /*
 adds the block to the longest branch of the blockchain
@@ -186,6 +309,16 @@ var addBlock = (newBlock) => {
 checks to see if the new block is valid
 */
 var isValidNewBlock = (newBlock, previousBlock) => {
+    // if (previousBlock.index + 1 !== newBlock.index) {//checks if newBlock's index is one more than the previous
+    //     console.log('invalid index');
+    //     return false;
+    // }else if(previousBlock.difficulty + 1 !== newBlock.difficulty){//checks if newBlock's difficulty is one more than the previous
+    //     console.log('invalid difficulty');
+    //     return false;
+    // }else if(previousBlock.work + newBlock.difficulty !== newBlock.work){//checks if newBlock's work makes sense
+    //     console.log('invalid work');
+    //     return false;
+    // }else
     if (getBlockHash(previousBlock) !== newBlock.header.preHash) {//checks if newBlock's previous hash is the previousBlock's hash
         console.log('invalid previoushash');
         return false;
