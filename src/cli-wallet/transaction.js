@@ -54,7 +54,7 @@ class Transaction {
 
     // Return the serialized data object
     // Don't know how getters work in ES6, too tired to learn right now
-    serializeTransaction() {
+    serializedData() {
         return this.serialize(this);
     }
 
