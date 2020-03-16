@@ -10,16 +10,20 @@ const fs = require('fs');
  */
 
 const NUMWALLETS = 20;
+const NUMROUNDS = 10;
 
-// Wallets folder
-let stat = fs.statSync('wallets');
-if (!stat.isDirectory()) {
+// Make a folder for all the wallets
+let stat;
+try { 
+    stat = fs.statSync('wallets');
+} catch (e) {
     fs.mkdirSync('wallets');
 }
 
 // Make the starting wallet
-stat = fs.statSync('wallets/first');
-if (!stat.isDirectory()) {
+try { 
+    stat = fs.statSync('wallets/first');
+} catch (e) {
     fs.mkdirSync('wallets/first');
 }
 pubcrypto.genkeys('first', 'wallets/first')
@@ -27,24 +31,98 @@ pubcrypto.genkeys('first', 'wallets/first')
 // Make the other NUMWALLETS wallets
 for (let i = 0; i < NUMWALLETS; i++) {
     let name = 'wallet' + i.toString();
-    let folder = 'wallets' + name;
-    stat = fs.statSync(folder);
-    if (!stat.isDirectory()) fs.mkdirSync(folder);
-    pubcrypto.genkeys(name, folder);
+    let walletFolder = 'wallets/' + name;
+    try { 
+        stat = fs.statSync(walletFolder);
+    } catch (e) {
+        fs.mkdirSync(walletFolder);
+    }
+    pubcrypto.genkeys(name, walletFolder);
 }
 
 // Prepare a transaction where each wallet gets $100 using previous transaction id 0
+// Prepare the transaction ingredients for the sender
+let amount = 100;
+let fee = 1;
+
+let publicKeyBuffer = fs.readFileSync('wallets/first/pubkey.pem');
+let publicKey = publicKeyBuffer.toString('hex');
+
+let previousID = 0;
+let previousIdx = 0;
+let previous = [{previousID, previousIdx}]
+
+let isNew = true;
+let passphrase = "first";
+let directory = "wallets/first";
+
+let type = "normal";
+let timestamp = Date.now();
+
+// Prepare the recipients list for this transaction
+let recipients = [];
+for (let i = 0; i < NUMWALLETS; i++) {
+    let name = 'wallet' + i.toString();
+    let walletFolder = 'wallets/' + name + "/";
+    publicKeyBuffer = fs.readFileSync(walletFolder + 'pubkey.pem');
+    let address = publicKeyBuffer.toString('hex');
+    recipients.push({
+        'index': i.toString(),
+        'address': address,
+        'amount': amount
+    })
+}
+
+// Make a transaction object
+let data = {publicKey, previous, fee, recipients, type, timestamp}
+let args = {data, isNew, passphrase, directory}
+let transactions = [];
+transactions.push(new Transaction(args));
+// console.log(transaction);
 
 
+// Function
+function makeSenderInfo(name, fee, previousID, previousIdx) {
+    const previous = [{previousID, previousIdx}];
+    const directory = `wallets/${name}`;
+    const publicKeyBuffer = fs.readFileSync(`${directory}/pubkey.pem`);
+    const publicKey = publicKeyBuffer.toString('hex');
+    const type = "normal";
+    const timestamp = Date.now();
+    const data = {publicKey, previous, fee, type, timestamp}
+    return data;
+}
 
+let d = makeSenderInfo('first', 1, 0, 0);
+// console.log(d);
+// console.log(transactions);
 
+// Make some more transactions, have everyone send the next guy $99
 
+for (let j = 0; j < NUMWALLETS; j++) {
+    previousID = transactions[j].id;
+    name = `wallet${j.toString()}`;
+    directory = `wallets/${name}`;
+    data = makeSenderInfo(name, 1, previousID, 0);
+    let nextWalletName = `wallet${(j+1)%20}`;
+    publicKeyBuffer = fs.readFileSync(`wallets/${nextWalletName}/pubkey.pem`);
+    nextWalletPubKey = publicKeyBuffer.toString('hex');
+    recipients = [{
+        'index': j.toString(),
+        'address' : nextWalletPubKey,
+        'amount': 99
+    }]
+    data.recipients = recipients;
+    const args = {
+        data,
+        isNew: true,
+        passphrase: name,
+        directory
+    }
+    transactions.push(new Transaction(args));
+}
 
-
-
-
-
-
+console.log(transactions);
 
 
 
