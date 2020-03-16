@@ -6,6 +6,7 @@ var WebSocket = require("ws");
 var genesisBlock = require("./genesisBlock.json");
 
 const Transaction = require('./cli-wallet/transaction.js');
+const sqlite3 = require("sqlite3").verbose();
 
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
@@ -17,6 +18,15 @@ var MessageType = {
     QUERY_ALL: 1,
     RESPONSE_BLOCKCHAIN: 2
 };
+
+
+// set up database
+var db = new sqlite3.Database(":memory:", (err) => {
+	if (err) {
+		console.log(err.message);
+	}
+	console.log("Connected to the database.");
+});
 
 function getBlockHash(block) {
     return CryptoJS.createHash('sha256').update(JSON.stringify(block.header)).digest('HEX');
