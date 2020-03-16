@@ -4,6 +4,8 @@ import { StyleSheet, Text, View, Modal, TouchableOpacity, Alert, TextInput } fro
 import TransactionList from './transactionList.js'
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+// import QRCodeScanner from 'react-native-qrcode-scanner';
+
 class Dashboard extends React.Component {
     
     state = {
@@ -13,6 +15,7 @@ class Dashboard extends React.Component {
         modalVisible: false,
         // recipient public key
         sendTo: '',
+        amount: '',
     }
 
     componentDidMount() {
@@ -35,8 +38,19 @@ class Dashboard extends React.Component {
         this.setState({ sendTo });
     }
 
+    handleAmountChange = amount => {
+        this.setState({ amount });
+    }
+
     setModalVisible = visible => {
         this.setState({modalVisible: visible});
+    }
+
+    showQRCodeScreen = () => {
+        console.log("going to qr code screen");
+        this.props.navigation.navigate('showQRCode', {
+            user: this.state.user,
+          });
     }
 
     goToLogin = () => {
@@ -89,6 +103,9 @@ class Dashboard extends React.Component {
                     <TouchableOpacity style={[styles.buttonContainer, styles.sendButton]} onPress={() => this.setModalVisible(true)}>
                         <Text style={styles.loginText}>Send Coins</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity style={[styles.buttonContainer, styles.sendButton]} onPress={this.showQRCodeScreen}>
+                        <Text style={styles.loginText}>Show QR Code</Text>
+                    </TouchableOpacity>
                 </View>
                 <View>
                     <Modal
@@ -105,6 +122,15 @@ class Dashboard extends React.Component {
                                     placeholder="Enter Recipient's Public Key"
                                     placeholderTextColor="#003f5c"
                                     onChangeText={this.handlePubKeyChange}
+                                />
+                            </View>
+                            <View style={styles.inputView}>
+                                <TextInput
+                                    style={styles.inputText}
+                                    value={sendTo}
+                                    placeholder="Amount"
+                                    placeholderTextColor="#003f5c"
+                                    onChangeText={this.handleAmountChange}
                                 />
                             </View>
                             <TouchableOpacity style={[styles.buttonContainer, styles.loginButton]} onPress={this.handleTransaction}>
