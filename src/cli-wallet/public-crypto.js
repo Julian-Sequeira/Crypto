@@ -124,55 +124,11 @@ function verifySignature(string, signature, publicKey) {
 }
 
 
-
-// /**
-//  * Generate public/private keys
-//  * This time, return the keys themselves, as opposed to saving to a file
-//  */ 
-// function genkeysMem(passphrase) {
-//     // Generates keys using RSA with mod 4k
-//     const { publicKey, privateKey }  = crypto.generateKeyPairSync('rsa', {
-//         modulusLength: 4096,
-//         publicKeyEncoding: {
-//             type: 'spki',
-//             format: 'pem'
-//         },
-//         privateKeyEncoding: {
-//             type: 'pkcs8',
-//             format: 'pem',
-//             cipher: 'aes-256-cbc',
-//             passphrase: passphrase    // to encrypt the private key with
-//         }
-    
-//     // Write both of the generated keys to a file    
-//     });
-//     const publicKeyHex = Buffer.from(publicKey, 'utf8').toString('hex');
-//     return { "publicKey" : publicKeyHex, "encryptedKey": privateKey };
-// }
-
-// /** Create a signature,
-//  *  But allow an encrypedkey input as opposed to reading from a file
-//  */
-
-// function createSignatureMem(string, passphrase, encryptedKey) {
-//     // Create a key object for Crypto to decrypt
-//     // Using hardcoded passphrase for now
-//     let keyObject = {
-//         key: encryptedKey,
-//         format: 'pem',
-//         type: 'pkcs8',
-//         passphrase: passphrase
-//     }
-
-//     // Decrypt the private key
-//     const privateKey = crypto.createPrivateKey(keyObject);
-
-//     // Using Crypto's sign object to make the signature
-//     const sign = crypto.createSign('SHA256');
-//     sign.write(string);
-//     sign.end();
-//     return sign.sign(privateKey, 'hex');    // ** The signature is encoded in hex **
-// }
+function getHash(data) {
+    const hash = crypto.createHash('sha256');
+    hash.update(JSON.stringify(data));
+    return hash.digest('hex');
+}
 
 
-module.exports = { genkeys, createSignature, verifySignature};
+module.exports = { genkeys, getHash, createSignature, verifySignature};

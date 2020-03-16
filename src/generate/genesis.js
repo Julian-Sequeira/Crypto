@@ -1,7 +1,8 @@
 // Created imports
+const fs = require('fs');
+const mining = require('./mining.js');
 const pubcrypto = require('../cli-wallet/public-crypto.js');
 const Transaction = require('../cli-wallet/transaction.js');
-const fs = require('fs');
 
 /**
  * Generate the genesis block for our cryptocurrency
@@ -10,7 +11,6 @@ const fs = require('fs');
  */
 
 const NUMWALLETS = 20;
-const NUMROUNDS = 10;
 
 // Make a folder for all the wallets
 let stat;
@@ -41,7 +41,7 @@ for (let i = 0; i < NUMWALLETS; i++) {
 }
 
 // Prepare a transaction where each wallet gets $100 using previous transaction id 0
-// Prepare the transaction ingredients for the sender
+// Prepare the transaction ingredients for the first wallet
 let amount = 100;
 let fee = 1;
 
@@ -78,52 +78,82 @@ let data = {publicKey, previous, fee, recipients, type, timestamp}
 let args = {data, isNew, passphrase, directory}
 let transactions = [];
 transactions.push(new Transaction(args));
-// console.log(transaction);
 
-
-// Function
-function makeSenderInfo(name, fee, previousID, previousIdx) {
-    const previous = [{previousID, previousIdx}];
+// Functions to avoid lots of this code everywhere
+function makeWallet(name) {
     const directory = `wallets/${name}`;
-    const publicKeyBuffer = fs.readFileSync(`${directory}/pubkey.pem`);
-    const publicKey = publicKeyBuffer.toString('hex');
-    const type = "normal";
-    const timestamp = Date.now();
-    const data = {publicKey, previous, fee, type, timestamp}
-    return data;
+    try { 
+        stat = fs.statSync(directory);
+    } catch (e) {
+        fs.mkdirSync(directory);
+    }
+    pubcrypto.genkeys(name, directory);
 }
 
-let d = makeSenderInfo('first', 1, 0, 0);
-// console.log(d);
-// console.log(transactions);
+function readPubKey(directory) {
+    const publicKeyBuffer = fs.readFileSync(`${directory}/pubkey.pem`);
+    return publicKeyBuffer.toString('hex');
+}
 
-// Make some more transactions, have everyone send the next guy $99
-
-for (let j = 0; j < NUMWALLETS; j++) {
-    previousID = transactions[j].id;
-    name = `wallet${j.toString()}`;
-    directory = `wallets/${name}`;
-    data = makeSenderInfo(name, 1, previousID, 0);
-    let nextWalletName = `wallet${(j+1)%20}`;
-    publicKeyBuffer = fs.readFileSync(`wallets/${nextWalletName}/pubkey.pem`);
-    nextWalletPubKey = publicKeyBuffer.toString('hex');
-    recipients = [{
-        'index': j.toString(),
-        'address' : nextWalletPubKey,
-        'amount': 99
-    }]
-    data.recipients = recipients;
+function makeTransaction(name, fee, previousID, previousIdx, recipients) {
+    const previous = [{previousID, previousIdx}];
+    const directory = `wallets/${name}`;
+    const publicKey = readPubKey(directory);
+    const type = "normal";
+    const timestamp = Date.now();
+    const data = {publicKey, previous, fee, recipients, type, timestamp}
     const args = {
-        data,
+        data, 
         isNew: true,
         passphrase: name,
         directory
     }
-    transactions.push(new Transaction(args));
+    const transaction = new Transaction(args);
+    return transaction;
 }
 
-console.log(transactions);
+// Make some more transactions, have everyone send the next guy $50
+let nextWalletPubKey;
+for (let j = 0; j < NUMWALLETS; j++) {
 
+    // Get the sender's public key
+    name = `wallet${j.toString()}`;
+    directory = `wallets/${name}`;
+    publicKey = readPubKey(directory);
+    
+    // Get the recipient's public key
+    nextWalletPubKey = readPubKey(`wallets/wallet${(j+1)%20}`);
+
+    // Prepare a recipient's list, send 50 bucks to the next and keep 49
+    recipients = [
+        {
+            'index' : 0,
+            'address' : publicKey,
+            'amount' : 49
+        },
+        {
+            'index': 1,
+            'address' : nextWalletPubKey,
+            'amount': 50
+        }
+    ]
+
+    // Make a transaction
+    previousID = transactions[j].id;
+    previousIdx = 0;
+    fee = 1;
+    transactions.push(makeTransaction(name, fee, previousID, previousIdx, recipients));
+}
+
+
+// Turn all these transactions into the genesis block
+// Make a wallet for a miner
+makeWallet('miner');
+const minerPublicKey = readPubKey(`wallets/miner`);
+const prevHash = pubcrypto.getHash('DEERCOIN');
+const genesisTemplate = mining.getBlockTemplate(minerPublicKey, prevHash, transactions);
+const genesisBlock = mining.mineBlock(genesisTemplate);
+console.log(genesisBlock);
 
 
 
