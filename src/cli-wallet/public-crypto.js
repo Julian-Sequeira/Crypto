@@ -7,7 +7,7 @@ const crypto = require('crypto');
 
 function genkeys(passphrase, dir) {
 
-    console.log(dir);
+    // console.log(dir);
 
     const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
         modulusLength: 4096,

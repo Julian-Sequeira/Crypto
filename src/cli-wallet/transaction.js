@@ -45,7 +45,7 @@ class Transaction {
         if (args.isNew) {
             const serial = this.serialize(this.data);
             this.id = this.calculateID();
-            console.log(args.directory);
+            // console.log(args.directory);
             this.signature = pubcrypto.createSignature(serial, args.passphrase, args.directory);
 
         // Otherwise, we're just dumping existing transaction data into a new object
