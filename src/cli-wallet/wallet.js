@@ -118,7 +118,6 @@ if (options.help) {
             const sendToSelf = totalAmt - amount - fee;
 
             const type = "normal";
-            const timestamp = Date.now();
 
             // Check that the keys directory exists
             try {
@@ -134,7 +133,7 @@ if (options.help) {
                 {'index': 1, 'address': publicKey, 'amount': sendToSelf}
             ];
             
-            const data = {publicKey, previous, fee, recipients, type, timestamp}
+            const data = {publicKey, previous, fee, recipients, type}
 
             // Generating a new transaction- isNew variable tells the constructor to generate an id and signature
             const isNew = true;

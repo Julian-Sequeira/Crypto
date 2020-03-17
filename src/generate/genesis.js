@@ -38,9 +38,8 @@ transactions.push(transaction);
 let nextWalletPubKey;
 for (let j = 0; j < utils.NUMWALLETS; j++) {
 
-    // Get the sender and recipient's public keys
+    // Get the recipient's public key
     name = `wallet${j.toString()}`;
-    publicKey = utils.readPubKey(name);
     nextWalletPubKey = utils.readPubKey(`wallet${(j+1)%20}`);
 
     // Prepare a recipient's list, send 50 bucks to the next and keep 49
