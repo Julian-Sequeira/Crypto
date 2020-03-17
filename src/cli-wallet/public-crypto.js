@@ -5,10 +5,11 @@ const crypto = require('crypto');
  * Generate public/private keys
  */ 
 
-function genkeys(passphrase) {
-    
-    // Generates keys using RSA with mod 4k
-    crypto.generateKeyPair('rsa', {
+function genkeys(passphrase, dir) {
+
+    // console.log(dir);
+
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
         modulusLength: 4096,
         publicKeyEncoding: {
             type: 'spki',
@@ -19,27 +20,60 @@ function genkeys(passphrase) {
             format: 'pem',
             cipher: 'aes-256-cbc',
             passphrase: passphrase    // to encrypt the private key with
-        }
+        }   
+    })
+
+    // Write the public key to a file
+    try {
+        fs.writeFileSync(`${dir}/pubkey.pem`, publicKey);
+        // console.log('public key has been saved.');
+    } catch (error) {
+        console.log('Error when saving public key', error);
+        throw error;
+    };
+
+    // Write the private key to a file
+    try {
+        fs.writeFileSync(`${dir}/privkey.pem`, privateKey);
+        // console.log('private key has been saved.');
+    } catch (error) {
+        console.log('Error when saving public key', error);
+        throw error;
+    };
     
-    // Write both of the generated keys to a file    
-    }, (err, publicKey, privateKey) => {
-        if (err) throw err; 
+    // // Generates keys using RSA with mod 4k
+    // crypto.generateKeyPair('rsa', {
+    //     modulusLength: 4096,
+    //     publicKeyEncoding: {
+    //         type: 'spki',
+    //         format: 'pem'
+    //     },
+    //     privateKeyEncoding: {
+    //         type: 'pkcs8',
+    //         format: 'pem',
+    //         cipher: 'aes-256-cbc',
+    //         passphrase: passphrase    // to encrypt the private key with
+    //     }
     
-        // Write the public key to a file (fd = file descriptor)
-        fs.open('pubkey.pem', 'w', (err, fd) => {
-            if (err) throw err;
-            fs.write(fd, publicKey, (err, written, string) => { if (err) throw err; })
-            fs.close(fd, (err) => { if (err) throw err; })
-        })
+    // // Write both of the generated keys to a file    
+    // }, (err, publicKey, privateKey) => {
+    //     if (err) throw err; 
     
-        // Write the private key to a file 
-        // Should be fine if done asynchronously since they aren't logically dependent
-        fs.open('privkey.pem', 'w', (err, fd) => {
-            if (err) throw err;
-            fs.write(fd, privateKey, (err, written, string) => { if (err) throw err; })
-            fs.close(fd, (err) => { if (err) throw err; }) 
-        })
-    });
+    //     // Write the public key to a file (fd = file descriptor)
+    //     fs.open(`${dir}/pubkey.pem`, 'w', (err, fd) => {
+    //         if (err) throw err;
+    //         fs.write(fd, publicKey, (err, written, string) => { if (err) throw err; })
+    //         fs.close(fd, (err) => { if (err) throw err; })
+    //     })
+    
+    //     // Write the private key to a file 
+    //     // Should be fine if done asynchronously since they aren't logically dependent
+    //     fs.open(`${dir}/privkey.pem`, 'w', (err, fd) => {
+    //         if (err) throw err;
+    //         fs.write(fd, privateKey, (err, written, string) => { if (err) throw err; })
+    //         fs.close(fd, (err) => { if (err) throw err; }) 
+    //     })
+    // });
 }
 
 
@@ -49,10 +83,10 @@ function genkeys(passphrase) {
  * Then encrypt the hash (let Crypto.js worry about the encryption function).
  */
 
-function createSignature(string, passphrase) {
+function createSignature(string, passphrase, dir) {
 
     // Load the encrypted private key from file
-    let encryptedKey = fs.readFileSync('privkey.pem');
+    let encryptedKey = fs.readFileSync(`${dir}/privkey.pem`);
 
     // Create a key object for Crypto to decrypt
     // Using hardcoded passphrase for now
@@ -90,55 +124,11 @@ function verifySignature(string, signature, publicKey) {
 }
 
 
-
-/**
- * Generate public/private keys
- * This time, return the keys themselves, as opposed to saving to a file
- */ 
-function genkeysMem(passphrase) {
-    // Generates keys using RSA with mod 4k
-    const { publicKey, privateKey }  = crypto.generateKeyPairSync('rsa', {
-        modulusLength: 4096,
-        publicKeyEncoding: {
-            type: 'spki',
-            format: 'pem'
-        },
-        privateKeyEncoding: {
-            type: 'pkcs8',
-            format: 'pem',
-            cipher: 'aes-256-cbc',
-            passphrase: passphrase    // to encrypt the private key with
-        }
-    
-    // Write both of the generated keys to a file    
-    });
-    const publicKeyHex = Buffer.from(publicKey, 'utf8').toString('hex');
-    return { "publicKey" : publicKeyHex, "encryptedKey": privateKey };
-}
-
-/** Create a signature,
- *  But allow an encrypedkey input as opposed to reading from a file
- */
-
-function createSignatureMem(string, passphrase, encryptedKey) {
-    // Create a key object for Crypto to decrypt
-    // Using hardcoded passphrase for now
-    let keyObject = {
-        key: encryptedKey,
-        format: 'pem',
-        type: 'pkcs8',
-        passphrase: passphrase
-    }
-
-    // Decrypt the private key
-    const privateKey = crypto.createPrivateKey(keyObject);
-
-    // Using Crypto's sign object to make the signature
-    const sign = crypto.createSign('SHA256');
-    sign.write(string);
-    sign.end();
-    return sign.sign(privateKey, 'hex');    // ** The signature is encoded in hex **
+function getHash(data) {
+    const hash = crypto.createHash('sha256');
+    hash.update(JSON.stringify(data));
+    return hash.digest('hex');
 }
 
 
-module.exports = { genkeys, createSignature, verifySignature, genkeysMem, createSignatureMem };
+module.exports = { genkeys, getHash, createSignature, verifySignature};
