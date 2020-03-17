@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, StyleSheet, Button, Vibration } from 'react-native';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 
 import { BarCodeScanner } from 'expo-barcode-scanner';
+import { withGlobalContext } from '../Context/GlobalContext.js';
 
-export default class BarcodeScannerExample extends React.Component {
+class Scan extends React.Component {
   state = {
     hasCameraPermission: null,
     scanned: false,
@@ -50,6 +51,13 @@ export default class BarcodeScannerExample extends React.Component {
 
   handleBarCodeScanned = ({ type, data }) => {
     this.setState({ scanned: true });
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    // Vibration.viberate();
+    this.props.global.updateRecipient(data);
+    this.props.route.params.updateRecipient(data);
+    console.log(this.props.global.recipient);
+    alert(`Public Key: ${data}`);
+    this.props.navigation.goBack();
   };
 }
+
+export default withGlobalContext(Scan);

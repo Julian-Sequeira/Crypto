@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, Share, TouchableOpacity, AsyncStorage } from 'react-native';
 
-//import QRCode from 'react-native-qrcode-svg';
 import { QRCode as CustomQRCode } from 'react-native-custom-qr-codes-expo';
 import { Ionicons } from '@expo/vector-icons';
 
