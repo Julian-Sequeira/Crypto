@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const pubcrypto = require('./public-crypto.js');
+const transactions = require("../miner/transactions.json");
 
 /**
  * Transaction class, built for transactions between 1 sender and 1 receiver currently
@@ -89,7 +90,93 @@ class Transaction {
         return pubcrypto.verifySignature(serial, this.signature, publicKeyBuffer);
     }
 
-    // Takes in the previous transaction object
+    //-------------------------------------------------
+    
+    checkSingleTransaction(address,transactionIDs){
+        for(var transaction = 0;transaction<transactionIDs.length;Transaction++){
+            if(this.addressInTransaction(transactionIDs[transaction],address)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[DODO]checks to see if the transaction has not been spent multiple times
+    checkSingleSpent(block, transactionIDs){
+        //#get the blockchain
+        var thickestBranch = blockchain['genesisHash'];
+        var toCheck = [thickestBranch];
+        while (toCheck.length > 0){//loop through every branch
+            var blockToCheck = toCheck[0];
+            var ChildrenList = blockToCheck.nextHash;
+            for(var i = 1;i<ChildrenList.length; i++){//loop through everychild
+                if(ChildrenList[i]==block){
+                    continue;
+                }
+                var address = blockchain[ChildrenList[i]].details.publicKey;
+                if(this.checkSingleTransaction(address,transactionIDs)==false){
+                    return false;
+                }
+                toCheck.push(blockchain[ChildrenList[i]]);
+            }
+            //the parent block that was fully checked shall be removed
+            toCheck.shift();
+        }
+        return true;
+    }
+
+    //[DOD]checks if the address exists in the list of transactions
+    addressInTransaction(transactions,address){
+        for(var transaction = 0; transaction < transactions.length; transaction++){
+             if (address === this.details.publicKey) {
+                return transactions[transaction];
+            }
+        }
+        return false;
+    }
+
+    checkAddress(transaction, addresses){
+        for(var address = 0;address<addresses.length;address++){
+            if(!this.addressInTransaction(transaction,addresses[address])){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[DOD]checks if the transaction exist in the blockchain
+    doesExist(blockchain,addresses){
+        //#get the blockchain
+        var thickestBranch = blockchain['genesisHash'];
+        var toCheck = [thickestBranch];
+        while (toCheck.length > 0){//loop through every branch
+            var blockToCheck = toCheck[0];
+            var ChildrenList = blockToCheck.nextHash;
+            for(var i = 1;i<ChildrenList.length; i++){//loop through everychild
+                var transaction = blockchain[ChildrenList[i]].body;
+                if(this.checkAddress(transaction,addresses)){
+                    return true;
+                }
+                toCheck.push(blockchain[ChildrenList[i]]);
+            }
+            //the parent block that was fully checked shall be removed
+            toCheck.shift();
+        }
+        return false;
+    }
+
+    //[DODO]gets the total amount we are sending to people
+    getTotal(transaction){
+        var total = 0;
+        for(var i = 0;i<transaction.details.recipients.length;i++){
+            total += transaction.details.recipients[i].amount;
+        }
+
+        return total + transaction.details.fee;
+    }
+
+
+    // [DOD]Takes in the previous transaction object
     // Verifies that the public keys of the last recipient and current sender match
     // Verifies that the amounts all much up
     verifyFromPrevious(prevTransaction) {
@@ -109,6 +196,22 @@ class Transaction {
         }
         if (sentAmount > prevAmount) {
             return false
+        }
+        return true;
+    }
+
+
+    //[DOD]check to see if the all the transactions in the block are valid
+    CheckBlockTransactions(transactions){
+        for(var transaction = 0; transaction < transactions.length; transaction++){
+            if(transactions[transaction].verifyTrxSignature() && transactions[transaction].verifyID() && transactions[transaction].checkSingleSpent()){
+                var prevTransaction = findPrev();
+                if(!this.verifyFromPrevious(prevTransaction)){
+                    return false;
+                }
+            }else{
+                return false;
+            }
         }
         return true;
     }
