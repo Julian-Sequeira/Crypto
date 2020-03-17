@@ -92,9 +92,9 @@ class Transaction {
 
     //-------------------------------------------------
     
-    checkSingleTransaction(address,transactionIDs){
-        for(var transaction = 0;transaction<transactionIDs.length;Transaction++){
-            if(this.addressInTransaction(transactionIDs[transaction],address)){
+    checkSingleTransaction(address, transactionIDs){
+        for(var transaction = 0; transaction<transactionIDs.length; transaction++){
+            if (this.addressInTransaction(transactionIDs[transaction],address)){
                 return false;
             }
         }
