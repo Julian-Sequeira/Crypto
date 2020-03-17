@@ -30,7 +30,7 @@ MORE FUNCTIONS HERE THAT I DON'T FULLY UNDERSTAND
 
 # CLI-Wallet
 
-Command line utility for walley functions
+Command line utility for wallet functions
 
 START:
 - ./cli-wallet --start
@@ -45,3 +45,6 @@ TRANSACTIONS:
 - Grabs your wallet's transaction history from the blockchain
 
 CREATE A NEW TRANSACTION:
+- ./cli-wallet -i prevId -x previousIdx -t totalAmt -m amount -f fee -a address
+- totalAmt: The total amount you have available to you from the previous transaction
+- amount: How much you want to send the recipient, the difference will go to your wallet
