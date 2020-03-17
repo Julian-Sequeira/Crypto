@@ -7,6 +7,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
 import showQRCode from "./components/Dashboard/showQRCode.js";
+import Scan from "./components/Dashboard/qrScan.js";
 
 const Stack = createStackNavigator();
 
@@ -30,6 +31,7 @@ export default function App() {
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="showQRCode" component={showQRCode} options={ {title: 'QR Code'} }/>
+        <Stack.Screen name="Scan" component={Scan} options={ {title: 'Scan QR Code'} }/>
       </Stack.Navigator>
     </NavigationContainer>
   );

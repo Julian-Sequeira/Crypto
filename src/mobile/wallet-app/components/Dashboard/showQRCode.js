@@ -12,7 +12,6 @@ class showQRCode extends React.Component {
         text: 'Anees',
     }
 
-    //TODO: instead of text, have a share icon
     componentDidMount() {
         this.props.navigation.setOptions({
             headerRight: () => (

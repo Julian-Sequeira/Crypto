@@ -3,8 +3,7 @@ import { StyleSheet, Text, View, Modal, TouchableOpacity, Alert, TextInput } fro
 
 import TransactionList from './transactionList.js'
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-// import QRCodeScanner from 'react-native-qrcode-scanner';
+import Scan from './qrScan.js';
 
 class Dashboard extends React.Component {
     
@@ -44,6 +43,13 @@ class Dashboard extends React.Component {
 
     setModalVisible = visible => {
         this.setState({modalVisible: visible});
+    }
+
+    showScanScreen = () => {
+        console.log("going to scan screen");
+        this.props.navigation.navigate('Scan', {
+            user: this.state.user,
+          }); 
     }
 
     showQRCodeScreen = () => {
@@ -93,8 +99,9 @@ class Dashboard extends React.Component {
         );
     }
 
+    //TODO: get rid of keyboard tapping outside
     render() {
-        const { user, balance, sendTo } = this.state;
+        const { user, balance, sendTo, amount } = this.state;
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.modal}>
@@ -105,6 +112,9 @@ class Dashboard extends React.Component {
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.buttonContainer, styles.sendButton]} onPress={this.showQRCodeScreen}>
                         <Text style={styles.loginText}>Show QR Code</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.buttonContainer, styles.sendButton]} onPress={this.showScanScreen}>
+                        <Text style={styles.loginText}>Scan QR Code</Text>
                     </TouchableOpacity>
                 </View>
                 <View>
@@ -127,9 +137,10 @@ class Dashboard extends React.Component {
                             <View style={styles.inputView}>
                                 <TextInput
                                     style={styles.inputText}
-                                    value={sendTo}
+                                    value={amount}
                                     placeholder="Amount"
                                     placeholderTextColor="#003f5c"
+                                    keyboardType='numeric'
                                     onChangeText={this.handleAmountChange}
                                 />
                             </View>
@@ -140,9 +151,9 @@ class Dashboard extends React.Component {
                                 <Text>Go back</Text>
                             </TouchableOpacity>
                         </View>
-                        </Modal>
-                    </View>
-                    <TransactionList />
+                    </Modal>
+                </View>
+                <TransactionList />
             </SafeAreaView>
 
         );
