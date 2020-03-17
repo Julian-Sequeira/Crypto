@@ -47,6 +47,13 @@ if (options.help) {
 } else if (options.start) {
     console.log("Generating key pairs...");
     const passphrase = askPassphrase();
+
+    // Make a keys directory to store the key pairs
+    try {
+        stat = fs.statSync('keys');
+    } catch (e) {
+        fs.mkdirSync('keys');
+    }
     pubcrypto.genkeys(passphrase, 'keys');
     process.on("exit", () => {
         console.log("Key pairs generated! Your wallet has been instantiated");
