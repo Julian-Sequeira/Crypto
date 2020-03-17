@@ -47,7 +47,7 @@ if (options.help) {
 } else if (options.start) {
     console.log("Generating key pairs...");
     const passphrase = askPassphrase();
-    pubcrypto.genkeys(passphrase);
+    pubcrypto.genkeys(passphrase, "keys");
     process.on("exit", () => {
         console.log("Key pairs generated! Your wallet has been instantiated");
     })
@@ -56,7 +56,7 @@ if (options.help) {
     // Get the public key (address) of the current user
     let publicKeyBuffer;
     try {
-        publicKeyBuffer = fs.readFileSync("pubkey.pem");
+        publicKeyBuffer = fs.readFileSync("keys/pubkey.pem");
     } catch (error) {
         if (error.errno == -2) {
             console.log("Can't find the public key file, please instantiate your wallet");
