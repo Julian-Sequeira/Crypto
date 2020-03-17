@@ -61,8 +61,43 @@ var initHttpServer = () => {
     var app = express();
     app.use(bodyParser.json());
 
-    app.get('/allBlocks', (req, res) => res.send(blockchain));
-    app.get('/lastBlock', (req, res) => res.send(blockchain['longest']));
+    app.get('/allBlocks', (req, res) => {
+        var blockchain;
+        let sql = 'SELECT * FROM blockchain;';
+        db.all(sql, [], (err, rows) => {
+            if (err) { // error
+                res.status(400);
+                blockchain = err.message;
+            } else if (rows.length === 0) { // no highscores
+                res.status(404);
+                blockchain = "No BlockChain!";
+            } else {
+                res.status(200);
+                blockchain = rows;
+            }
+            res.send(blockchain);
+        });
+        
+    });
+    app.get('/lastBlock', (req, res) => {
+        var longest;
+        let sql = 'SELECT * FROM block WHERE blockhash = '
+        sql += '(SELECT child FROM blockchain WHERE blockhash = longest);';
+        db.all(sql, [], (err, rows) => {
+            if (err) { // error
+                res.status(400);
+                longest = err.message;
+            } else if (rows.length === 0) { // no highscores
+                res.status(404);
+                longest = "No BlockChain!";
+            } else {
+                res.status(200);
+                longest = rows;
+            }
+            res.send(longest);
+        });
+    });
+
     app.get('/getNewBlocks', (req,res) => {
         var blockHash = req.body.hash;
         var foundBlock = null;
@@ -76,6 +111,39 @@ var initHttpServer = () => {
         console.log('got new block');
         console.log(req.body.newBlock);
         addBlock(req.body.newBlock);
+        // insert into blocks
+        new Promise(function(resolve, reject) {
+            let sql = 'INSERT INTO block(blockhash, prehash, difficulty, nonce, timestamp) ';
+            sql += 'VALUES(?, ?, ?, ?, ?);';
+            db.get(sql, [req.body.newBlock.header.currHash, req.body.newBlock.header.preHash, req.body.newBlock.header.difficulty, req.body.newBlock.header.nonce, req.body.newBlock.header.timestamp], (err, row) => {
+                if (err) {
+                    // error
+                    res.status(404);
+                    var result = err.message;
+                    res.json(result);
+                    reject(err.message);
+                }else{
+                    resolve(1);
+                }
+            });
+
+        }).then(function(result) { // (**)
+        
+            let sql = 'INSERT INTO blockchain(blockhash, child) ';
+            sql += 'VALUES(?, ?);';
+            db.get(sql, [req.body.newBlock.header.currHash, req.body.newBlock.header.preHash], (err, row) => {
+                if (err) {
+                    // error
+                    res.status(404);
+                    var result = err.message;
+                    res.json(result);
+                    reject(err.message);
+                }else{
+                    resolve(1);
+                }
+            });
+
+        });
         broadcast(responseLatestMsg());
         res.send();
     });

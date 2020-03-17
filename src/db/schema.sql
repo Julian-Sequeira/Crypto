@@ -15,6 +15,10 @@ CREATE TABLE blockchain (
 	child VARCHAR(30) REFERENCES block(blockhash)
 );
 
+-- these are the two variables we need for this project (please change them if necessary)
+INSERT INTO blockchain(blockhash,child) VALUES ("genesis","521ae34d0f1bd452103724aa8e53e6793da6fc581adeeac3f13a31fb94272437");
+INSERT INTO blockchain(blockhash,child) VALUES ("longest","521ae34d0f1bd452103724aa8e53e6793da6fc581adeeac3f13a31fb94272437");
+
 
 -- Table for the block
 CREATE TABLE block (
