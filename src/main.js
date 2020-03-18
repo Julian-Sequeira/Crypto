@@ -162,7 +162,7 @@ var initHttpServer = () => {
                 }
             });
 
-        }).then(function(result) { // (**)
+        }).then(function(resolve, reject) { // (**)
         
             let sql = 'INSERT INTO blockchain(blockhash, child) ';
             sql += 'VALUES(?, ?);';
@@ -177,6 +177,50 @@ var initHttpServer = () => {
                     resolve(1);
                 }
             });
+
+        }).then(function(resolve, reject){
+            let sql = 'INSERT INTO transaction(id, signature, publicKey, previousID, previousIdx, fee) ';
+            sql += 'VALUES(?, ?, ?, ?, ?, ?);';
+            if(req.body.newBlock.body.length==0){//in case there are no transactions
+                reject();
+            }
+
+            //insert all transactions into database
+            for(var i = 0; i < req.body.newBlock.body.length; i++){
+                db.get(sql, [req.body.newBlock.body[i].id, req.body.newBlock.body[i].signature,
+                        req.body.newBlock.body[i].details.publicKey,req.body.newBlock.body[i].details.previousID,
+                        req.body.newBlock.body[i].details.previousIdx, req.body.newBlock.body[i].details.fee], (err, row) => {
+                    if (err) {
+                        // error
+                        res.status(404);
+                        var result = err.message;
+                        res.json(result);
+                        reject(err.message);
+                    }else{
+                        resolve(1);
+                    }
+                });
+            }
+            
+
+        }).then(function(resolve, reject){
+            let sql = 'INSERT INTO blocktransaction(blockhash, id)';
+            sql += 'VALUES(?, ?);';
+            //insert all transactions into database
+            for(var i = 0; i < req.body.newBlock.body.length; i++){
+                db.get(sql, [req.body.newBlock.header.currHash, req.body.newBlock.body[i].id], (err, row) => {
+                    if (err) {
+                        // error
+                        res.status(404);
+                        var result = err.message;
+                        res.json(result);
+                        reject(err.message);
+                    }else{
+                        resolve(1);
+                    }
+                });
+            }
+            
 
         });
         broadcast(responseLatestMsg());
