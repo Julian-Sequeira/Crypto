@@ -33,22 +33,6 @@ function getBlockHash(block) {
     return CryptoJS.createHash('sha256').update(JSON.stringify(block.header)).digest('HEX');
 }
 
-function validateTransaction(transaction) {
-    // TODO: check if signing is correct
-    // for (const block of blockchain) {
-    //     for (const confTransaction of block.body) {
-    //         if (confTransaction.details.previousID == transaction.details.previousID){
-    //             return false;
-    //         }
-    //         if (confTransaction.id == transaction.details.previousID
-    //             && confTransaction.details.amount == transaction.details.amount){
-    //             return true;
-    //         }
-    //     }
-    // }
-    return true;
-}
-
 //our blockchain is more like a tree. It will keep track of all the children
 var blockchain = {};
 const genesisHash = getBlockHash(genesisBlock);
@@ -147,81 +131,12 @@ var initHttpServer = () => {
         // console.log(req.body.newBlock);
         addBlock(req.body.newBlock);
         // insert into blocks
-        new Promise(function(resolve, reject) {
-            let sql = 'INSERT INTO block(blockhash, prehash, difficulty, nonce, timestamp) ';
-            sql += 'VALUES(?, ?, ?, ?, ?);';
-            db.get(sql, [req.body.newBlock.header.currHash, req.body.newBlock.header.preHash, req.body.newBlock.header.difficulty, req.body.newBlock.header.nonce, req.body.newBlock.header.timestamp], (err, row) => {
-                if (err) {
-                    // error
-                    res.status(404);
-                    var result = err.message;
-                    res.json(result);
-                    reject(err.message);
-                }else{
-                    resolve(1);
-                }
-            });
-
-        }).then(function(resolve, reject) { // (**)
-        
-            let sql = 'INSERT INTO blockchain(blockhash, child) ';
-            sql += 'VALUES(?, ?);';
-            db.get(sql, [req.body.newBlock.header.currHash, req.body.newBlock.header.preHash], (err, row) => {
-                if (err) {
-                    // error
-                    res.status(404);
-                    var result = err.message;
-                    res.json(result);
-                    reject(err.message);
-                }else{
-                    resolve(1);
-                }
-            });
-
-        }).then(function(resolve, reject){
-            let sql = 'INSERT INTO transaction(id, signature, publicKey, previousID, previousIdx, fee) ';
-            sql += 'VALUES(?, ?, ?, ?, ?, ?);';
-            if(req.body.newBlock.body.length==0){//in case there are no transactions
-                reject();
-            }
-
-            //insert all transactions into database
-            for(var i = 0; i < req.body.newBlock.body.length; i++){
-                db.get(sql, [req.body.newBlock.body[i].id, req.body.newBlock.body[i].signature,
-                        req.body.newBlock.body[i].details.publicKey,req.body.newBlock.body[i].details.previousID,
-                        req.body.newBlock.body[i].details.previousIdx, req.body.newBlock.body[i].details.fee], (err, row) => {
-                    if (err) {
-                        // error
-                        res.status(404);
-                        var result = err.message;
-                        res.json(result);
-                        reject(err.message);
-                    }else{
-                        resolve(1);
-                    }
-                });
-            }
-            
-
-        }).then(function(resolve, reject){
-            let sql = 'INSERT INTO blocktransaction(blockhash, id)';
-            sql += 'VALUES(?, ?);';
-            //insert all transactions into database
-            for(var i = 0; i < req.body.newBlock.body.length; i++){
-                db.get(sql, [req.body.newBlock.header.currHash, req.body.newBlock.body[i].id], (err, row) => {
-                    if (err) {
-                        // error
-                        res.status(404);
-                        var result = err.message;
-                        res.json(result);
-                        reject(err.message);
-                    }else{
-                        resolve(1);
-                    }
-                });
-            }
-            
-
+        insertBlock(req.body.newBlock).then(function(result) { // (**)
+            insertBlockchain(req.body.newBlock);
+        }).then(function(result){
+            insertAllTransactions(req.body.newBlock);
+        }).then(function(result){
+            insertBlockTransaction(req.body.newBlock);
         });
         broadcast(responseLatestMsg());
         res.send();
@@ -384,67 +299,6 @@ var initErrorHandler = (ws) => {
 };
 
 /*
-Given the blockData, it will create a new block and add it to the longest branch
-*/
-// var generateNextBlock = (blockData) => {
-//     var previousBlock = getLatestBlock();
-//     var nextIndex = previousBlock.index + 1;
-//     var nextDifficulty = previousBlock.difficulty + 1;
-//     var nextWork = previousBlock.work + nextDifficulty;
-//     var nextTimestamp = new Date().getTime() / 1000;
-//     var nextNonce = getNonceForDifficultry(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextDifficulty, nextWork);
-//     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextDifficulty, nextWork ,nextNonce);
-//     return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash, nextDifficulty, nextWork, nextNonce);
-// };
-
-// /*
-// Returns a nonce value that can give us a hash with certain difficulty
-//  */
-// var getNonceForDifficultry = (index, previousHash, timestamp, data, difficulty, work) => {
-//     var newHash = null;
-//     var nonce = -1;
-//     do{
-//         nonce += 1;//adds one to the nonce everytime the hash difficulty is not correct
-//         newHash = calculateHash(index, previousHash, timestamp, data, difficulty, work, nonce);
-//     } while (!checkHashFormat(newHash, difficulty));//checks hash difficulty
-//     return nonce;
-// }
-
-
-// /*
-// returns a hash for the given block given its attributes
-// This function is used for check the hash validity of a block
-// */
-// var calculateHashForBlock = (block) => {
-//     return calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.difficulty, block.work, block.nonce);
-// };
-
-// /*
-// Checks if the hash has certain difficulty
-// By difficulty, we mean the number of zeroes at the beginning of the hash
-// For example, a hash with difficulty 2 must have a format 00xxxxxxxxx
-// */
-// var checkHashFormat = (hash, difficulty) => {
-//     var regex = RegExp(`^[0]{${difficulty}}.+`,"i");
-//     return regex.test(hash);
-// };
-
-
-// /*
-// calculates hash of a block given all its attributes
-// */
-// var calculateHash = (index, previousHash, timestamp, data, difficulty, work, nonce) => {
-//     return CryptoJS.SHA256(index + previousHash + timestamp + data + difficulty + work + nonce).toString();
-// };
-
-// /*
-// checks if a block has more work than the current longest
-// */
-// var checkMostWork = (newBlock) => {
-//     return longest.work < newBlock.work;
-// }
-
-/*
 adds the block to the longest branch of the blockchain
 */
 var addBlock = (newBlock) => {
@@ -586,6 +440,166 @@ var findThickestBranch = (blockchain) => {
     return thickestBranch;
 }
 
+/*
+insert new block into database
+*/
+var insertBlock = (block) => {
+    return new Promise(function(resolve, reject) {
+        let sql = 'INSERT INTO block(blockhash, prehash, difficulty, nonce, timestamp) ';
+        sql += 'VALUES(?, ?, ?, ?, ?);';
+        db.get(sql, [block.header.currHash, block.header.preHash, 
+                    block.header.difficulty, block.header.nonce, 
+                    block.header.timestamp], (err, row) => {
+            if (err) {
+                // error
+                res.status(404);
+                var result = err.message;
+                res.json(result);
+                reject(err.message);
+            }else{
+                resolve(1);
+            }
+        });
+
+    });
+}
+
+/* 
+insert new blockchain data into database
+*/
+var insertBlockchain = (block) => {
+    return new Promise(function(resolve, reject) {
+        let sql = 'INSERT INTO blockchain(blockhash, child) ';
+        sql += 'VALUES(?, ?);';
+        db.get(sql, [block.header.currHash, block.header.preHash], (err, row) => {
+            if (err) {
+                // error
+                res.status(404);
+                var result = err.message;
+                res.json(result);
+                reject(err.message);
+            }else{
+                resolve(1);
+            }
+        });
+    });
+}
+
+/* 
+insert new transactions from new blockchain
+*/
+var insertAllTransactions = (block) => {
+    return new Promise(function(resolve, reject) {
+        let sql = 'INSERT INTO transaction(id, signature, publicKey, previousID, previousIdx, fee) ';
+        sql += 'VALUES(?, ?, ?, ?, ?, ?);';
+        if(block.body.length==0){//in case there are no transactions
+            reject();
+        }
+
+        //insert all transactions into database
+        for(var i = 0; i < block.body.length; i++){
+            db.get(sql, [block.body[i].id, block.body[i].signature,
+                    block.body[i].details.publicKey,block.body[i].details.previousID,
+                    block.body[i].details.previousIdx, block.body[i].details.fee], (err, row) => {
+                if (err) {
+                    // error
+                    res.status(404);
+                    var result = err.message;
+                    res.json(result);
+                    reject(err.message);
+                }else{
+                    insertAllRecipients(block.body[i]).then(function(result){
+                        insertTransactionRecipient(block.body[i]).catch(reject(0));
+                    }).catch(reject(0));
+                    resolve(1);
+                }
+            });
+        }
+    });
+}
+
+/* 
+insert new block transaction 
+specify which transaction belongs to which block
+*/
+var insertBlockTransaction = (block) => {
+    return new Promise(function(resolve, reject) {
+        let sql = 'INSERT INTO blocktransaction(blockhash, id)';
+        sql += 'VALUES(?, ?);';
+        //insert all transactions into database
+        for(var i = 0; i < block.body.length; i++){
+            db.get(sql, [block.header.currHash, block.body[i].id], (err, row) => {
+                if (err) {
+                    // error
+                    res.status(404);
+                    var result = err.message;
+                    res.json(result);
+                    reject(err.message);
+                }else{
+                    resolve(1);
+                }
+            });
+        }
+    });
+}
+
+/* 
+insert new transactions from new blockchain
+*/
+var insertAllRecipients = (transaction) => {
+    return new Promise(function(resolve, reject) {
+        let sql = 'INSERT INTO recipient(index, address, amount) ';
+        sql += 'VALUES(?, ?, ?);';
+        if(transaction.details.recipients==0){//in case there are no transactions
+            reject();
+        }
+
+        //insert all transactions into database
+        var recipient;
+        for(var i = 0; i < transaction.details.recipients.length; i++){
+            recipient = transaction.details.recipients[i];
+            db.get(sql, [recipient.index, recipient.address, recipient.amount], (err, row) => {
+                if (err) {
+                    // error
+                    res.status(404);
+                    var result = err.message;
+                    res.json(result);
+                    reject(err.message);
+                }else{
+                    resolve(1);
+                }
+            });
+        }
+    });
+}
+
+/* 
+insert new transaction recipient 
+specify which recipient belongs to which transaction
+*/
+var insertTransactionRecipient = (transaction) => {
+    return new Promise(function(resolve, reject) {
+        let sql = 'INSERT INTO transactionrecipient(id, recipientID)';
+        sql += 'VALUES(?, ?);';
+        //insert all transactions into database
+        var recipient;
+        for(var i = 0; i < transaction.details.recipients.length; i++){
+            recipient = transaction.details.recipients[i];
+            db.get(sql, [transaction.id,recipient.index], (err, row) => {
+                if (err) {
+                    // error
+                    res.status(404);
+                    var result = err.message;
+                    res.json(result);
+                    reject(err.message);
+                }else{
+                    resolve(1);
+                }
+            });
+        }
+    });
+}
+
 var getLatestBlock = () => latestBlock;
 var queryChainLengthMsg = () => ({'type': MessageType.QUERY_LATEST});
 var queryAllMsg = () => ({'type': MessageType.QUERY_ALL});
@@ -604,12 +618,3 @@ connectToPeers(initialPeers);
 initHttpServer();
 initP2PServer();
 
-//----------------------------------------------testing area
-/*
-var newBlock = generateNextBlock('sina was here');
-addBlock(newBlock);
-newBlock = generateNextBlock('sina was here 2');
-addBlock(newBlock);
-console.log("-------------------");
-console.log(findThickestBranch(blockchain));
-*/
