@@ -1,6 +1,9 @@
 const initHttpServer = require('./node/httpServer');
 const { initP2PServer, connectToPeers, initialPeers } = require('./node/p2pServer');
+const BlockChain = require('./node/blockChain');
+
+const blockchain = new BlockChain();
 
 connectToPeers(initialPeers);
-initHttpServer();
-initP2PServer();
+initHttpServer(blockchain);
+initP2PServer(blockchain);

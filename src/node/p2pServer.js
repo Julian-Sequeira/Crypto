@@ -10,7 +10,10 @@ const MessageType = {
     RESPONSE_BLOCKCHAIN: 2
 };
 
-const initP2PServer = () => {
+let blockchain;
+
+const initP2PServer = (chain) => {
+  blockchain = chain;
   const server = new WebSocket.Server({port: p2p_port});
   server.on('connection', ws => initConnection(ws));
   console.log('listening websocket p2p port on: ' + p2p_port);
@@ -63,12 +66,12 @@ const initErrorHandler = (ws) => {
 const handleBlockchainResponse = (message) => {
   const receivedBlocks = JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
   const latestBlockReceived = receivedBlocks[receivedBlocks.length - 1];
-  const latestBlockHeld = getLatestBlock();
+  const latestBlockHeld = blockchain.getLatestBlock();
   if (latestBlockReceived.index > latestBlockHeld.index) {
       console.log('blockchain possibly behind. We got: ' + latestBlockHeld.index + ' Peer got: ' + latestBlockReceived.index);
       if (latestBlockHeld.hash === latestBlockReceived.previousHash) {
           console.log("We can append the received block to our chain");
-          addBlock(latestBlockReceived)
+          blockchain.addBlock(latestBlockReceived)
           broadcast(responseLatestMsg());
       } else if (receivedBlocks.length === 1) {
           console.log("We have to query the chain from our peer");
@@ -89,10 +92,10 @@ var responseChainMsg = () =>({
 });
 var responseLatestMsg = () => ({
     'type': MessageType.RESPONSE_BLOCKCHAIN,
-    'data': JSON.stringify([getLatestBlock()])
+    'data': JSON.stringify(blockchain.getLatestBlock())
 });
 
 var write = (ws, message) => ws.send(JSON.stringify(message));
 var broadcast = (message) => sockets.forEach(socket => write(socket, message));
 
-module.exports = { initP2PServer, connectToPeers, initialPeers };
+module.exports = { initP2PServer, responseLatestMsg, connectToPeers, initialPeers, broadcast };
