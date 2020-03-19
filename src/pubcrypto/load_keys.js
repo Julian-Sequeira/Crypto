@@ -2,7 +2,7 @@ const fs = require('fs');
 const genkeys = require('./keygen.js');
 
 // Where we store the generated keys
-const KEYS_DIRECTORY = '../keys';
+const KEYS_DIRECTORY = 'keys';
 const PUBKEY_PATH = `${KEYS_DIRECTORY}/pubkey.pem`;
 const PRIVKEY_PATH = `${KEYS_DIRECTORY}/privkey.pem`;
 

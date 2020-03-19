@@ -101,7 +101,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
     // TODO: construct block template here, need to update block structure and fields
     const header = {
         version: '1.0.0',
-        prevHash,
+        preHash: prevHash,
         timestamp: Date.now(),
         currHash,
         difficulty: 0, // TODO: difficulty may change
