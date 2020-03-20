@@ -41,4 +41,4 @@ app.use(express.json());
 
 const port = process.env.PORT || 8378;
 
-app.listen(port, () => console.log(`Miner started on port ${port}`));
+// app.listen(port, () => console.log(`Miner started on port ${port}`));

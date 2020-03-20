@@ -1,42 +1,48 @@
+const axios = require('axios').default;
 const crypto = require('crypto');
 const Transaction = require('../cli-wallet/transaction');
-const axios = require('axios').default;
-const CryptoJS = require('crypto');
+
 
 /**
  * We use fake transactions here
  * An array of three transactions will be loaded from file 'transactions.json'
  */
 const getFakeTransactions = () => {
-  const fs = require('fs');
-  const transactions = JSON.parse(fs.readFileSync('./transactions.json', 'utf8'));
-  return transactions;
+    const fs = require('fs');
+    const transactions = JSON.parse(fs.readFileSync('./transactions.json', 'utf8'));
+    return transactions;
 }
 
 const getTransactions = async () => {
-  let transactions = null;
-  try{
-    // TODO: get peer list and request from peer list
-    transactions = (await axios.get('http://localhost:3001/transactions')).data;
-  } catch (e) {
-    console.log(e);
-  }
-  return transactions;
+    let transactions = null;
+    try{
+        // TODO: get peer list and request from peer list
+        transactions = (await axios.get('http://localhost:3001/transactions')).data;
+    } catch (e) {
+        console.log(e);
+    }
+    return transactions;
 }
 
 const getLastBlock = async () => {
-  let lastblock = null;
-  try{
-    // TODO: get peer list and request from peer list
-    lastblock = (await axios.get('http://localhost:3001/lastBlock')).data;
-  } catch (e) {
-    console.log(e);
-  }
-  return lastblock;
+    let lastblock = null;
+    try{
+        // TODO: get peer list and request from peer list
+        lastblock = (await axios.get('http://localhost:3001/lastBlock')).data;
+    } catch (e) {
+        console.log(e);
+    }
+    return lastblock;
 }
 
 function getBlockHash(block) {
-  return CryptoJS.createHash('sha256').update(JSON.stringify(block.header)).digest('HEX');
+    return crypto.createHash('sha256').update(JSON.stringify(block.header)).digest('HEX');
+}
+
+function getHash(data) {
+    const hash = crypto.createHash('sha256');
+    hash.update(JSON.stringify(data));
+    return hash.digest('hex');
 }
 
 // TODO: verify that all transaction are valid for this block
@@ -46,87 +52,93 @@ function getBlockHash(block) {
  * Get a block of transactions, with the first one being miner's reward.
  * The block body will be later used in mining function (calculate hash value).
  */
-const getBlockTemplate = async (publicKey) => {
-  // crete the first transaction in the block body which is the reward for miner
-  const details = {
-    publicKey: null,
-    previousID: '0', // all reward transactions have previous ID of 0
-    amount: 1, // the reward amount has to be less or equal to 1
-    fee: 0,
-    address: publicKey.toString('HEX'),
-  };
-  const args = {
-    details,
-    isNew: false,
-    id: 0xFFFFFFFF,
-    signature: null,
-  };
-  transaction = new Transaction(args);
+const getBlockTemplate = async (publicKey, prevHash, transactions) => {
 
-  let transactions;
-  try{
-    // transactions = getFakeTransactions();
-    transactions = await getTransactions();
-  } catch (e) {
-    console.log(e);
-    return;
-  }
+    // Get the list of transactions to turn into a block
+    if (transactions === undefined) {
+        try{
+            // transactions = getFakeTransactions();
+            transactions = await getTransactions();
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+    }
 
-  console.log(transactions);
+    // Create the first transaction in the block body which is the reward for miner
+    const data = {
+        publicKey: null,
+        previousID: '0', // all reward transactions have previous ID of 0
+        amount: 1, // the reward amount has to be less or equal to 1
+        fee: 0,
+        address: publicKey.toString('HEX'),
+    };
+    const args = {
+        data,
+        isNew: false,
+        id: 0xFFFFFFFF,
+        signature: null,
+    };
+    const transaction = new Transaction(args);
 
-  // body will be an array of transactions
-  const body = [];
-  body.push(transaction.data);
-  transactions.forEach(t => body.push(t));
-  const currHash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('HEX');
+    // Create the body of the block, an array of transactions
+    const body = [];
+    body.push(transaction);
+    transactions.forEach(t => body.push(t));
+    const currHash = getHash(body);
 
-  let lastBlock;
-  try{
-    lastBlock = await getLastBlock();
-  } catch (e) {
-    console.log(e);
-    return;
-  }
+    // Get the hash of the previous block
+    if (prevHash === undefined) {
+        try{
+            let lastBlock = await getLastBlock();
+            prevHash = getBlockHash(lastBlock);
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+    }
 
-  // console.log(lastBlock);
+    // TODO: construct block template here, need to update block structure and fields
+    const header = {
+        version: '1.0.0',
+        preHash: prevHash,
+        timestamp: Date.now(),
+        currHash,
+        difficulty: 0, // TODO: difficulty may change
+        nonce: 0, // This will be the value for miner to change and get currect hash
+    }
 
-  // TODO: construct block template here, need to update block structure and fields
-  const header = {
-    version: '1.0.0',
-    // preHash: 'b10b2168c8f76ea759ee627c08d6fd6cb0b58746ef9cc37bfb01ef754babeab',
-    preHash: getBlockHash(lastBlock),
-    timestamp: Date.now(),
-    currHash,
-    difficulty: 0, // TODO: difficulty may change
-    nonce: 0, // This will be the value for miner to change and get currect hash
-  }
+    return {
+        header,
+        body,
+    }
+}
 
-  return {
-    header,
-    body,
-  };
-};
-
+/** 
+ *  Mine transactions into a block
+ *  First make the block template
+ *  Then keep trying new nonces until we get a hash with the proper number of preceding 0s
+ */
 
 const mineBlock = (block) => new Promise((resolve, reject) => {
-  const difficulty = block.header.difficulty;
-  let nonce = Number.MIN_SAFE_INTEGER;
-  let currHash = null;
-  let count = 0;
-  while (nonce <= Number.MAX_SAFE_INTEGER) {
-    block.header.nonce = nonce;
-    currHash = crypto.createHash('sha256').update(JSON.stringify(block)).digest('hex');
-    if (currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
-      // console.log(currHash);
-      return resolve(block);
+    const difficulty = block.header.difficulty;
+    let nonce = Number.MIN_SAFE_INTEGER;
+    let currHash = null;
+    let count = 0;
+    while (nonce <= Number.MAX_SAFE_INTEGER) {
+        block.header.nonce = nonce;
+        currHash = getHash(block);
+        if (currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
+            // console.log(currHash);
+            return resolve(block);
+        }
+        nonce++;
+        if (nonce % 2 ** 51 === 0) console.log(count++);
     }
-    nonce++;
-    if (nonce % 2 ** 51 === 0) console.log(count++);
-  }
-  return reject('failed to find correct nounce');
-});
+    return reject('Failed to find correct nonce!');
+})
 
 module.exports = {
-  getBlockTemplate,
-  mineBlock,
+    getBlockTemplate,
+    mineBlock,
 };

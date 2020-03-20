@@ -1,102 +1,79 @@
 // Created imports
-const pubcrypto = require('../cli-wallet/public-crypto.js');
-const Transaction2 = require('../cli-wallet/transaction2.js');
-const axios = require('axios');
 const fs = require('fs');
+const mining = require('./mining.js');
+const pubcrypto = require('../cli-wallet/public-crypto.js');
+const utils = require('./utils.js');
 
-// Generate starting wallet
-let first = pubcrypto.genkeysMem('passphrase');
+/**
+ * Generate the genesis block for our cryptocurrency
+ * First make a series of transactions
+ * Then use the miner to make a block, and save it to 'genesisBlock.json'
+ */
 
-const NUMWALLETS = 20;
+// Prepare a transaction where each wallet gets $100 using previous transaction id 0
+let previous = [{ previousID: 0, previousIdx: 0 }];
+let name = "first";
 
-// Generate 8 more wallets
-let wallets = [];
-for (let i = 0; i < NUMWALLETS; i++) {
-    wallets.push(pubcrypto.genkeysMem('passphrase' + i.toString()));
-}
-
-// Prepare a transaction where each wallet gets $100 using prevID 0 and the starting wallet
-const passphrase = "passphrase";
-const publicKey = first.publicKey;
-const encryptedKey = first.encryptedKey;
-const previousID = 0;
-const previousIdx = 0;
-const fee = 0.05;
-const amount = 100;
+// Prepare the recipients list for this transaction
+let amount = 100;
 let recipients = [];
-
-const publicKeyBuffer = fs.readFileSync('../cli-wallet/pubkey.pem');
-const address = publicKeyBuffer.toString('hex');
-
-let index;
-for (let i = 0; i < NUMWALLETS; i++) {
-    // address = wallets[i].publicKey;
-    index = i.toString();
+let address, walletName
+for (let i = 0; i < utils.NUMWALLETS; i++) {
+    walletName = 'wallet' + i.toString();
+    address = utils.readPubKey(walletName);
     recipients.push({
-        'index': index,
+        'index': i.toString(),
         'address': address,
         'amount': amount
     })
 }
 
-// console.log(recipients);
+// Make a transactions list, put this transaction as the first one
+let transactions = [];
+let transaction = utils.makeTransaction(name, previous, recipients);
+transactions.push(transaction);
 
-const details = {publicKey, previousID, previousIdx, fee, recipients};
-const isNew = true;
-const args = {details, isNew, passphrase};
-let transaction = new Transaction2(args, encryptedKey);
 
-const trxData = transaction.serializedData();
-try {
-    fs.writeFileSync("../miner/transactions.json", trxData);
-} catch(err) {
-    console.log(err);
+// Make some more transactions, have everyone send the next guy $50
+let nextWalletPubKey;
+for (let j = 0; j < utils.NUMWALLETS; j++) {
+
+    // Get the recipient's public key
+    name = `wallet${j.toString()}`;
+    nextWalletPubKey = utils.readPubKey(`wallet${(j+1)%20}`);
+
+    // Prepare a recipient's list, send 50 bucks to the next and keep 49
+    recipients = [
+        {
+            'index' : 0,
+            'address' : publicKey,
+            'amount' : 49
+        },
+        {
+            'index': 1,
+            'address' : nextWalletPubKey,
+            'amount': 50
+        }
+    ]
+
+    // Make a transaction
+    previousID = transactions[j].id;
+    previous = [{ previousID, previousIdx: 0 }]
+    transactions.push(utils.makeTransaction(name, previous, recipients));
 }
 
 
-axios.post('http://localhost:3001/addTransaction', {trxData
-    }).then((res) => {
-        console.log("Transaction sent to deercoin node! Please wait for confirmation of insertion onto the blockchain");
-    }).catch((err) => {
-        // console.error(err);
-        console.log("Sending transaction failed");
-    });
+// Turn all these transactions into the genesis block
+// Make a wallet for a miner
+utils.makeWallet('miner');
+const minerPublicKey = utils.readPubKey(`miner`);
+const prevHash = pubcrypto.getHash('DEERCOIN');
+const genesisTemplate = mining.getBlockTemplate(minerPublicKey, prevHash, transactions);
+const genesisBlock = mining.mineBlock(genesisTemplate);
+console.log(genesisBlock);
 
 
-
-// Now let each wallet give $10 to wallet
-
-
-
-
-
-
-
-
-
-
-// // Starting amounts of money
-// let money = [];
-// for (let i = 0; i < 8; i++) {
-//     money.push(100);
-// }
-
-
-// Now let each wallet send transactions to each other randomly
-
-// const numTransactions = 100;
-// for (let i = 0; i < numTransactions; i++) {
-    
-//     // Pick a random wallet
-//     // Choose a random amount for that wallet to spend and subtract from the amount that wallet has
-//     let randWallet = Math.floor(Math.random() * 8);
-//     let remaining = money[randWallet];
-//     let fee = 0.05
-//     let randAmount = Math.floor(Math.random() * (remaining - fee));
-//     money[randWallet] = money[randWallet] - fee - randAmount;
-
-//     // 
-
-
-
-// }
+// Make a directory to house the blocks (figure out a db solution later)
+// Save genesisBlock.json in there
+utils.makeDir('blocks');
+utils.writeData('blocks/genesisBlock.json', genesisBlock);

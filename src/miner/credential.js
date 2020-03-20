@@ -1,7 +1,7 @@
 const fs = require('fs');
 const crypto = require('crypto');
 
-const KEYS_DIRECTORY = '../keys';
+const KEYS_DIRECTORY = 'keys';
 const PUBLIC_KEY_PATH = `${KEYS_DIRECTORY}/public.pem`;
 const PRIVATE_KEY_PATH = `${KEYS_DIRECTORY}/private.pem`;
 
