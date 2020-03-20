@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const Transaction = require('../cli-wallet/transaction.js');
-const { broadcast, responseLatestMsg } = require('./p2pServer');
+const { broadcast, responseLatestMsg, newBlockMsg, getPeers, connectToPeers } = require('./p2pServer');
 
 const http_port = process.env.HTTP_PORT || 3001;
 
@@ -74,11 +74,11 @@ const initHttpServer = (chain) => {
     // }).then(function (result) {
     //   insertBlockTransaction(req.body.newBlock);
     // });
-    broadcast(responseLatestMsg());
+    broadcast(newBlockMsg(req.body.newBlock));
     res.send();
   });
   app.get('/peers', (req, res) => {
-    res.send(sockets.map(s => s._socket.remoteAddress + ':' + s._socket.remotePort));
+    res.send(getPeers());
   });
   app.post('/addPeer', (req, res) => {
     connectToPeers([req.body.peer]);

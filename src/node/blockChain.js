@@ -24,10 +24,12 @@ class BlockChain {
   getLatestBlock = () => this.latestBlock;
   getBlockChain = () => this.blockchain;
   getDB = () => db;
+  getMempool = () => this.memPool;
 
   addBlock = (newBlock) => {
     if (newBlock.header.preHash in this.blockchain) {//check to see if this branch exist at all
       if (isValidNewBlock(newBlock, this.blockchain[newBlock.header.preHash].block)) {
+        console.log('adding block');
         const newBlockHash = getBlockHash(newBlock); // TODO
         this.blockchain[newBlock.header.preHash].nextHashes.push(newBlockHash);
         this.blockchain[newBlockHash] = { block: newBlock, nextHashes: [] };
@@ -42,6 +44,15 @@ class BlockChain {
       }
     }
     console.log('new block is invalid');
+  }
+
+  replaceChain = (newChain) => {
+    this.blockchain = newChain;
+    this.latestBlock = this.blockchain[this.blockchain['longestHash']].block;
+  }
+
+  replaceMempool = (newMempool) => {
+    this.memPool = newMempool;
   }
 
   isValidChain = (blockchainToValidate) => {
