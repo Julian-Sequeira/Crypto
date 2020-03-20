@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
 
+import { withGlobalContext } from '../Context/GlobalContext.js';
+
 class Login extends React.Component {
 
     state = {
@@ -27,13 +29,11 @@ class Login extends React.Component {
         const val = await AsyncStorage.getItem(username);
         if (val == password) {
           // TODO: this is double loading the dashboard, find a way to pass params while reseting!!
-          this.props.navigation.navigate('Dashboard', {
-            user: username,
-          });
-          /*this.props.navigation.reset({
+          this.props.global.updateDetails(username);
+          this.props.navigation.reset({
             index: 0,
             routes: [{name: 'Dashboard'}],
-          });*/
+          });
           console.log("hello");
         } else {
           this.setState({ error: 'Invalid Username or Password' });
@@ -139,4 +139,4 @@ const styles = StyleSheet.create({
   });
 
 
-export default Login;
+  export default withGlobalContext(Login);

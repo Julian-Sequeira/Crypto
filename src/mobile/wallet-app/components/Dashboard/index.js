@@ -3,16 +3,13 @@ import { StyleSheet, Text, View, Modal, TouchableOpacity, Alert, TextInput } fro
 
 import TransactionList from './transactionList.js'
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { withGlobalContext } from '../Context/GlobalContext.js';
 
 class Dashboard extends React.Component {
     
     state = {
         user: '',
         balance: '1000',
-        // Send money modal
-        modalVisible: false,
-        // recipient public key
-        sendTo: '',
     }
 
     componentDidMount() {
@@ -24,19 +21,29 @@ class Dashboard extends React.Component {
             ),
         });
         console.log("dashboard mounted");
-        if (typeof(this.props.route.params.user) != 'undefined') {
-            this.setState({ user: this.props.route.params.user })
-            console.log("success");
-        }
+        this.setState({ user: this.props.global.username })
         console.log(this.props.route);
     }
 
-    handlePubKeyChange = sendTo => {
-        this.setState({ sendTo });
+    showTransactionScreen = () => {
+        this.props.navigation.navigate('SendTransaction', {
+            user: this.state.user,
+          }); 
     }
 
-    setModalVisible = visible => {
-        this.setState({modalVisible: visible});
+    showScanScreen = () => {
+        console.log("going to scan screen");
+        this.setModalVisible(false);
+        this.props.navigation.navigate('Scan', {
+            user: this.state.user,
+          }); 
+    }
+
+    showQRCodeScreen = () => {
+        console.log("going to qr code screen");
+        this.props.navigation.navigate('showQRCode', {
+            user: this.state.user,
+          });
     }
 
     goToLogin = () => {
@@ -65,58 +72,21 @@ class Dashboard extends React.Component {
         );
     }
 
-    handleTransaction = () => {
-        
-        Alert.alert(
-            'Transaction',
-            'Money sent',
-            [
-                {
-                    text: 'OK', 
-                    onPress: () => console.log("sent transaction"),
-                },
-            ],
-        );
-    }
-
     render() {
-        const { user, balance, sendTo } = this.state;
+        const { user, balance } = this.state;
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.modal}>
                     <Text style={styles.nameText}>{user}</Text>
                     <Text style={styles.nameText}>Balance: {balance} coins</Text>
-                    <TouchableOpacity style={[styles.buttonContainer, styles.sendButton]} onPress={() => this.setModalVisible(true)}>
+                    <TouchableOpacity style={[styles.buttonContainer, styles.sendButton]} onPress={this.showTransactionScreen}>
                         <Text style={styles.loginText}>Send Coins</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity style={[styles.buttonContainer, styles.sendButton]} onPress={this.showQRCodeScreen}>
+                        <Text style={styles.loginText}>Show QR Code</Text>
+                    </TouchableOpacity>
                 </View>
-                <View>
-                    <Modal
-                        animationType="slide"
-                        transparent={false}
-                        visible={this.state.modalVisible}
-                    >
-                        <View style={[styles.container, styles.modal]}>
-                            <Text style={styles.logo}>Create a Transaction</Text>
-                            <View style={styles.inputView}>
-                                <TextInput
-                                    style={styles.inputText}
-                                    value={sendTo}
-                                    placeholder="Enter Recipient's Public Key"
-                                    placeholderTextColor="#003f5c"
-                                    onChangeText={this.handlePubKeyChange}
-                                />
-                            </View>
-                            <TouchableOpacity style={[styles.buttonContainer, styles.loginButton]} onPress={this.handleTransaction}>
-                                <Text>Send</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.setModalVisible(false)}>
-                                <Text>Go back</Text>
-                            </TouchableOpacity>
-                        </View>
-                        </Modal>
-                    </View>
-                    <TransactionList />
+                <TransactionList />
             </SafeAreaView>
 
         );
@@ -196,4 +166,4 @@ const styles = StyleSheet.create({
       },
   });
 
-export default Dashboard;
+  export default withGlobalContext(Dashboard);
