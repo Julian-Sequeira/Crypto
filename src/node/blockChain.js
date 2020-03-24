@@ -6,12 +6,6 @@ const { getBlockHash } = require('../shared/utils.js');
 class BlockChain {
   constructor() {
     // set up database
-    this.db = new sqlite3.Database(":memory:", (err) => {
-      if (err) {
-        console.log(err.message);
-      }
-      console.log("Connected to the database.");
-    });
     const genesisHash = getBlockHash(genesisBlock);
     this.blockchain = {};
     this.blockchain['genesisHash'] = genesisHash;
