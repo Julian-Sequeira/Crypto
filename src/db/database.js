@@ -189,6 +189,65 @@ class Database{
         });
     }
 
+    getTransaction = (transactionId) => {
+        var collection = db.collection('transactions');
+        var cursor = collection.find({"id":transactionId});
+        return cursor[0];
+    }
+
+    getBlock = (blockHash) => {
+        var block = {};
+        block["header"] = {};
+        block["body"] = [];
+        var collection = db.collection('blocks');
+        var cursor = collection.find({"currHash":blockHash});
+        if(cursor.length < 1){
+            return null
+        }
+
+        block["header"]["preHash"] = cursor[0].preHash;
+        block["header"]["timestamp"] = cursor[0].timestamp;
+        block["header"]["currHash"] = cursor[0].currHash;
+        block["header"]["difficulty"] = cursor[0].difficulty;
+        block["header"]["nonce"] = cursor[0].nonce;
+
+        for(var transactionId = 0;transactionId < block["body"].length;transactionId++){
+            block["body"].push(this.getTransaction(transactionId));
+        }
+
+        return block;
+    }
+
+    getNextHashes = (blockHash) => {
+        var collection = db.collection('blockchain');
+        var cursor = collection.find({"blockhash": blockHash});
+        if(cursor.length < 1){
+            return []
+        }
+
+        return cursor[0].nextHashes;
+    }
+
+    getBlockchain = () => {
+        var blockchain = {}
+        blockchain['genesisHash'] = this.genesisHash;
+        this.genesisBlock = this.getBlock(this.genesisHash);
+        blockchain[this.genesisHash] = { block: this.genesisBlock, nextHashes: this.getNextHashes(this.genesisHash) };
+        var hashesToCheck = []
+        hashesToCheck.push(...this.getNextHashes(this.genesisHash));
+        var toAdd = null;
+        while(true){
+            if(hashesToCheck.length == 0){
+                break;
+            }
+            toAdd = hashesToCheck.shift();
+            blockchain[toAdd] = { block: this.getBlock(toAdd), nextHashes: this.getNextHashes(toAdd) };
+            hashesToCheck.push(...this.getNextHashes(toAdd));
+        }
+
+        return blockchain;
+    }
+
 
 
 }
