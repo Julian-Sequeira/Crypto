@@ -68,7 +68,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
     // Create the first transaction in the block body which is the reward for miner
     const data = {
         publicKey: null,
-        previousID: '0', // all reward transactions have previous ID of 0
+        previousID: 0xFFFFFF, // all reward transactions have previous ID of 0xFFFFFF
         amount: 1, // the reward amount has to be less or equal to 1
         fee: 0,
         address: publicKey.toString('HEX'),
@@ -76,7 +76,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
     const args = {
         data,
         isNew: false,
-        id: 0xFFFFFFFF,
+        id: null,
         signature: null,
     };
     const transaction = new Transaction(args);
@@ -114,7 +114,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
     }
 }
 
-/** 
+/**
  *  Mine transactions into a block
  *  First make the block template
  *  Then keep trying new nonces until we get a hash with the proper number of preceding 0s
