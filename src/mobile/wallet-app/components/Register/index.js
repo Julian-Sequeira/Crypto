@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
+// import { RSA } from 'react-native-rsa-native';
 
 
 class Register extends React.Component {
@@ -45,8 +46,17 @@ class Register extends React.Component {
         console.log(error);
       }
       console.log(this.state.username, this.state.password);
+      const publicKey = "public-key";
+      const privateKey = "private-key";
+      const account = {
+        username: this.state.username,
+        password: this.state.password,
+        publicKey,
+        privateKey,
+      }
       try {
-        await AsyncStorage.setItem(this.state.username, this.state.password);
+        await AsyncStorage.setItem(this.state.username, JSON.stringify(account));
+        console.log("registered");
         this.props.navigation.goBack();
       } catch (error) {
         console.log("error saving data");

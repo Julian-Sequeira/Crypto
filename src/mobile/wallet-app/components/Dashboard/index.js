@@ -9,7 +9,7 @@ class Dashboard extends React.Component {
     
     state = {
         user: '',
-        balance: '1000',
+        balance: '0',
     }
 
     componentDidMount() {

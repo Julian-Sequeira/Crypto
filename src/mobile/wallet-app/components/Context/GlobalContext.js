@@ -6,14 +6,13 @@ const GlobalContext = React.createContext({});
 export class GlobalContextProvider extends React.Component {
 
     state = {
-        test: 'Anees',
         username: null,
         userDetails: null,
         recipient: null,
     }
 
-    updateDetails = ( key ) => {
-        const data = AsyncStorage.getItem(key);
+    updateDetails = async ( key ) => {
+        const data = await AsyncStorage.getItem(key);
         this.setState({ username: key });
         this.setState({ userDetails: data });
     }
