@@ -54,8 +54,7 @@ function makeTransaction(name, previous, recipients) {
     const directory = `wallets/${name}`;
     const publicKey = readPubKey(name);
     const type = "normal";
-    const timestamp = Date.now();
-    const data = {publicKey, previous, fee: FEE, recipients, type, timestamp}
+    const data = {publicKey, previous, fee: FEE, recipients, type}
     const args = {
         data, 
         isNew: true,
