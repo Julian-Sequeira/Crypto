@@ -86,6 +86,19 @@ const initHttpServer = (chain) => {
   });
   app.get('/transactions', (req, res) => res.send(JSON.stringify(blockchain.memPool)));
   // Get a transaction from a wallet or another node
+
+
+  app.get('/availabletransactions', (req, res) => {
+    let at = getAvailableTransactions(req.address);
+    res.send({
+        transactions: at
+    })
+    res.status(200);
+  });
+
+
+
+
   app.post('/addTransaction', (req, res) => {
     // console.log(req.body.trxData);
     // TODO: check if trans is valid
