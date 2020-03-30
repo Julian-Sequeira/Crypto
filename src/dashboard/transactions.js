@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import Tree from 'react-d3-tree';
 import axios from 'axios';
-import crypto from 'crypto';
+import Transaction from './transaction.js';
 
 class Transactions extends Component {
 
@@ -20,12 +19,22 @@ class Transactions extends Component {
     if (transactions !== undefined) {
       this.setState({transactions});
     }
+    // console.log(transactions);
+  }
+
+  getTransactionComps = (transactions) => {
+    const comps = [];
+    transactions.forEach((transaction) => {
+      comps.push(<Transaction transaction={transaction} key={transaction.id} />);
+    })
+    return comps;
   }
 
   render() {
+    const comps = this.getTransactionComps(this.state.transactions);
     return (
       <div className="transactions">
-        {this.state.transactions.toString()}
+        {comps}
       </div>
     );
   }

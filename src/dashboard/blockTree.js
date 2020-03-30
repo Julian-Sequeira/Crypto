@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import Tree from 'react-d3-tree';
 import axios from 'axios';
 import crypto from 'crypto';
+import { shorten } from './utils.js';
+import BlockPage from './blockPage.js';
  
 const myTreeData = [
   {
@@ -52,10 +54,10 @@ function treeDataRec(blockchain, curHash, index){
   const treeData = {
       name: index.toString(),
       attributes: {
-        hash: parentBlockHash.substring(0, 4) + '...' 
-              + parentBlockHash.substring(parentBlockHash.length-4)
+        hash: shorten(parentBlockHash, 4)
       },
-      children: []
+      children: [],
+      hash: parentBlockHash
   }
   blockData.nextHashes.forEach((hash) => {
     const child = treeDataRec(blockchain, hash, index+1);
@@ -74,7 +76,9 @@ class BlockTree extends Component {
 
   state = {
     blockchain: null,
-    treeData: myTreeData
+    treeData: myTreeData,
+    currentBlockHash: null,
+    showOverlay: false
   }
 
   async componentDidMount(){
@@ -87,17 +91,36 @@ class BlockTree extends Component {
     }
     if (blockchain !== undefined) {
       const treeData = blockchainToTreeData(blockchain)
-      this.setState({treeData});
+      this.setState({treeData, blockchain});
     }
   }
 
+  clickHandler = (blockData) => {
+    this.setState({showOverlay: true, currentBlockHash: blockData.hash})
+  }
+
+  hideOverlay = () => {
+    this.setState({ showOverlay: false });
+  }
+
   render() {
+    const { showOverlay, currentBlockHash, blockchain } = this.state;
     return (
       <div className="blockTree">
+        {showOverlay ? 
+          <div className="blockOverlay">
+            <BlockPage block={blockchain[currentBlockHash]} hash={currentBlockHash}/>
+            <button className="closeButton" onClick={this.hideOverlay}>X</button>
+          </div> 
+          :
+          <div />
+        }
         <Tree 
           data={this.state.treeData} 
           translate={{x: 100, y: 200}} 
           nodeSize={{x: 200, y:100}}
+          onClick={this.clickHandler}
+          collapsible={false}
         />
       </div>
     );

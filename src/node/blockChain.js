@@ -19,6 +19,7 @@ class BlockChain {
   getBlockChain = () => this.blockchain;
   getDB = () => db;
   getMempool = () => this.memPool;
+  getBlock = (hash) => this.blockchain[hash];
 
   addBlock = (newBlock) => {
     if (newBlock.header.preHash in this.blockchain) {//check to see if this branch exist at all
