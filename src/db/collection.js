@@ -1,11 +1,21 @@
-
+const genesisBlock = require("../genesisBlock.json");
+const { getBlockHash } = require('../shared/utils.js');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost/Deercoin';
 
+/*
+    const genesisHash = getBlockHash(genesisBlock);
+    this.blockchain = {};
+    this.blockchain['genesisHash'] = genesisHash;
+    this.blockchain[genesisHash] = { block: genesisBlock, nextHashes: [] };
+    this.blockchain['longestHash'] = genesisHash; //stores the leaf node of the longest chain
+    this.latestBlock = genesisBlock;
+*/
 
 MongoClient.connect(url, function (err, client) {
     if (err) throw err;
-    var db = client.db('Deercoin');     
+    var db = client.db('Deercoin');    
+    const genesisHash = getBlockHash(genesisBlock); 
     new Promise(function(resolve, reject) {
 
         //deleting the collections
@@ -29,12 +39,16 @@ MongoClient.connect(url, function (err, client) {
         //creating new collections
         db.collection('blockchain').insertMany([
             {
-                blockhash: "genesis",
-                children: ["521ae34d0f1bd452103724aa8e53e6793da6fc581adeeac3f13a31fb94272437"]
+                blockhash: "genesisHash",
+                nextHashes: [genesisHash]
             },
             {
-                blockhash: "longest",
-                children: ["521ae34d0f1bd452103724aa8e53e6793da6fc581adeeac3f13a31fb94272437"]
+                blockhash: "longestHash",
+                nextHashes: [genesisHash]
+            },
+            {
+                blockhash: "",
+                nextHashes: []
             }
 
         ]);
@@ -45,8 +59,13 @@ MongoClient.connect(url, function (err, client) {
         db.createCollection("blocks", function (err, res) {
             if (err) throw err;
             console.log("blocks collection created!");
+            db.collection('blocks').insertOne({
+                hash: genesisHash,
+                block: genesisBlock
+            });
             return result;
         });
+
 
     }).then(function(result) {
 
@@ -60,9 +79,9 @@ MongoClient.connect(url, function (err, client) {
     }).then(function(result) {
 
         //creating new collections
-        db.createCollection("recipients", function (err, res) {
+        db.createCollection("mempool", function (err, res) {
             if (err) throw err;
-            console.log("recipinets collection created!");
+            console.log("mempool collection created!");
             return result;
         });
 
