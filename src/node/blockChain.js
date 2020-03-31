@@ -1,6 +1,6 @@
 const genesisBlock = require("../genesisBlock.json");
-const memory = require("../db/collection.js");
-const sqlite3 = require("sqlite3").verbose();
+// const memory = require("../db/collection.js");
+// const sqlite3 = require("sqlite3").verbose();
 
 const { getBlockHash } = require('../shared/utils.js');
 

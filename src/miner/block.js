@@ -68,10 +68,9 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
     // Create the first transaction in the block body which is the reward for miner
     const data = {
         publicKey: null,
-        previousID: '0', // all reward transactions have previous ID of 0
-        amount: 1, // the reward amount has to be less or equal to 1
+        previous: [{previousID: 'new coins', previousIdx: 0}], // all reward transactions have previous ID of 0
         fee: 0,
-        address: publicKey.toString('HEX'),
+        recipients: [{index: 0, address: publicKey.toString('HEX'), amount: 1}],
     };
     const args = {
         data,
