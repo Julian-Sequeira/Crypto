@@ -12,18 +12,25 @@ class Transaction extends Component {
     }
   }
 
-  handleTransactionClick = (transaction) => {
-    const { setOverlayComponent } = this.props;
-    const comp = <TransactionPage transaction={transaction} />;
-    setOverlayComponent(comp, transaction.id);
+  getRecipientComps = () => {
+    const { transaction } = this.props;
+    const recipients = transaction.data.recipients;
+    const comps = [];
+    recipients.forEach((recipient) => {
+    const comp = <div className='recipient' key={`${recipient.address}:${recipient.index}`} >- {shorten(recipient.address, 16)} : {recipient.amount}</div>;
+      comps.push(comp);
+    });
+    return comps;
   }
 
   render() {
     const { transaction } = this.props;
-    const recipientString = transaction.data.recipients ? transaction.data.recipients.map(rcpt => `(${shorten(rcpt.address, 6)}, ${rcpt.amount}) `) : '';
+    // const recipientString = transaction.data.recipients ? transaction.data.recipients.map(rcpt => `(${shorten(rcpt.address, 6)}, ${rcpt.amount}) `) : '';
+    const recipients = this.getRecipientComps();
     return (
       <div className="transaction" onClick={this.handleClick}>
-        {shorten(transaction.data.publicKey, 6)} -> [{recipientString}(fee, {transaction.data.fee})]
+        {shorten(transaction.data.publicKey, 16)}
+        {recipients}
       </div>
     );
   }

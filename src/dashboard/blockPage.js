@@ -45,8 +45,9 @@ class BlockPage extends Component {
     const { blockInfo, hash } = this.state;
     const block = blockInfo ? blockInfo.block : null;
     const comps = block ? this.getTransactionComps(block.body) : '';
+    console.log(block);
     return (
-      <div className="block">
+      <div className="blockPage">
         {
           blockInfo === undefined ? `block with hash '${hash}' not found` :
           <div>
