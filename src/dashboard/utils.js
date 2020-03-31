@@ -1,4 +1,7 @@
 function shorten(string, n){
+  if (string == null) {
+    return '';
+  }
   if (string.length <= 2*n) {
     return string;
   }
