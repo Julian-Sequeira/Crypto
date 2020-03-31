@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const Transaction = require("../cli-wallet/transaction.js");
+const { getHash } = require("../shared/utils.js");
 const {
   broadcast,
   responseLatestMsg,
@@ -55,9 +56,15 @@ const initHttpServer = chain => {
   app.post("/addBlock", (req, res) => {
     console.log("got new block");
     // console.log(req.body.newBlock);
-    blockchain.addBlock(req.body.newBlock);
-    broadcast(newBlockMsg(req.body.newBlock));
-    res.send();
+    const isValid = verifyBlock(req.body.newBlock);
+    if (isValid) {
+      blockchain.addBlock(req.body.newBlock);
+      broadcast(newBlockMsg(req.body.newBlock));
+      res.status(200).send({ msg: "Block accepted" });
+    } else {
+      console.log("invalid block, please try again");
+      res.status(400).send({ msg: "Block rejected" });
+    }
   });
   app.get("/peers", (req, res) => {
     res.send(getPeers());
@@ -123,6 +130,39 @@ const initHttpServer = chain => {
   app.listen(http_port, () =>
     console.log("Listening http on port: " + http_port)
   );
+};
+
+const verifyBlock = block => {
+  // validate header
+  const {
+    preHash, // previous block header hash
+    currHash, // current block body hash
+    difficulty // number of zeros required
+  } = block.header;
+  if (!(preHash in blockchain)) {
+    console.log("preHash does not exist in the blockchain");
+    return false;
+  }
+  const bodyHash = getHash(block.body);
+  if (currHash !== bodyHash) {
+    console.log("invalid block transactions body hash");
+    return false;
+  }
+  const blockHash = getHash(block);
+  if (blockHash.substring(0, difficulty) !== "0".repeat(difficulty)) {
+    console.log("invalid nonce");
+    return false;
+  }
+  // validate transactions body
+  for (const transaction of block.body) {
+    const isValid = verifyTransaction(transaction);
+    if (!isValid) {
+      console.log("invalid transaction:", transaction);
+      return false;
+    }
+  }
+  console.log("block verified");
+  return true;
 };
 
 const verifyTransaction = transaction => {

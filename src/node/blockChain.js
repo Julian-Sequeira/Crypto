@@ -1,6 +1,6 @@
 const genesisBlock = require("../genesisBlock.json");
-const memory = require("../db/collection.js");
-const sqlite3 = require("sqlite3").verbose();
+// const memory = require("../db/collection.js");
+// const sqlite3 = require("sqlite3").verbose();
 
 const { getBlockHash } = require('../shared/utils.js');
 
@@ -55,7 +55,7 @@ class BlockChain {
     if (JSON.stringify(blockchainToValidate['genesis']) !== JSON.stringify(genesisBlock)) {
       return false;
     }
-  
+
     var toCheck = [genesisBlock];
     while (toCheck.length > 0) {//loop through every branch
       var blockToCheck = toCheck[0];
