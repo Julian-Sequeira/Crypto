@@ -20,6 +20,15 @@ const initHttpServer = (chain) => {
   app.get('/lastBlock', (req, res) => {
     res.send(blockchain.getLatestBlock());
   });
+  app.get('/block', (req, res) => {
+    const hash = req.query.hash;
+    if (hash === undefined) {
+      return res.send({ block: null, failed: true, msg: 'no hash found in url' });
+    }
+    const block = blockchain.getBlock(hash);
+    const reponse = { block, failed: block === undefined, msg: 'block not found' }
+    res.send(reponse);
+  });
 
   app.get('/getNewBlocks', (req, res) => {
     const blockHash = req.body.hash;

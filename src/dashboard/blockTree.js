@@ -2,48 +2,10 @@ import React, { Component } from 'react';
 import Tree from 'react-d3-tree';
 import axios from 'axios';
 import crypto from 'crypto';
- 
-const myTreeData = [
-  {
-    name: 'Top Level',
-    attributes: {
-      keyA: 'val A',
-      keyB: 'val B',
-      keyC: 'val C',
-    },
-    children: [
-      {
-        name: 'Level 2: A',
-        attributes: {
-          keyA: 'val A',
-          keyB: 'val B',
-          keyC: 'val C',
-        },
-      },
-      {
-        name: 'Level 2: A',
-        attributes: {
-          keyA: 'val A',
-          keyB: 'val B',
-          keyC: 'val C',
-        },
-      },
-    ],
-  },
-];
-
-// function getRandomBlocks(n){
-//   const blocks = [];
-//   for (let i = 0; i < n; i++){
-//     let hash = crypto.SHA1("qwertyuiop" + i).toString();
-//     blocks.push({index: i, data: "TRANSACTION DATA HERE", hash: hash});
-//   }
-//   return blocks;
-// }
-
-function getBlockHash(block) {
-  return crypto.createHash('sha256').update(JSON.stringify(block.header)).digest('HEX');
-}
+import { shorten } from './utils.js';
+import BlockPage from './blockPage.js';
+import _ from 'lodash';
+import { getBlockHash } from '../shared/utils.js';
 
 function treeDataRec(blockchain, curHash, index){
   const blockData = blockchain[curHash];
@@ -52,10 +14,10 @@ function treeDataRec(blockchain, curHash, index){
   const treeData = {
       name: index.toString(),
       attributes: {
-        hash: parentBlockHash.substring(0, 4) + '...' 
-              + parentBlockHash.substring(parentBlockHash.length-4)
+        hash: shorten(parentBlockHash, 4)
       },
-      children: []
+      children: [],
+      hash: parentBlockHash
   }
   blockData.nextHashes.forEach((hash) => {
     const child = treeDataRec(blockchain, hash, index+1);
@@ -74,10 +36,15 @@ class BlockTree extends Component {
 
   state = {
     blockchain: null,
-    treeData: myTreeData
+    treeData: [{name: '0'}]
   }
 
   async componentDidMount(){
+    this.refresh();
+  }
+
+  refresh = async () => {
+    // console.log('refreshing blockchain');
     let blockchain;
     try{
       blockchain = (await axios.get('http://localhost:3001/allBlocks')).data;
@@ -85,10 +52,18 @@ class BlockTree extends Component {
     catch (e) {
       console.log(e);
     }
-    if (blockchain !== undefined) {
+    if (blockchain !== undefined & !_.isEqual(blockchain, this.state.blockchain)) {
       const treeData = blockchainToTreeData(blockchain)
-      this.setState({treeData});
+      this.setState({treeData, blockchain});
     }
+    setTimeout(this.refresh, 5000);
+  }
+
+  clickHandler = (blockData) => {
+    const { setOverlayComponent } = this.props;
+    const { blockchain } = this.state;
+    const comp = <BlockPage block={blockchain[blockData.hash]} hash={blockData.hash} setOverlayComponent={setOverlayComponent} />;
+    setOverlayComponent(comp, blockData.hash);
   }
 
   render() {
@@ -98,6 +73,8 @@ class BlockTree extends Component {
           data={this.state.treeData} 
           translate={{x: 100, y: 200}} 
           nodeSize={{x: 200, y:100}}
+          onClick={this.clickHandler}
+          collapsible={false}
         />
       </div>
     );
