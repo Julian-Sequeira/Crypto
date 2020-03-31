@@ -26,16 +26,16 @@ A node program which mines blocks:
         nonce,
     }
     body: [
-        Transaction: { // miner reward transaction
+        Transaction: { // miner reward transaction (coinbase transaction)
             data: {
                 publicKey: null, // sender is set to null
-                previousID: '0', // all reward transactions have previous ID of 0
+                previousID: 0xFFFFFF, // all reward transactions have previous ID of 0x0xFFFFFF
                 amount: 1, // the reward amount has to be less or equal to 1
                 fee: 0, // this should always be 0
                 address // miner's deercoin address
             },
             isNew: false, // this field must be false, otherwise id and signature will be overwritten
-            id: 0xFFFFFFFF, // miner reward transaction special id
+            id, // miner reward transaction id will be generated on the fly
             signature: null, // signature is set to null
         },
         Transaction,
