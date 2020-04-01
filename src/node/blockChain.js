@@ -84,27 +84,6 @@ class BlockChain {
     return false;
   }
 
-<<<<<<< HEAD
-    /*
-  find the branch(leaf node) that contains the most work in the given blockchain
-  */
-  findThickestBranch = () => {
-    const thickestBranch = genesisBlock;
-    const toCheck = [thickestBranch];
-    while (toCheck.length > 0) {//loop through every branch
-      const blockToCheck = toCheck[0];
-      const ChildrenList = this.blockchain[getBlockHash(blockToCheck)];
-      for (let i = 1; i < ChildrenList.length; i++) {//loop through everychild
-        if (thickestBranch.work < ChildrenList[i].work) {
-          thickestBranch = ChildrenList[i];
-        }
-        toCheck.push(ChildrenList[i]);
-      }
-      //the parent block that was fully checked shall be removed
-      toCheck.shift();
-    }
-    return thickestBranch;
-=======
   /*
     get the list of the longest chain starting with the most recent block
   */
@@ -116,7 +95,6 @@ class BlockChain {
       current_hash = this.blockchain[current_hash].header.preHash;
     } while (current_hash != this.blockchain['genesisHash']);
     return longestChain;
->>>>>>> 8cbb4c9d5b04d8ec3f8fd289f40e257c09ca89e9
   }
 }
 
