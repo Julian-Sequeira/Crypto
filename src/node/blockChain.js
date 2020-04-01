@@ -13,7 +13,7 @@ class BlockChain {
     this.blockchain[genesisHash] = { block: genesisBlock, nextHashes: [] };
     this.blockchain['longestHash'] = genesisHash; //stores the leaf node of the longest chain
     this.latestBlock = genesisBlock;
-    this.memPool = [];//use priority queo
+    this.memPool = []; //use priority queo
   }
 
   getLatestBlock = () => this.latestBlock;
@@ -82,6 +82,19 @@ class BlockChain {
       current_block = this.blockchain[current_block.header.preHash];
     }
     return false;
+  }
+
+  /*
+    get the list of the longest chain starting with the most recent block
+  */
+  findLongestChain = () => {
+    const longestChain = [];
+    let current_hash = this.blockchain['longestHash'];
+    do {
+      longestChain.push(this.blockchain[current_hash]);
+      current_hash = this.blockchain[current_hash].header.preHash;
+    } while (current_hash != this.blockchain['genesisHash']);
+    return longestChain;
   }
 }
 
