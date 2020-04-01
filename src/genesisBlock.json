@@ -1,7 +1,7 @@
 {
   "header": {
     "version": "1.0.0",
-    "prevHash": "6a53086e35b6ebe462e975e3c11f04715dd5be61747fd54c7cfc2ea49e46c77e",
+    "preHash": "6a53086e35b6ebe462e975e3c11f04715dd5be61747fd54c7cfc2ea49e46c77e",
     "timestamp": 1585778291994,
     "currHash": "3295ef76663ab24f15f1ee49fe564add836eeb5a717f455f499ba08acaf6347e",
     "difficulty": 0,

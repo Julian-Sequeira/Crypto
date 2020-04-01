@@ -13,7 +13,7 @@ class BlockChain {
     this.blockchain[genesisHash] = { block: genesisBlock, nextHashes: [] };
     this.blockchain['longestHash'] = genesisHash; //stores the leaf node of the longest chain
     this.latestBlock = genesisBlock;
-    this.memPool = []; //use priority queo
+    this.memPool = {}; 
   }
 
   getLatestBlock = () => this.latestBlock;

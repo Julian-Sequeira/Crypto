@@ -71,6 +71,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
         previous: [{previousID: 'new coins', previousIdx: 0}], // all reward transactions have previous ID of 0
         fee: 0,
         recipients: [{index: 0, address: publicKey.toString('HEX'), amount: 1}],
+        timestamp: Date.now(),
         type: 'miner'
     };
     const args = {
@@ -104,7 +105,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
         preHash: prevHash,
         timestamp: Date.now(),
         currHash,
-        difficulty: 0, // TODO: difficulty may change
+        difficulty: 4, // TODO: difficulty may change
         nonce: 0, // This will be the value for miner to change and get currect hash
     }
 

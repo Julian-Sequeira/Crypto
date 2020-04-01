@@ -5,7 +5,7 @@ function getBlockHash(block) {
 }
 
 function getHash(data) {
-  const hash = crypto.createHash('sha256');
+  const hash = CryptoJS.createHash('sha256');
   hash.update(JSON.stringify(data));
   return hash.digest('hex');
 }

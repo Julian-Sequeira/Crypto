@@ -74,7 +74,7 @@ const initHttpServer = chain => {
     res.send();
   });
   app.get("/transactions", (req, res) =>
-    res.send(JSON.stringify(blockchain.memPool))
+    res.send(JSON.stringify(Object.values(blockchain.memPool)))
   );
   // Get a transaction from a wallet or another node
 
@@ -94,7 +94,7 @@ const initHttpServer = chain => {
     const isValid = verifyTransaction(transaction);
     if (isValid) {
       console.log("got valid transaction");
-      blockchain.memPool.push(transaction);
+      blockchain.memPool[transaction.id] = transaction;
       // console.log(blockchain.memPool);
       res.status(200);
       res.send({ msg: "Transaction received" });
@@ -142,7 +142,7 @@ const verifyBlock = block => {
     currHash, // current block body hash
     difficulty // number of zeros required
   } = block.header;
-  if (!(preHash in blockchain)) {
+  if (!(preHash in blockchain.getBlockChain())) {
     console.log("preHash does not exist in the blockchain");
     return false;
   }
@@ -157,7 +157,10 @@ const verifyBlock = block => {
     return false;
   }
   // validate transactions body
-  for (const transaction of block.body) {
+  for (const transactionData of block.body) {
+    transactionData.isNew = false;
+    const transaction = new Transaction(transactionData);
+    // console.log(transaction);
     const isValid = verifyTransaction(transaction);
     if (!isValid) {
       console.log("invalid transaction:", transaction);
@@ -170,6 +173,10 @@ const verifyBlock = block => {
 
 const verifyTransaction = transaction => {
   // verify the transaction signature
+  if (transaction.data.type === 'miner'){
+    // verify miner
+    return true;
+  }
   isSignatureValid = transaction.verifyTrxSignature();
   if (!isSignatureValid) {
     console.log("transaction signature is invalid");
