@@ -55,6 +55,7 @@ let transaction = utils.makeTransaction(name, previous, recipients);
 console.log(transaction);
 
 utils.writeData('../mobile/wallet-app/assets/transactions/first.json', transaction);
+utils.writeData('../mobile/wallet-app/assets/hexkey.js', address);
 
 
 // Second transaction - send 5 deercoin to wallet 2 and 5 to wallet 3
