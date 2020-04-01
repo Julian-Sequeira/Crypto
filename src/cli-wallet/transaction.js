@@ -11,7 +11,7 @@ class Transaction {
     // args = {
     //     data:{
     //     publicKey, 
-    //     previous: [{ index, previousID, previousIdx }] 
+    //     previous: [{ previousID, previousIdx }] 
     //     fee, 
     //     recipients: [{ index, address, amount }],
     //     type,

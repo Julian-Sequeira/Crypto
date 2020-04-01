@@ -34,12 +34,21 @@ let transaction = utils.makeTransaction(name, previous, recipients);
 transactions.push(transaction);
 
 
+// Send some money (500) to the mobile wallet
+const mobileAddress = utils.readPubKey('mobile');
+recipients = [{index: 0, address: mobileAddress, amount: 500}]
+transaction = utils.makeTransaction(name, previous, recipients);
+transactions.push(transaction);
+
+
+
 // Make some more transactions, have everyone send the next guy $50
-let nextWalletPubKey;
+let publicKey, nextWalletPubKey;
 for (let j = 0; j < utils.NUMWALLETS; j++) {
 
-    // Get the recipient's public key
+    // Get the sender and recipient's public key
     name = `wallet${j.toString()}`;
+    publicKey = utils.readPubKey(name);
     nextWalletPubKey = utils.readPubKey(`wallet${(j+1)%20}`);
 
     // Prepare a recipient's list, send 50 bucks to the next and keep 49

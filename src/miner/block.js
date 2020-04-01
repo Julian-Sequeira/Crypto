@@ -71,6 +71,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
         previous: [{previousID: 'new coins', previousIdx: 0}], // all reward transactions have previous ID of 0
         fee: 0,
         recipients: [{index: 0, address: publicKey.toString('HEX'), amount: 1}],
+        type: 'miner'
     };
     const args = {
         data,
