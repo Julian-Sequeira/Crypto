@@ -13,7 +13,7 @@ class BlockChain {
     this.blockchain[genesisHash] = { block: genesisBlock, nextHashes: [] };
     this.blockchain['longestHash'] = genesisHash; //stores the leaf node of the longest chain
     this.latestBlock = genesisBlock;
-    this.memPool = [];//use priority queo
+    this.memPool = []; //use priority queo
   }
 
   getLatestBlock = () => this.latestBlock;
@@ -84,6 +84,7 @@ class BlockChain {
     return false;
   }
 
+<<<<<<< HEAD
     /*
   find the branch(leaf node) that contains the most work in the given blockchain
   */
@@ -103,6 +104,19 @@ class BlockChain {
       toCheck.shift();
     }
     return thickestBranch;
+=======
+  /*
+    get the list of the longest chain starting with the most recent block
+  */
+  findLongestChain = () => {
+    const longestChain = [];
+    let current_hash = this.blockchain['longestHash'];
+    do {
+      longestChain.push(this.blockchain[current_hash]);
+      current_hash = this.blockchain[current_hash].header.preHash;
+    } while (current_hash != this.blockchain['genesisHash']);
+    return longestChain;
+>>>>>>> 8cbb4c9d5b04d8ec3f8fd289f40e257c09ca89e9
   }
 }
 

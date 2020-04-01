@@ -61,3 +61,43 @@ html, body {
 .blockPage, .transactionPage {
   margin: 20px;
 }
+
+.transactionPage {
+  width: 100%;
+  height: 100%;
+}
+
+.transactionIcon {
+  margin-top: 10%;
+  width: 96%;
+  height: 50%;
+}
+
+.transactionIconFrom, .transactionIconCoins, .transactionIconTo {
+  width: 20%;
+  height: 70%;
+  margin: 3%;
+  float: left;
+  text-align: center;
+  word-wrap: break-word;
+  font-size: large;
+  font-weight: bold;
+}
+
+.transactionIconFrom {
+
+}
+
+.transactionIconCoins {
+}
+
+.transactionIconTo {
+  width: 40%;
+  text-align: right;
+  overflow: auto;
+}
+
+.transactionIconToRec {
+  display: table; 
+  vertical-align: middle;
+}

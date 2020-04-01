@@ -90,7 +90,11 @@ const initHttpServer = (chain) => {
 
 const getTransactions = (address) => {
   const transactions = [];
+<<<<<<< HEAD
   let currBlock = blockchain.findThickestBranch();
+=======
+  let currBlock = blockchain.getLatestBlock();
+>>>>>>> 8cbb4c9d5b04d8ec3f8fd289f40e257c09ca89e9
   let preHash = currBlock.header.preHash;
   while (true) {
     // go through all transactions in currBlock
