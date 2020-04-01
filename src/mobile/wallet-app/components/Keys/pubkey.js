@@ -1,4 +1,4 @@
------BEGIN PUBLIC KEY-----
+let publicKey = `
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtDzbDVstu9F4+jIXZ0IA
 AbeSFfq1jm9lXpeUqh+3Um0YGtv2GYaivsJef3G0b7TkQsqD4peKEdZGFQ6mr6fZ
 WWj3j0qBSvtS60HJbw6KlHaPFFeLEYGFadr01qbxyGO3Is7L9UKY1LgljH5zyXt6
@@ -10,5 +10,9 @@ xfCbXbA+70HhOBt5kRKVNrWDQl7aiRqBTwEHnMiA9l28GXl75+j2Vqr0SyYgqQo4
 ze8of/cYQ4dqPy6QxNWzYQVk0hQaczSX9Za+EtDCVeXhslAQRcWUiaTxcqyabQol
 gWMenoDXiF1zEjbOC4GEViq0T1QUEnfgCB/kLxE36xN+0VXDWfGcwIv/23djQg4j
 bz6RMZBPiCDjWiIlq600etad+a/TC13oAkzOoJUyhlDW3qy/qDkdLgtEGII4JoDS
-6sSC1M7LKS01SNwD6KYIPxECAwEAAQ==
------END PUBLIC KEY-----
+6sSC1M7LKS01SNwD6KYIPxECAwEAAQ==`;
+
+publicKey = publicKey.toString('hex');
+
+export default publicKey;
+

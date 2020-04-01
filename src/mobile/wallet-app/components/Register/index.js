@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
-import pub from '../keys/publicKey.js';
-import priv from '../keys/privateKey.js';
+import priv from '../Keys/privkey.js';
+import pub from '../Keys/pubkey.js';
 
 
 class Register extends React.Component {
@@ -47,8 +47,8 @@ class Register extends React.Component {
         console.log(error);
       }
       console.log(this.state.username, this.state.password);
-      const publicK = "pub";
-      const privateK = "priv";
+      const publicK = pub;
+      const privateK = priv;
       const account = {
         username: this.state.username,
         password: this.state.password,

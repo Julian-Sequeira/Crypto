@@ -3,6 +3,9 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'reac
 
 import { Ionicons } from '@expo/vector-icons';
 import { withGlobalContext } from '../Context/GlobalContext.js';
+import firstTx from '../transactions/first.js';
+import secondTx from '../transactions/second.js';
+import axios from 'axios';
 
 class SendTransaction extends React.Component {
 
@@ -42,6 +45,19 @@ class SendTransaction extends React.Component {
     }
 
     handleTransaction = () => {
+        let result;
+        const body = {
+            trxData: JSON.stringify(firstTx),
+        }
+
+        axios.post(`https://efdac82e.ngrok.io/addTransaction`, body)
+        .then((res) => {
+            result = res;
+            // console.log(res);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
         
         Alert.alert(
             'Transaction',
@@ -49,7 +65,7 @@ class SendTransaction extends React.Component {
             [
                 {
                     text: 'OK', 
-                    onPress: () => console.log("sent transaction"),
+                    onPress: () => console.log("money sent, status: " + result.status),
                 },
             ],
         );

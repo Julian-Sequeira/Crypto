@@ -10,8 +10,12 @@ class Dashboard extends React.Component {
     
     state = {
         user: '',
-        balance: '0',
+        balance: '5',
     }
+
+    /*shouldComponentUpdate(nextProps, nextState) {
+        return this.state.user == '' || this.state.balance == 5;
+    }*/
 
     componentDidMount() {
         const userDetails = JSON.parse(this.props.global.userDetails);
@@ -24,9 +28,10 @@ class Dashboard extends React.Component {
             address,
         }
         console.log("from dashboard: " + userDetails.publicKey);
-        axios.post(`http://localhost:3001/getBalance`, body)
+        axios.post(`https://efdac82e.ngrok.io/getBalance`, body)
         .then((res) => {
-            const balance = res.data;
+            const balance = res.data.balance;
+            console.log("current balance: " + balance);
             this.setState({ balance });
         })
         .catch((err) => {

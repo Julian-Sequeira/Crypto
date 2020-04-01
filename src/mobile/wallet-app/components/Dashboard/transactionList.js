@@ -37,11 +37,12 @@ class TransactionList extends React.Component {
           address: userDetails.publicKey,
         }
         console.log("public key: " + userDetails.publicKey);
-        axios.post(`http://localhost:3001/getTransactions`, body)
+        axios.post(`https://efdac82e.ngrok.io/getTransactions`, body)
         .then((res) => {
-            const data = res.data.transactions;
-            console.log(data);
-            this.setState({ data });
+            // res.data.transactions.id = 1;
+            const result = res.data.transactions;
+            console.log("transaction data(result): " + JSON.stringify(result));
+            this.setState({ data: result });
         })
         .catch((err) => {
           console.log(err);
