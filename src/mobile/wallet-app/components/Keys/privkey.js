@@ -1,4 +1,4 @@
------BEGIN ENCRYPTED PRIVATE KEY-----
+let privateKey = `
 MIIJrTBXBgkqhkiG9w0BBQ0wSjApBgkqhkiG9w0BBQwwHAQIvER3tgRDN4gCAggA
 MAwGCCqGSIb3DQIJBQAwHQYJYIZIAWUDBAEqBBBATMwyVnAJHehfKK9LBS1cBIIJ
 UDJYV3PBjgwWqJOcyiXjJkxWjaVpuTIph+yc9Z3MPceOEpMvdSeMOjp88w7nSGO4
@@ -50,5 +50,8 @@ OD/tSZqFUfOZAtd6hMf+gH33aos/A8U2nOymrSzxia0jybSq7vtPSr1S33nY8jhg
 Es/qLdBDMeLlW5ht5J5kW8frfZ0mvRKUdjHW5oFwCEXqh6vby/I73iXJ3raRfoeJ
 QIx8fMoP55ZShf0yjui0zB6HD3fCpnx14lHxkQ0nVkpkQhyoAtYixF6VEYix87Gj
 ai9xS+WGVBONSvgYkAQV4maOkWrgMRB42CHBzzUTG/qxwchSWy0k9oet2KCCElKn
-2aGydXgYOJtSFnqhbJQZLCuXxbobeOIHZV86X9K/j0ka
------END ENCRYPTED PRIVATE KEY-----
+2aGydXgYOJtSFnqhbJQZLCuXxbobeOIHZV86X9K/j0ka`;
+
+privateKey = privateKey.toString('hex');
+
+export default privateKey;

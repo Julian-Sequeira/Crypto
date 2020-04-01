@@ -10,29 +10,14 @@ class Dashboard extends React.Component {
     
     state = {
         user: '',
-        balance: '0',
+        balance: '5',
     }
 
-    componentDidMount() {
-        const userDetails = JSON.parse(this.props.global.userDetails);
-        if (userDetails === null) {
-            console.log("user details are null");
-            return;
-        }
-        const address = userDetails.publicKey;
-        const body = {
-            address,
-        }
-        console.log("from dashboard: " + userDetails.publicKey);
-        axios.post(`http://localhost:3001/getBalance`, body)
-        .then((res) => {
-            const balance = res.data;
-            this.setState({ balance });
-        })
-        .catch((err) => {
-            console.log(err);
-        })
+    /*shouldComponentUpdate(nextProps, nextState) {
+        return this.state.user == '' || this.state.balance == 5;
+    }*/
 
+    componentDidMount() {
         this.props.navigation.setOptions({
             headerRight: () => (
                 <TouchableOpacity>
@@ -43,6 +28,25 @@ class Dashboard extends React.Component {
         console.log("dashboard mounted");
         this.setState({ user: this.props.global.username })
         console.log(this.props.route);
+        const userDetails = JSON.parse(this.props.global.userDetails);
+        if (userDetails === null) {
+            console.log("user details are null");
+            return;
+        }
+        const address = userDetails.publicKey;
+        const body = {
+            address,
+        }
+        console.log("from dashboard: " + userDetails.publicKey);
+        axios.post(`https://efdac82e.ngrok.io/getBalance`, body)
+        .then((res) => {
+            const balance = res.data.balance;
+            console.log("current balance: " + balance);
+            this.setState({ balance });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
     }
 
     showTransactionScreen = () => {
