@@ -76,7 +76,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
     const args = {
         data,
         isNew: false,
-        id: 0xFFFFFFFF,
+        id: null,
         signature: null,
     };
     const transaction = new Transaction(args);
@@ -114,7 +114,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
     }
 }
 
-/** 
+/**
  *  Mine transactions into a block
  *  First make the block template
  *  Then keep trying new nonces until we get a hash with the proper number of preceding 0s

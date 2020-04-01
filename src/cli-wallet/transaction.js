@@ -16,7 +16,7 @@ class Transaction {
     //     recipients: [{ index, address, amount }],
     //     type,
     //     timestamp
-    // },       
+    // },
     //     id: transaction ID (not needed if new transaction),
     //     signature: transaction signature (not needed if new transaction),
     //     isNew: boolean to indicate new transaction or not,
@@ -24,15 +24,15 @@ class Transaction {
     //     directory: folder where the encrypted private key is stored
     // }
 
-    constructor(args) { 
+    constructor(args) {
 
         // This object will be hashed to produce the transaction ID and then signature
         // If anything here is different, the ID and signatures will also be different
         this.data = args.data;
-        this.data.timestamp = Date.now();
 
         // Create the transaction ID and signature if this is a new transaction
         if (args.isNew) {
+            this.data.timestamp = Date.now();
             const serial = this.serialize(this.data);
             this.id = this.calculateID();
             // console.log(args.directory);
@@ -40,12 +40,13 @@ class Transaction {
 
         // Otherwise, we're just dumping existing transaction data into a new object
         } else {
-            this.id = args.id;
+            // only coinbase transactions have id of null
+            this.id = args.id === null ? this.calculateID() : args.id;
             this.signature = args.signature;
-        }       
+        }
     }
 
-    // Modularizing this so that if we use a different serialization 
+    // Modularizing this so that if we use a different serialization
     // strategy in the future, it can be changed here
     serialize(jsObject) {
         return JSON.stringify(jsObject);
@@ -81,7 +82,7 @@ class Transaction {
     }
 
     //-------------------------------------------------
-    
+
     checkSingleTransaction(address, transactionIDs){
         for(var transaction = 0; transaction<transactionIDs.length; transaction++){
             if (this.addressInTransaction(transactionIDs[transaction],address)){
@@ -211,17 +212,17 @@ class Transaction {
 module.exports = Transaction;
 
 /**
- * - transaction ID 
+ * - transaction ID
  *      - SHA256(JSON.stringify({previousID, pubkey, address, amount, processing fee}))
  * - previous transaction ID (1 for now)
  * - public key of owner
  * - signature
  *      - SIGN(JSON.stringify({previousID, pubkey, address, amount, processing fee}))
  * - hashed address of recipient (1 for now)
- * 
+ *
  * - amount
  * - processing fee
- * 
+ *
  * A P2P Node needs to:
  *      1. Go check the previous transaction id in the blockchain
  *      2. Make sure the public key provided matches the address of the recipient in previous transaction

@@ -36,7 +36,7 @@ class TransactionPage extends Component {
         &nbsp;&nbsp;
         <img src="/dcoin.png" height="50" width="50"></img>
         &nbsp;&nbsp;
-        {shorten(recipient.address,10)}
+        {shorten(recipient.address,8)}
       </div>;
       comps.push(comp);
     });

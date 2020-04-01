@@ -1,6 +1,6 @@
 const initHttpServer = require('./node/httpServer');
 const { initP2PServer } = require('./node/p2pServer');
-const BlockChain = require('./node/blockChain');
+const BlockChain = require('./node/blockChain').BlockChain;
 const os = require('os');
 const ngrok = require('ngrok');
 

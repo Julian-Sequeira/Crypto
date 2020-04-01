@@ -122,4 +122,4 @@ const isValidNewBlock = (newBlock, previousBlock) => {
 
 
 
-module.exports = BlockChain;
+module.exports = { BlockChain, isValidNewBlock };

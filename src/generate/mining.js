@@ -20,7 +20,7 @@ function getBlockTemplate(publicKey, prevHash, transactions) {
     const args = {
         data,
         isNew: false,
-        id: 0xFFFFFFFF,
+        id: null,
         signature: null,
     };
     const transaction = new Transaction(args);
