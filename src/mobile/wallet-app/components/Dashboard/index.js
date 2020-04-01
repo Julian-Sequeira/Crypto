@@ -18,6 +18,16 @@ class Dashboard extends React.Component {
     }*/
 
     componentDidMount() {
+        this.props.navigation.setOptions({
+            headerRight: () => (
+                <TouchableOpacity>
+                    <Text style={styles.headerRight} onPress={this.signOut}>Sign Out</Text>
+                </TouchableOpacity>
+            ),
+        });
+        console.log("dashboard mounted");
+        this.setState({ user: this.props.global.username })
+        console.log(this.props.route);
         const userDetails = JSON.parse(this.props.global.userDetails);
         if (userDetails === null) {
             console.log("user details are null");
@@ -36,18 +46,7 @@ class Dashboard extends React.Component {
         })
         .catch((err) => {
             console.log(err);
-        })
-
-        this.props.navigation.setOptions({
-            headerRight: () => (
-                <TouchableOpacity>
-                    <Text style={styles.headerRight} onPress={this.signOut}>Sign Out</Text>
-                </TouchableOpacity>
-            ),
         });
-        console.log("dashboard mounted");
-        this.setState({ user: this.props.global.username })
-        console.log(this.props.route);
     }
 
     showTransactionScreen = () => {
