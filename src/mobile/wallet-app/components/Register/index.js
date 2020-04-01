@@ -1,5 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, AsyncStorage } from 'react-native';
+import pub from '../keys/publicKey.js';
+import priv from '../keys/privateKey.js';
 
 
 class Register extends React.Component {
@@ -23,7 +25,7 @@ class Register extends React.Component {
       this.setState({ confirmedPassword });
     }
 
-    handleSubmit = () => {
+    handleSubmit = () => {  
       const { password, confirmedPassword } = this.state;
       if (password == confirmedPassword) {
         this.storeUserInformation();
@@ -45,8 +47,17 @@ class Register extends React.Component {
         console.log(error);
       }
       console.log(this.state.username, this.state.password);
+      const publicK = "pub";
+      const privateK = "priv";
+      const account = {
+        username: this.state.username,
+        password: this.state.password,
+        publicKey: publicK,
+        privateKey: privateK,
+      }
       try {
-        await AsyncStorage.setItem(this.state.username, this.state.password);
+        await AsyncStorage.setItem(this.state.username, JSON.stringify(account));
+        console.log("registered");
         this.props.navigation.goBack();
       } catch (error) {
         console.log("error saving data");

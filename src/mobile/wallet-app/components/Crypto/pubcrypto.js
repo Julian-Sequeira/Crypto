@@ -1,15 +1,16 @@
-const crypto = require('crypto');
+//const crypto = require('crypto');
+import { generateKeyPairSync } from "react-native-crypto-js";
 
 /**
  * Generate public/private keys
  * Returned as an object: {publicKey: ..., privatKey: ...}
  */ 
 
-function genkeys(passphrase, dir) {
+export default function genkeys(passphrase) {
 
     // console.log(dir);
 
-    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    const { publicKey, privateKey } = generateKeyPairSync('rsa', {
         modulusLength: 4096,
         publicKeyEncoding: {
             type: 'spki',
@@ -77,5 +78,5 @@ function getHash(data) {
     return hash.digest('hex');
 }
 
-
-module.exports = { genkeys, getHash, createSignature, verifySignature};
+// export { genkeys, getHash, createSignature, verifySignature }
+// module.exports = { genkeys, getHash, createSignature, verifySignature};

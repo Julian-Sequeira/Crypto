@@ -4,48 +4,8 @@ import axios from 'axios';
 import crypto from 'crypto';
 import { shorten } from './utils.js';
 import BlockPage from './blockPage.js';
- 
-const myTreeData = [
-  {
-    name: 'Top Level',
-    attributes: {
-      keyA: 'val A',
-      keyB: 'val B',
-      keyC: 'val C',
-    },
-    children: [
-      {
-        name: 'Level 2: A',
-        attributes: {
-          keyA: 'val A',
-          keyB: 'val B',
-          keyC: 'val C',
-        },
-      },
-      {
-        name: 'Level 2: A',
-        attributes: {
-          keyA: 'val A',
-          keyB: 'val B',
-          keyC: 'val C',
-        },
-      },
-    ],
-  },
-];
-
-// function getRandomBlocks(n){
-//   const blocks = [];
-//   for (let i = 0; i < n; i++){
-//     let hash = crypto.SHA1("qwertyuiop" + i).toString();
-//     blocks.push({index: i, data: "TRANSACTION DATA HERE", hash: hash});
-//   }
-//   return blocks;
-// }
-
-function getBlockHash(block) {
-  return crypto.createHash('sha256').update(JSON.stringify(block.header)).digest('HEX');
-}
+import _ from 'lodash';
+import { getBlockHash } from '../shared/utils.js';
 
 function treeDataRec(blockchain, curHash, index){
   const blockData = blockchain[curHash];
@@ -76,12 +36,15 @@ class BlockTree extends Component {
 
   state = {
     blockchain: null,
-    treeData: myTreeData,
-    currentBlockHash: null,
-    showOverlay: false
+    treeData: [{name: '0'}]
   }
 
   async componentDidMount(){
+    this.refresh();
+  }
+
+  refresh = async () => {
+    // console.log('refreshing blockchain');
     let blockchain;
     try{
       blockchain = (await axios.get('http://localhost:3001/allBlocks')).data;
@@ -89,32 +52,23 @@ class BlockTree extends Component {
     catch (e) {
       console.log(e);
     }
-    if (blockchain !== undefined) {
+    if (blockchain !== undefined & !_.isEqual(blockchain, this.state.blockchain)) {
       const treeData = blockchainToTreeData(blockchain)
       this.setState({treeData, blockchain});
     }
+    setTimeout(this.refresh, 5000);
   }
 
   clickHandler = (blockData) => {
-    this.setState({showOverlay: true, currentBlockHash: blockData.hash})
-  }
-
-  hideOverlay = () => {
-    this.setState({ showOverlay: false });
+    const { setOverlayComponent } = this.props;
+    const { blockchain } = this.state;
+    const comp = <BlockPage block={blockchain[blockData.hash]} hash={blockData.hash} setOverlayComponent={setOverlayComponent} />;
+    setOverlayComponent(comp, blockData.hash);
   }
 
   render() {
-    const { showOverlay, currentBlockHash, blockchain } = this.state;
     return (
       <div className="blockTree">
-        {showOverlay ? 
-          <div className="blockOverlay">
-            <BlockPage block={blockchain[currentBlockHash]} hash={currentBlockHash}/>
-            <button className="closeButton" onClick={this.hideOverlay}>X</button>
-          </div> 
-          :
-          <div />
-        }
         <Tree 
           data={this.state.treeData} 
           translate={{x: 100, y: 200}} 

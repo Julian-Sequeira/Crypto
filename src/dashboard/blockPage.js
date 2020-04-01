@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import Transaction from './transaction.js';
 
 class BlockPage extends Component {
 
@@ -29,18 +30,36 @@ class BlockPage extends Component {
       }
     }
   }
+
+  getTransactionComps = (transactions) => {
+    const { setOverlayComponent } = this.props;
+    const comps = [];
+    transactions.forEach((transaction) => {
+      comps.push(<Transaction transaction={transaction} key={transaction.id} setOverlayComponent={setOverlayComponent} />);
+      comps.push(<br key={transaction.id + 'br'} />);
+    })
+    return comps;
+  }
   
   render() {
     const { blockInfo, hash } = this.state;
     const block = blockInfo ? blockInfo.block : null;
+    const comps = block ? this.getTransactionComps(block.body) : '';
+    console.log(block);
     return (
-      <div className="block">
+      <div className="blockPage">
         {
           blockInfo === undefined ? `block with hash '${hash}' not found` :
           <div>
-            Block hash: {hash}
-            <br />
-            timestamp: {block.header.timestamp}
+            block hash: {hash} <br /><br />
+            version: {block.header.version} <br />
+            previous block's hash: {block.header.preHash} <br />
+            timestamp: {block.header.timestamp} <br />
+            hash of transactions: {block.header.currHash} <br />
+            difficulty: {block.header.difficulty} <br />
+            nonce: {block.header.nonce} <br /><br /><br />
+            transactions: <br /><br />
+            {comps}
           </div>
         }
       </div>

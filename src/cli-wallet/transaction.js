@@ -10,9 +10,9 @@ class Transaction {
 
     // args = {
     //     data:{
-    //     publicKey,
-    //     previous: [{ index, previousID, previousIdx }]
-    //     fee,
+    //     publicKey, 
+    //     previous: [{ previousID, previousIdx }] 
+    //     fee, 
     //     recipients: [{ index, address, amount }],
     //     type,
     //     timestamp
@@ -29,10 +29,10 @@ class Transaction {
         // This object will be hashed to produce the transaction ID and then signature
         // If anything here is different, the ID and signatures will also be different
         this.data = args.data;
-        this.data.timestamp = Date.now();
 
         // Create the transaction ID and signature if this is a new transaction
         if (args.isNew) {
+            this.data.timestamp = Date.now();
             const serial = this.serialize(this.data);
             this.id = this.calculateID();
             // console.log(args.directory);

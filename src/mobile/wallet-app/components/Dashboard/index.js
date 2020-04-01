@@ -4,15 +4,35 @@ import { StyleSheet, Text, View, Modal, TouchableOpacity, Alert, TextInput } fro
 import TransactionList from './transactionList.js'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { withGlobalContext } from '../Context/GlobalContext.js';
+import axios from 'axios';
 
 class Dashboard extends React.Component {
     
     state = {
         user: '',
-        balance: '1000',
+        balance: '0',
     }
 
     componentDidMount() {
+        const userDetails = JSON.parse(this.props.global.userDetails);
+        if (userDetails === null) {
+            console.log("user details are null");
+            return;
+        }
+        const address = userDetails.publicKey;
+        const body = {
+            address,
+        }
+        console.log("from dashboard: " + userDetails.publicKey);
+        axios.post(`http://localhost:3001/getBalance`, body)
+        .then((res) => {
+            const balance = res.data;
+            this.setState({ balance });
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+
         this.props.navigation.setOptions({
             headerRight: () => (
                 <TouchableOpacity>

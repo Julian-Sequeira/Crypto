@@ -87,11 +87,13 @@ const initHttpServer = chain => {
   });
 
   app.post("/addTransaction", (req, res) => {
-    // console.log(req.body.trxData);
-    console.log("got transactions");
-    const transaction = new Transaction(JSON.parse(req.body.trxData));
+    const transactionData = JSON.parse(req.body.trxData);
+    transactionData.isNew = false;
+    const transaction = new Transaction(transactionData);
+    console.log(transaction);
     const isValid = verifyTransaction(transaction);
     if (isValid) {
+      console.log("got valid transaction");
       blockchain.memPool.push(transaction);
       // console.log(blockchain.memPool);
       res.status(200);
@@ -102,6 +104,7 @@ const initHttpServer = chain => {
       res.send({ msg: "Transaction rejected" });
     }
   });
+
   app.post("/getBalance", (req, res) => {
     // get balance of a wallet user
     let balance = 0;
@@ -208,31 +211,31 @@ const verifyTransaction = transaction => {
 const getAvailableTransactions = address => {
   const usedTransactions = [];
   const availableTransactions = [];
-  let currBlock = findThickestBranch(blockchain);
+  let currBlock = blockchain.getLatestBlock();
   let preHash = currBlock.header.preHash;
   while (true) {
     // go through all transactions in currBlock
     currBlock.body.forEach(transaction => {
       // sending money
-      if (transaction.details.publicKey === address) {
+      if (transaction.data.publicKey === address) {
         // usedTransactions.push(transaction.details.previousID);
-        transaction.details.previous.forEach(t =>
+        transaction.data.previous.forEach(t =>
           usedTransactions.push(t.previousID)
         );
-        transaction.details.recipients.forEach(recipient => {
+        transaction.data.recipients.forEach(recipient => {
           if (recipient.address === address) {
             availableTransactions.push({
-              id: transaction.details.id,
+              id: transaction.id,
               amount: recipient.amount
             });
           }
         });
       } else {
-        transaction.details.recipients.forEach(recipient => {
+        transaction.data.recipients.forEach(recipient => {
           // receiving money
           if (recipient.address === address) {
             availableTransactions.push({
-              id: transaction.details.id,
+              id: transaction.id,
               amount: recipient.amount
             });
           }
@@ -284,200 +287,6 @@ const getTransactions = address => {
     preHash = currBlock.preHash;
   }
   return transactions;
-};
-
-/*
-insert new block into database
-*/
-var insertBlock = block => {
-  return new Promise(function(resolve, reject) {
-    let sql =
-      "INSERT INTO block(blockhash, prehash, difficulty, nonce, timestamp) ";
-    sql += "VALUES(?, ?, ?, ?, ?);";
-    blockchain.db.get(
-      sql,
-      [
-        block.header.currHash,
-        block.header.preHash,
-        block.header.difficulty,
-        block.header.nonce,
-        block.header.timestamp
-      ],
-      (err, row) => {
-        if (err) {
-          // error
-          // res.status(404);
-          // var result = err.message;
-          // res.json(result);
-          reject(err.message);
-        } else {
-          resolve(1);
-        }
-      }
-    );
-  });
-};
-
-/*
-insert new blockchain data into database
-*/
-var insertBlockchain = block => {
-  return new Promise(function(resolve, reject) {
-    let sql = "INSERT INTO blockchain(blockhash, child) ";
-    sql += "VALUES(?, ?);";
-    blockchain.db.get(
-      sql,
-      [block.header.currHash, block.header.preHash],
-      (err, row) => {
-        if (err) {
-          // error
-          res.status(404);
-          var result = err.message;
-          res.json(result);
-          reject(err.message);
-        } else {
-          resolve(1);
-        }
-      }
-    );
-  });
-};
-
-/*
-insert new transactions from new blockchain
-*/
-var insertAllTransactions = block => {
-  return new Promise(function(resolve, reject) {
-    let sql =
-      "INSERT INTO transaction(id, signature, publicKey, previousID, previousIdx, fee) ";
-    sql += "VALUES(?, ?, ?, ?, ?, ?);";
-    if (block.body.length == 0) {
-      //in case there are no transactions
-      reject();
-    }
-
-    //insert all transactions into database
-    for (var i = 0; i < block.body.length; i++) {
-      blockchain.db.get(
-        sql,
-        [
-          block.body[i].id,
-          block.body[i].signature,
-          block.body[i].details.publicKey,
-          block.body[i].details.previousID,
-          block.body[i].details.previousIdx,
-          block.body[i].details.fee
-        ],
-        (err, row) => {
-          if (err) {
-            // error
-            res.status(404);
-            var result = err.message;
-            res.json(result);
-            reject(err.message);
-          } else {
-            insertAllRecipients(block.body[i])
-              .then(function(result) {
-                insertTransactionRecipient(block.body[i]).catch(reject(0));
-              })
-              .catch(reject(0));
-            resolve(1);
-          }
-        }
-      );
-    }
-  });
-};
-
-/*
-insert new block transaction
-specify which transaction belongs to which block
-*/
-var insertBlockTransaction = block => {
-  return new Promise(function(resolve, reject) {
-    let sql = "INSERT INTO blocktransaction(blockhash, id)";
-    sql += "VALUES(?, ?);";
-    //insert all transactions into database
-    for (var i = 0; i < block.body.length; i++) {
-      blockchain.db.get(
-        sql,
-        [block.header.currHash, block.body[i].id],
-        (err, row) => {
-          if (err) {
-            // error
-            res.status(404);
-            var result = err.message;
-            res.json(result);
-            reject(err.message);
-          } else {
-            resolve(1);
-          }
-        }
-      );
-    }
-  });
-};
-
-/*
-insert new transactions from new blockchain
-*/
-var insertAllRecipients = transaction => {
-  return new Promise(function(resolve, reject) {
-    let sql = "INSERT INTO recipient(index, address, amount) ";
-    sql += "VALUES(?, ?, ?);";
-    if (transaction.details.recipients == 0) {
-      //in case there are no transactions
-      reject();
-    }
-
-    //insert all transactions into database
-    var recipient;
-    for (var i = 0; i < transaction.details.recipients.length; i++) {
-      recipient = transaction.details.recipients[i];
-      blockchain.db.get(
-        sql,
-        [recipient.index, recipient.address, recipient.amount],
-        (err, row) => {
-          if (err) {
-            // error
-            res.status(404);
-            var result = err.message;
-            res.json(result);
-            reject(err.message);
-          } else {
-            resolve(1);
-          }
-        }
-      );
-    }
-  });
-};
-
-/*
-insert new transaction recipient
-specify which recipient belongs to which transaction
-*/
-var insertTransactionRecipient = transaction => {
-  return new Promise(function(resolve, reject) {
-    let sql = "INSERT INTO transactionrecipient(id, recipientID)";
-    sql += "VALUES(?, ?);";
-    //insert all transactions into database
-    var recipient;
-    for (var i = 0; i < transaction.details.recipients.length; i++) {
-      recipient = transaction.details.recipients[i];
-      blockchain.db.get(sql, [transaction.id, recipient.index], (err, row) => {
-        if (err) {
-          // error
-          res.status(404);
-          var result = err.message;
-          res.json(result);
-          reject(err.message);
-        } else {
-          resolve(1);
-        }
-      });
-    }
-  });
 };
 
 module.exports = initHttpServer;

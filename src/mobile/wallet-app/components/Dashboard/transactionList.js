@@ -4,8 +4,11 @@ import { StyleSheet, Text, View, FlatList } from 'react-native';
 import Data from './data.js';
 import Constants from 'expo-constants';
 import { ListItem } from 'react-native-elements';
+import { withGlobalContext } from '../Context/GlobalContext.js';
 
-export default class TransactionList extends React.Component {
+import axios from 'axios';
+
+class TransactionList extends React.Component {
 
     state = {
         data: Data,
@@ -24,7 +27,25 @@ export default class TransactionList extends React.Component {
 
     requestTransactionHistory = () => {
         this.setState( { refreshing: false } );
-        // TODO: Fetch data
+        const userDetails = JSON.parse(this.props.global.userDetails);
+        if (userDetails === null) {
+          console.log("user details are null");
+          return;
+      }
+        console.log("transaction list user details: " + userDetails);
+        const body = {
+          address: userDetails.publicKey,
+        }
+        console.log("public key: " + userDetails.publicKey);
+        axios.post(`http://localhost:3001/getTransactions`, body)
+        .then((res) => {
+            const data = res.data.transactions;
+            console.log(data);
+            this.setState({ data });
+        })
+        .catch((err) => {
+          console.log(err);
+        })
     }
 
     renderSeparator = () => {
@@ -40,8 +61,6 @@ export default class TransactionList extends React.Component {
         );
       };
 
-    // TODO: add list refresh
-
     render() {
         const { data, refreshing } = this.state;
 
@@ -51,7 +70,9 @@ export default class TransactionList extends React.Component {
                     data={data}
                     renderItem={({ item }) => (
                         <ListItem
-                            title={item.title}
+                            title={item.sender}
+                            subtitle={item.date}
+                            rightTitle={item.amount}
                             bottomDivider
                         />
                     )}
@@ -82,3 +103,5 @@ const styles = StyleSheet.create({
       fontSize: 20,
     },
   });
+
+  export default withGlobalContext(TransactionList);

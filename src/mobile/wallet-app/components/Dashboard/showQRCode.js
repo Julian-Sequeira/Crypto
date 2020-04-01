@@ -1,17 +1,20 @@
 import React from 'react';
-import { StyleSheet, Text, View, Share, TouchableOpacity, AsyncStorage } from 'react-native';
+import { StyleSheet, View, Share, TouchableOpacity } from 'react-native';
 
 import { QRCode as CustomQRCode } from 'react-native-custom-qr-codes-expo';
 import { Ionicons } from '@expo/vector-icons';
+import { withGlobalContext } from '../Context/GlobalContext.js';
 
 class showQRCode extends React.Component {
     
     state = {
-        // TODO: update text
-        text: 'Anees',
+        text: 't',
     }
 
     componentDidMount() {
+        const userDetails = JSON.parse(this.props.global.userDetails);
+        this.setState({ text: userDetails.publicKey });
+
         this.props.navigation.setOptions({
             headerRight: () => (
                 <TouchableOpacity onPress={this.onShare} style={styles.headerRight}>
@@ -52,4 +55,4 @@ const styles = StyleSheet.create({
     },
     })
 
-export default showQRCode;
+export default withGlobalContext(showQRCode);

@@ -27,14 +27,15 @@ class Login extends React.Component {
       try {
         const {username, password} = this.state;
         const val = await AsyncStorage.getItem(username);
-        if (val == password) {
-          // TODO: this is double loading the dashboard, find a way to pass params while reseting!!
+        console.log("user details upson login : " + val);
+        const userDetails = JSON.parse(val);
+        const compareTo = userDetails.password;
+        if (compareTo === password) {
           this.props.global.updateDetails(username);
           this.props.navigation.reset({
             index: 0,
             routes: [{name: 'Dashboard'}],
           });
-          console.log("hello");
         } else {
           this.setState({ error: 'Invalid Username or Password' });
           console.log("Invalid password");

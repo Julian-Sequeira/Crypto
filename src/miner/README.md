@@ -29,7 +29,7 @@ A node program which mines blocks:
         Transaction: { // miner reward transaction (coinbase transaction)
             data: {
                 publicKey: null, // sender is set to null
-                previousID: 0xFFFFFF, // all reward transactions have previous ID of 0x0xFFFFFF
+                previousID: 0xFFFFFF, // all reward transactions have previous ID of 0xFFFFFF
                 amount: 1, // the reward amount has to be less or equal to 1
                 fee: 0, // this should always be 0
                 address // miner's deercoin address

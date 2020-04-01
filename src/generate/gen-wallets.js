@@ -15,3 +15,5 @@ for (let i = 0; i < utils.NUMWALLETS; i++) {
     utils.makeWallet(name);
     console.log(`Generated ${name}`);
 }
+
+utils.makeWallet('mobile');
