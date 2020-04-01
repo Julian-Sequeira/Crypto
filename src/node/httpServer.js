@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const Transaction = require('../cli-wallet/transaction.js');
-const { broadcast, responseLatestMsg, newBlockMsg, getPeers, connectToPeers } = require('./p2pServer');
+const { broadcast, responseLatestMsg, newBlockMsg, getPeers, connectToPeers } = require('./p2pServer')
 
 const http_port = process.env.HTTP_PORT || 3001;
 
@@ -90,14 +90,14 @@ const initHttpServer = (chain) => {
 
 const getTransactions = (address) => {
   const transactions = [];
-  let currBlock = findThickestBranch(blockchain);
+  let currBlock = blockchain.findThickestBranch();
   let preHash = currBlock.header.preHash;
   while (true) {
     // go through all transactions in currBlock
     currBlock.body.forEach((transaction) => {
       // sending money
-      if (transaction.details.publicKey === address) {
-        transaction.details.recipients.forEach((recipient) => {
+      if (transaction.data.publicKey === address) {
+        transaction.data.recipients.forEach((recipient) => {
           if (recipient.address === address) {
             return;
           }
@@ -111,10 +111,10 @@ const getTransactions = (address) => {
         return;
       }
       // receiving money
-      transaction.details.recipients.forEach((recipient) => {
+      transaction.data.recipients.forEach((recipient) => {
         if (recipient.address === address) {
           transactions.push({
-            sender: transaction.details.publicKey,
+            sender: transaction.data.publicKey,
             recipient: address,
             amount: recipient.amount,
             date: new Date(currBlock.header.timestamp * 1000)

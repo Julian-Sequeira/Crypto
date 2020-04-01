@@ -8,7 +8,7 @@ import { withGlobalContext } from '../Context/GlobalContext.js';
 class showQRCode extends React.Component {
     
     state = {
-        text: ''
+        text: 't',
     }
 
     componentDidMount() {

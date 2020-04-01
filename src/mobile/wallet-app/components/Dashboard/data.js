@@ -1,27 +1,39 @@
 const DATA = [
     {
       id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'First Item',
+      sender: 'First Item',
+      date: '01/05/2020',
+      amount: '50',
     },
     {
       id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Second Item',
+      sender: 'Second Item',
+      date: '01/05/2020',
+      amount: '50',
     },
     {
       id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Third Item',
+      sender: 'Third Item',
+      date: '01/05/2020',
+      amount: '50',
     },
     {
       id: 'bd7acbea-c1b1-46c2-aed5-3ahjkjhd53abb28ba',
-      title: '4 Item',
+      sender: '4 Item',
+      date: '01/05/2020',
+      amount: '50',
     },
     {
       id: '3ac68afc-c605-48d3-a4f8-fbhjkhjd91aa97f63',
-      title: '5 Item',
+      sender: '5 Item',
+      date: '01/05/2020',
+      amount: '50',
     },
     {
       id: '58694a0f-3da1-471f-bd96-145571ejhk29d72',
-      title: '6 Item',
+      sender: '6 Item',
+      date: '01/05/2020',
+      amount: '50',
     },
   ];
 

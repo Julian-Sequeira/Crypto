@@ -83,6 +83,27 @@ class BlockChain {
     }
     return false;
   }
+
+    /*
+  find the branch(leaf node) that contains the most work in the given blockchain
+  */
+  findThickestBranch = () => {
+    const thickestBranch = genesisBlock;
+    const toCheck = [thickestBranch];
+    while (toCheck.length > 0) {//loop through every branch
+      const blockToCheck = toCheck[0];
+      const ChildrenList = this.blockchain[getBlockHash(blockToCheck)];
+      for (let i = 1; i < ChildrenList.length; i++) {//loop through everychild
+        if (thickestBranch.work < ChildrenList[i].work) {
+          thickestBranch = ChildrenList[i];
+        }
+        toCheck.push(ChildrenList[i]);
+      }
+      //the parent block that was fully checked shall be removed
+      toCheck.shift();
+    }
+    return thickestBranch;
+  }
 }
 
 /*
@@ -107,25 +128,6 @@ const isValidNewBlock = (newBlock, previousBlock) => {
   return true;
 };
 
-/*
-find the branch(leaf node) that contains the most work in the given blockchain
-*/
-const findThickestBranch = (blockchain) => {
-  const thickestBranch = genesisBlock;
-  const toCheck = [thickestBranch];
-  while (toCheck.length > 0) {//loop through every branch
-    const blockToCheck = toCheck[0];
-    const ChildrenList = this.blockchain[getBlockHash(blockToCheck)];
-    for (let i = 1; i < ChildrenList.length; i++) {//loop through everychild
-      if (thickestBranch.work < ChildrenList[i].work) {
-        thickestBranch = ChildrenList[i];
-      }
-      toCheck.push(ChildrenList[i]);
-    }
-    //the parent block that was fully checked shall be removed
-    toCheck.shift();
-  }
-  return thickestBranch;
-}
+
 
 module.exports = BlockChain;
