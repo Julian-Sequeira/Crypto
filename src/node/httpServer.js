@@ -4,6 +4,10 @@ const bodyParser = require('body-parser');
 const Transaction = require('../cli-wallet/transaction.js');
 const { broadcast, responseLatestMsg } = require('./p2pServer');
 
+
+
+const findThickestBranch = require('./blockChain.js').findThickestBranch;
+
 const http_port = process.env.HTTP_PORT || 3001;
 
 let blockchain;
@@ -88,11 +92,9 @@ const initHttpServer = (chain) => {
   // Get a transaction from a wallet or another node
 
 
-  app.get('/availabletransactions', (req, res) => {
-    let at = getAvailableTransactions(req.address);
-    res.send({
-        transactions: at
-    })
+  app.post('/availableTransactions', (req, res) => {
+    let transactions = getAvailableTransactions(req.address);
+    res.send({ transactions });
     res.status(200);
   });
 

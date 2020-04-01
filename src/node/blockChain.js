@@ -121,4 +121,4 @@ const findThickestBranch = (blockchain) => {
   return thickestBranch;
 }
 
-module.exports = BlockChain;
+module.exports = { BlockChain, findThickestBranch, isValidNewBlock };
