@@ -55,7 +55,7 @@ class BlockChain {
     if (JSON.stringify(blockchainToValidate['genesis']) !== JSON.stringify(genesisBlock)) {
       return false;
     }
-  
+
     var toCheck = [genesisBlock];
     while (toCheck.length > 0) {//loop through every branch
       var blockToCheck = toCheck[0];

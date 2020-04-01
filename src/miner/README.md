@@ -19,7 +19,7 @@ A node program which mines blocks:
 {
     header: {
         version,
-        prevHash, // previous block header hash
+        preHash, // previous block header hash
         timestamp,
         currHash, // current block body hash
         difficulty, // number of zeros required
