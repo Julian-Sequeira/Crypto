@@ -275,12 +275,12 @@ const getTransactions = address => {
           });
         });
       } else {
-        transaction.details.recipients.forEach(recipient => {
+        transaction.data.recipients.forEach(recipient => {
           // receiving money
           if (recipient.address === address) {
             transactions.push({
-              id: transaction.details.id,
-              sender: transaction.details.publicKey,
+              id: transaction.id,
+              sender: transaction.data.publicKey,
               recipient: address,
               amount: recipient.amount,
               date: new Date(currBlock.header.timestamp * 1000)
