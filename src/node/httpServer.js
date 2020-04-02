@@ -272,7 +272,7 @@ const getAvailableTransactions = address => {
 
 const getTransactions = address => {
   const transactions = [];
-  let currBlock = getLatestBlock(blockchain);
+  let currBlock = blockchain.getLatestBlock();
   let preHash = currBlock.header.preHash;
   while (true) {
     // go through all transactions in currBlock

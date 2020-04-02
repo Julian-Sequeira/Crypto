@@ -10,7 +10,7 @@ class Dashboard extends React.Component {
     
     state = {
         user: '',
-        balance: '5',
+        balance: '500',
     }
 
     /*shouldComponentUpdate(nextProps, nextState) {
@@ -33,12 +33,12 @@ class Dashboard extends React.Component {
             console.log("user details are null");
             return;
         }
-        const address = userDetails.publicKey;
+        /*const address = userDetails.publicKey;
         const body = {
             address,
         }
         console.log("from dashboard: " + userDetails.publicKey);
-        axios.post(`https://efdac82e.ngrok.io/getBalance`, body)
+        axios.post(`https://5a1395d3.ngrok.io/getBalance`, body)
         .then((res) => {
             const balance = res.data.balance;
             console.log("current balance: " + balance);
@@ -46,7 +46,19 @@ class Dashboard extends React.Component {
         })
         .catch((err) => {
             console.log(err);
-        });
+        });*/
+    }
+
+    updateMockData = () => {
+        const balance = 494
+        this.setState({ balance });
+        const txList = {
+            sender: "2d2d2d2d2d424547494e2...",
+            amount: "5",
+            date: "04/01/2020",
+        }
+        const data = [txList];
+        return data;
     }
 
     showTransactionScreen = () => {
@@ -110,7 +122,7 @@ class Dashboard extends React.Component {
                         <Text style={styles.loginText}>Show QR Code</Text>
                     </TouchableOpacity>
                 </View>
-                <TransactionList />
+                <TransactionList mockData={this.updateMockData}/>
             </SafeAreaView>
 
         );

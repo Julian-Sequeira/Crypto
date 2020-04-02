@@ -50,10 +50,11 @@ class SendTransaction extends React.Component {
             trxData: JSON.stringify(firstTx),
         }
 
-        axios.post(`https://efdac82e.ngrok.io/addTransaction`, body)
+        axios.post(`https://e2cc9c2c.ngrok.io/addTransaction`, body)
         .then((res) => {
             result = res;
-            // console.log(res);
+            this.props.global.updateCanSendBalance();
+            this.props.global.updateCanSendTxHist();
         })
         .catch((err) => {
             console.log(err);
@@ -65,7 +66,7 @@ class SendTransaction extends React.Component {
             [
                 {
                     text: 'OK', 
-                    onPress: () => console.log("money sent, status: " + result.status),
+                    onPress: () => console.log("money sent, status: " + result),
                 },
             ],
         );

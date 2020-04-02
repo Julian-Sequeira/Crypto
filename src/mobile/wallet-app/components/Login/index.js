@@ -27,6 +27,10 @@ class Login extends React.Component {
       try {
         const {username, password} = this.state;
         const val = await AsyncStorage.getItem(username);
+        if (val == null) {
+          this.setState({ error: 'User does not exist' });
+          return;
+        }
         console.log("user details upson login : " + val);
         const userDetails = JSON.parse(val);
         const compareTo = userDetails.password;

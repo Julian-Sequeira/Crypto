@@ -31,22 +31,27 @@ class TransactionList extends React.Component {
         if (userDetails === null) {
           console.log("user details are null");
           return;
-      }
+        }
         console.log("transaction list user details: " + userDetails);
+        const mockData = this.props.mockData();
+        this.setState({ data: mockData });
+        /*
         const body = {
           address: userDetails.publicKey,
         }
         console.log("public key: " + userDetails.publicKey);
-        axios.post(`https://efdac82e.ngrok.io/getTransactions`, body)
+        axios.post(`https://5a1395d3.ngrok.io/getTransactions`, body)
         .then((res) => {
             // res.data.transactions.id = 1;
-            const result = res.data.transactions;
+            let result = res.data.transactions;
+            //result.sender = result.sender.subString(5);
             console.log("transaction data(result): " + JSON.stringify(result));
+            result = [result[0], result[1], result[2], result[3]];
             this.setState({ data: result });
         })
         .catch((err) => {
           console.log(err);
-        })
+        })*/
     }
 
     renderSeparator = () => {
