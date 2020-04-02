@@ -56,11 +56,19 @@ const initHttpServer = chain => {
   app.post("/addBlock", (req, res) => {
     console.log("got new block");
     // console.log(req.body.newBlock);
-    const isValid = verifyBlock(req.body.newBlock);
+    const block = req.body.newBlock;
+    const isValid = verifyBlock(block);
     if (isValid) {
-      blockchain.addBlock(req.body.newBlock);
-      broadcast(newBlockMsg(req.body.newBlock));
+      blockchain.addBlock(block);
+      broadcast(newBlockMsg(block));
       res.status(200).send({ msg: "Block accepted" });
+      // remove transactions from mempool
+      block.body.forEach((transaction) => {
+        const key = JSON.stringify(transaction.data.previous);
+        if (key in blockchain.memPool) {
+          delete blockchain.memPool[key];
+        }
+      });
     } else {
       console.log("invalid block, please try again");
       res.status(400).send({ msg: "Block rejected" });
@@ -88,13 +96,19 @@ const initHttpServer = chain => {
 
   app.post("/addTransaction", (req, res) => {
     const transactionData = JSON.parse(req.body.trxData);
+    if (JSON.stringify(transactionData.data.previous) in blockchain.memPool) {
+      console.log("transaction already received");
+      res.status(400);
+      res.send({ msg: "Transaction rejected" });
+      return;
+    }
     transactionData.isNew = false;
     const transaction = new Transaction(transactionData);
     console.log(transaction);
     const isValid = verifyTransaction(transaction);
     if (isValid) {
       console.log("got valid transaction");
-      blockchain.memPool[transaction.id] = transaction;
+      blockchain.memPool[JSON.stringify(transaction.data.previous)] = transaction;
       // console.log(blockchain.memPool);
       res.status(200);
       res.send({ msg: "Transaction received" });
@@ -174,7 +188,7 @@ const verifyBlock = block => {
 const verifyTransaction = transaction => {
   // verify the transaction signature
   if (transaction.data.type === 'miner'){
-    // verify miner
+    // TODO: verify miner
     return true;
   }
   isSignatureValid = transaction.verifyTrxSignature();
