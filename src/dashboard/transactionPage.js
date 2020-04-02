@@ -19,7 +19,7 @@ class TransactionPage extends Component {
     const recipients = transaction.data.recipients;
     const comps = [];
     recipients.forEach((recipient) => {
-    const comp = <div className='recipient' key={`${recipient.address}:${recipient.index}`} >- {shorten(recipient.address, 16)} : {recipient.amount}</div>;
+    const comp = <div className='recipient' key={`${recipient.address}:${recipient.index}`} >- {shorten(recipient.address, 16)}</div>;
       comps.push(comp);
     });
     return comps;
@@ -84,11 +84,15 @@ class TransactionPage extends Component {
             <img src="/dcoin.png" height="100" width="100"></img>
           </div>
           <div className="transactionIconTo">
+            <div className="centered">
+              TO
+            </div>
             {recipientIcons}
           </div>
         </div>
         <div>
           <br /><br />
+          Details: <br /><br />
           transaction id: {transaction.id} <br />
           signature: {shorten(transaction.signature, 16)} <br /><br />
           previous transaction IDs: {previousIDs} <br />

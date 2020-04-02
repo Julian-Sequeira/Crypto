@@ -8,11 +8,22 @@ html, body {
   margin: 1px;
 }
 
+.centered {
+  text-align: center;
+}
+
+.leftABit {
+  text-indent: 45px;
+}
+
 .transactions {
+  background-color: #1fdb83;
+  background-image: linear-gradient(141deg, #a2cd3e 0%, #1fdb74 51%, #2ce858 75%);
   width: 100%;
   height: 19%;
   border: solid black 1px;
   overflow: auto;
+  z-index: 1;
 }
 
 .transaction {
@@ -23,11 +34,16 @@ html, body {
 }
 
 .blockTree {
+  background-color: #1fc8db;
+  background-image: linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%);
   width: 100%;
   height: 80%;
   /* min-height: 400px; */
   border: solid black 1px;
   z-index: 100;
+}
+
+.blockLabel {
 }
 
 .blockOverlay {

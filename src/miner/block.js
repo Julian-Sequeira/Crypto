@@ -105,7 +105,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
         preHash: prevHash,
         timestamp: Date.now(),
         currHash,
-        difficulty: 4, // TODO: difficulty may change
+        difficulty: 5, // TODO: difficulty may change
         nonce: 0, // This will be the value for miner to change and get currect hash
     }
 
