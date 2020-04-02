@@ -31,7 +31,7 @@ class TransactionPage extends Component {
     const comps = [];
     recipients.forEach((recipient) => {
       const comp = 
-      <div className='transactionIconToRec' key={`icon-${recipient.address}:${recipient.index}`} >
+      <div className='transactionPageIconToRec' key={`icon-${recipient.address}:${recipient.index}`} >
         {recipient.amount.toString().padStart(3, '0')}
         &nbsp;&nbsp;
         <img src="/dcoin.png" height="50" width="50"></img>
@@ -41,7 +41,7 @@ class TransactionPage extends Component {
       comps.push(comp);
     });
     const comp = 
-    <div className='transactionIconToRec' key={`icon-fee`} >
+    <div className='transactionPageIconToRec' key={`icon-fee`} >
       {transaction.data.fee.toString().padStart(3, '0')}
       &nbsp;&nbsp;
       <img src="/dcoin.png" height="50" width="50"></img>
@@ -68,22 +68,22 @@ class TransactionPage extends Component {
     const recipientIcons = this.getRecipientCompsIcons();
     return (
       <div className="transactionPage">
-        <div className="transactionIcon">
-          <div className="transactionIconFrom">
+        <div className="transactionPageIcon">
+          <div className="transactionPageIconFrom">
             FROM
             <br /><br />
             <div>
               {shorten(transaction.data.publicKey, 30)}
             </div>
           </div>
-          <div className="transactionIconCoins">
+          <div className="transactionPageIconCoins">
             <div>
               {this.getTotalAmount()}
             </div>
             <br />
             <img src="/dcoin.png" height="100" width="100"></img>
           </div>
-          <div className="transactionIconTo">
+          <div className="transactionPageIconTo">
             <div className="centered">
               TO
             </div>

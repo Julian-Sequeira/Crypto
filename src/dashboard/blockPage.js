@@ -51,15 +51,16 @@ class BlockPage extends Component {
         {
           blockInfo === undefined ? `block with hash '${hash}' not found` :
           <div>
-            block hash: {hash} <br /><br />
-            version: {block.header.version} <br />
-            previous block's hash: {block.header.preHash} <br />
+            block hash: {hash} <br />
+            previous block's hash: {block.header.preHash} <br /><br /><br />
+            transactions: <br /><br />
+            {comps}
+            <br />
+            Details: <br /><br />
             timestamp: {block.header.timestamp} <br />
             hash of transactions: {block.header.currHash} <br />
             difficulty: {block.header.difficulty} <br />
-            nonce: {block.header.nonce} <br /><br /><br />
-            transactions: <br /><br />
-            {comps}
+            nonce: {block.header.nonce} 
           </div>
         }
       </div>
