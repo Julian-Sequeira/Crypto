@@ -264,10 +264,10 @@ const getTransactions = address => {
     // go through all transactions in currBlock
     currBlock.body.forEach(transaction => {
       // sending money
-      if (transaction.details.publicKey === address) {
-        transaction.details.recipients.forEach(recipient => {
+      if (transaction.data.publicKey === address) {
+        transaction.data.recipients.forEach(recipient => {
           transactions.push({
-            id: transaction.details.id,
+            id: transaction.id,
             sender: address,
             recipient: recipient.address,
             amount: recipient.amount,
