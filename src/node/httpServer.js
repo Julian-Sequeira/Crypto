@@ -258,7 +258,7 @@ const getAvailableTransactions = address => {
 
 const getTransactions = address => {
   const transactions = [];
-  let currBlock = findThickestBranch(blockchain);
+  let currBlock = getLatestBlock(blockchain);
   let preHash = currBlock.header.preHash;
   while (true) {
     // go through all transactions in currBlock
