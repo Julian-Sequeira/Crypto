@@ -34,16 +34,16 @@ function getHashString(hash) {
   const comp = 
   <div>
     <div>
-      {hash.substring(0,14)}
+      {hash.substring(0,11)}
     </div>
     <div>
-      {hash.substring(14,28)}
+      {hash.substring(11,22)}
     </div>
     <div className="leftABit">
       ...
     </div>
     <div>
-      {hash.substring(hash.length - 14, hash.length)}
+      {hash.substring(hash.length - 11, hash.length)}
     </div>
   </div>
   return comp;

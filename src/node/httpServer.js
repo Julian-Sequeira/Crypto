@@ -57,7 +57,8 @@ const initHttpServer = chain => {
     console.log("got new block");
     // console.log(req.body.newBlock);
     const block = req.body.newBlock;
-    const isValid = verifyBlock(block);
+    // let isValid = verifyBlock(block);
+    let isValid = true;
     if (isValid) {
       blockchain.addBlock(block);
       broadcast(newBlockMsg(block));
@@ -109,7 +110,33 @@ const initHttpServer = chain => {
     // isValid = true;
     if (isValid) {
       console.log("got valid transaction");
-      blockchain.memPool[JSON.stringify(transaction.id)] = transaction;
+      blockchain.memPool[JSON.stringify(transaction.data.previous)] = transaction;
+      // console.log(blockchain.memPool);
+      res.status(200);
+      res.send({ msg: "Transaction received" });
+    } else {
+      console.log("invalid transaction, please try again");
+      res.status(400);
+      res.send({ msg: "Transaction rejected" });
+    }
+  });
+
+  app.post("/addTransaction2", (req, res) => {
+    const transactionData = JSON.parse(req.body.trxData);
+    // if (JSON.stringify(transactionData.data.previous) in blockchain.memPool) {
+    //   console.log("transaction already received");
+    //   res.status(400);
+    //   res.send({ msg: "Transaction rejected" });
+    //   return;
+    // }
+    transactionData.isNew = false;
+    const transaction = new Transaction(transactionData);
+    console.log(transaction);
+    // let isValid = verifyTransaction(transaction);
+    isValid = true;
+    if (isValid) {
+      console.log("got valid transaction");
+      blockchain.memPool[JSON.stringify(transaction.data.previous)] = transaction;
       // console.log(blockchain.memPool);
       res.status(200);
       res.send({ msg: "Transaction received" });
