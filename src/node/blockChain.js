@@ -1,4 +1,4 @@
-const genesisBlock = require("../genesisBlock.json");
+const genesisBlock = require("../generate/blocks/genesisBlock.json");
 // const memory = require("../db/collection.js");
 // const sqlite3 = require("sqlite3").verbose();
 

@@ -14,7 +14,7 @@ function getBlockTemplate(publicKey, prevHash, transactions) {
         publicKey: null,
         previous: [{previousID: 'new coins', previousIdx: 0}], // all reward transactions have previous ID of 0
         fee: 0,
-        recipients: [{index: 0, address: publicKey.toString('HEX'), amount: 1}],
+        recipients: [{index: 0, address: publicKey.toString('HEX'), amount: transactions.length}],
         type: 'miner'
     };
     const args = {

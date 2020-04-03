@@ -35,10 +35,10 @@ transactions.push(transaction);
 
 
 // Send some money (500) to the mobile wallet
-const mobileAddress = utils.readPubKey('mobile');
-recipients = [{index: 0, address: mobileAddress, amount: 500}]
-transaction = utils.makeTransaction(name, previous, recipients);
-transactions.push(transaction);
+// const mobileAddress = utils.readPubKey('mobile');
+// recipients = [{index: 0, address: mobileAddress, amount: 500}]
+// transaction = utils.makeTransaction(name, previous, recipients);
+// transactions.push(transaction);
 
 
 
