@@ -14,7 +14,7 @@ async function mine(){
   block.mineBlock(blockTemplate)
     .then(async (newBlock) => {
       // TODO: send the newly generated block to P2P nodes
-      console.log(JSON.stringify(newBlock));
+      // console.log(JSON.stringify(newBlock));
       try{
         await axios({
           method: 'post',

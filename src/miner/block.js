@@ -126,14 +126,18 @@ const mineBlock = (block) => new Promise((resolve, reject) => {
     let nonce = Number.MIN_SAFE_INTEGER;
     let currHash = null;
     let count = 0;
+    console.log(`current difficulty for this block is ${difficulty}`);
     while (nonce <= Number.MAX_SAFE_INTEGER) {
         block.header.nonce = nonce;
         currHash = getHash(block);
         if (currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
-            // console.log(currHash);
+            console.log(`got hash ${currHash} - Success! There are enough 0's!`);
             return resolve(block);
         }
         nonce++;
+        if (currHash.substring(0, difficulty-1) === '0'.repeat(difficulty-1) && currHash[difficulty] !== '0') {
+            console.log(`got hash ${currHash} - not enough 0's`);
+        }
         if (nonce % 2 ** 51 === 0) console.log(count++);
     }
     return reject('Failed to find correct nonce!');

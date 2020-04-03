@@ -109,7 +109,7 @@ const initHttpServer = chain => {
     // isValid = true;
     if (isValid) {
       console.log("got valid transaction");
-      blockchain.memPool[JSON.stringify(transaction.id.previous)] = transaction;
+      blockchain.memPool[JSON.stringify(transaction.id)] = transaction;
       // console.log(blockchain.memPool);
       res.status(200);
       res.send({ msg: "Transaction received" });
