@@ -29,6 +29,7 @@ class Transactions extends Component {
   }
 
   getTransactionComps = (transactions) => {
+    console.log(transactions);
     const { setOverlayComponent } = this.props;
     const comps = [];
     transactions.forEach((transaction) => {
@@ -41,7 +42,12 @@ class Transactions extends Component {
     const comps = this.getTransactionComps(this.state.transactions);
     return (
       <div className="transactions">
-        {comps}
+        <h2 className="transactionTitle">
+          Unmined Transactions:
+        </h2>
+        <div>
+          {comps}
+        </div>
       </div>
     );
   }

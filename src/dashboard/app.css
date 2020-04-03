@@ -136,3 +136,8 @@ html, body {
   display: table; 
   vertical-align: middle;
 }
+
+.transactionTitle {
+  font-size: large;
+  font-weight: bold;
+}
