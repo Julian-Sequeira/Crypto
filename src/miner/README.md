@@ -15,7 +15,7 @@ A node program which mines blocks:
 
 ## structure
 
-```
+```json
 {
     header: {
         version,

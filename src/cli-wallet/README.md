@@ -1,7 +1,7 @@
 # Transaction Class
 
 A Transaction object takes in the following object:
-
+```json
 args = {
     data:{
         publicKey, 
@@ -16,6 +16,7 @@ args = {
     passphrase: use this to decrypt the encrypted private key stored on file,
     directory: folder where the encrypted private key is stored
 }
+```
 
 - When sending a transaction over the network, you can use transaction.serializedData() to
 get a serial string to send. 

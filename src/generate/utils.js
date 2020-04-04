@@ -1,6 +1,12 @@
+// Easy path management
+require('module-alias/register');
+
+// Node modules
 const fs = require('fs');
-const pubcrypto = require('../cli-wallet/public-crypto.js');
-const Transaction = require('../cli-wallet/transaction.js');
+
+// Custom modules
+const pubcrypto = require('@shared/public-crypto.js');
+const Transaction = require('@shared/cli-wallet/transaction.js');
 
 /**
  * The number of wallets we have to work with

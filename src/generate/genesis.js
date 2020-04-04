@@ -1,7 +1,12 @@
-// Created imports
+// Easy path management
+require('module-alias/register');
+
+// Node modules
 const fs = require('fs');
+
+// Custom modules
 const mining = require('./mining.js');
-const pubcrypto = require('../cli-wallet/public-crypto.js');
+const pubcrypto = require('@shared/public-crypto.js');
 const utils = require('./utils.js');
 
 /**

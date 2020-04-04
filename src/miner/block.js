@@ -1,6 +1,12 @@
+// Easy path management
+require('module-alias/register');
+
+// Node modules
 const axios = require('axios').default;
 const crypto = require('crypto');
-const Transaction = require('../cli-wallet/transaction');
+
+// Custom modules
+const Transaction = require('@shared/transaction');
 
 
 /**
@@ -102,7 +108,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
     // TODO: construct block template here, need to update block structure and fields
     const header = {
         version: '1.0.0',
-        preHash: prevHash,
+        prevHash: prevHash,
         timestamp: Date.now(),
         currHash,
         difficulty: 5, // TODO: difficulty may change

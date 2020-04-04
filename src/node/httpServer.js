@@ -1,7 +1,13 @@
+// Easy path management
+require('module-alias/register');
+
+// Node modules
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const Transaction = require("../cli-wallet/transaction.js");
+
+// Custom modules
+const Transaction = require("@shared/transaction.js");
 const { getHash } = require("../shared/utils.js");
 const {
   broadcast,

@@ -1,5 +1,7 @@
-const pubcrypto = require('../cli-wallet/public-crypto.js');
-const Transaction = require('../cli-wallet/transaction.js');
+// Easy path management
+require('module-alias/register');
+const pubcrypto = require('@shared/public-crypto.js');
+const Transaction = require('@shared/transaction.js');
 
 
 /**
@@ -34,10 +36,10 @@ function getBlockTemplate(publicKey, prevHash, transactions) {
     // TODO: construct block template here, need to update block structure and fields
     const header = {
         version: '1.0.0',
-        preHash: prevHash,
+        prevHash,
         timestamp: Date.now(),
         currHash,
-        difficulty: 0, // TODO: difficulty may change
+        difficulty: 1, // TODO: difficulty may change
         nonce: 0, // This will be the value for miner to change and get currect hash
     }
 

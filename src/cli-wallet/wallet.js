@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Easy path management
-require('module-alias/register')
+require('module-alias/register');
 
 // Node Modules
 const axios = require("axios");
