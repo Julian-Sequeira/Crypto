@@ -17,6 +17,7 @@
     "getopts": "^2.2.5",
     "js-sha256": "^0.9.0",
     "lodash": "^4.17.15",
+    "module-alias": "^2.2.2",
     "mongodb": "^3.5.5",
     "ngrok": "^3.2.7",
     "nodemon": "^2.0.2",
@@ -45,5 +46,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "_moduleAliases": {
+    "@root" : ".",
+    "@src" : "./src",
+    "@shared" : "./src/shared"
   }
 }

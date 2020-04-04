@@ -1,12 +1,17 @@
 #!/usr/bin/env node
+
+// Easy path management
+require('module-alias/register')
+
+// Node Modules
 const axios = require("axios");
 const fs = require("fs");
 const getopts = require("getopts");
 const reader = require("readline-sync");
 
 // Created imports
-const pubcrypto = require("./public-crypto.js");
-const Transaction = require("./transaction.js");
+const pubcrypto = require("@shared/public-crypto.js");
+const Transaction = require("@shared/transaction.js");
 
 // Parse cmdline args
 const options = getopts(process.argv, {
