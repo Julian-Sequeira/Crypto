@@ -73,10 +73,10 @@ class BlockChain {
         }
 
         // Check that the block hashes to the right difficulty
-        const currHash = newBlock.header.currHash;
+        const blockHash = getHash(newBlock);
         for (let i = 0; i < this.difficulty; i++) {
-            if (currHash[i] != '0') {
-                console.log(currHash);
+            if (blockHash[i] != '0') {
+                console.log(blockHash);
                 console.log("0s don't match difficulty");
                 return false;
             }
