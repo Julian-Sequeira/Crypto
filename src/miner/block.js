@@ -21,13 +21,26 @@ const getFakeTransactions = () => {
 
 const getTransactions = async () => {
     let transactions = null;
+    let difficulty = null;
     try{
         // TODO: get peer list and request from peer list
         transactions = (await axios.get('http://localhost:3001/transactions')).data;
+        difficulty = (await axios.get('http://localhost:3001/difficulty')).data;
     } catch (e) {
         console.log(e);
     }
     return transactions;
+}
+
+const getDifficulty = async () => {
+    let difficulty = null;
+    try{
+        difficulty = (await axios.get('http://localhost:3001/difficulty')).data.difficulty;
+    } catch (e) {
+        console.log(e);
+    }
+    console.log(difficulty);
+    return difficulty;
 }
 
 const getLastBlock = async () => {
@@ -71,6 +84,15 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
         }
     }
 
+    // Get the target difficulty
+    let difficulty;
+    try {
+        difficulty = await getDifficulty();
+    } catch (e) {
+        console.log(e);
+        return;
+    }
+
     // Create the first transaction in the block body which is the reward for miner
     const data = {
         publicKey: null,
@@ -111,7 +133,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
         prevHash: prevHash,
         timestamp: Date.now(),
         currHash,
-        difficulty: 5, // TODO: difficulty may change
+        difficulty, 
         nonce: 0, // This will be the value for miner to change and get currect hash
     }
 
@@ -130,19 +152,18 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
 const mineBlock = (block) => new Promise((resolve, reject) => {
     const difficulty = block.header.difficulty;
     let nonce = Number.MIN_SAFE_INTEGER;
-    let currHash = null;
     let count = 0;
     console.log(`current difficulty for this block is ${difficulty}`);
     while (nonce <= Number.MAX_SAFE_INTEGER) {
         block.header.nonce = nonce;
-        currHash = getHash(block);
-        if (currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
-            console.log(`got hash ${currHash} - Success! There are enough 0's!`);
+        block.header.currHash = getHash(block);
+        if (block.header.currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
+            console.log(`got hash ${block.header.currHash} - Success! There are enough 0's!`);
             return resolve(block);
         }
         nonce++;
-        if (currHash.substring(0, difficulty-1) === '0'.repeat(difficulty-1) && currHash[difficulty] !== '0') {
-            console.log(`got hash ${currHash} - not enough 0's`);
+        if (block.header.currHash.substring(0, difficulty-1) === '0'.repeat(difficulty-1) && block.header.currHash[difficulty] !== '0') {
+            console.log(`got hash ${block.header.currHash} - not enough 0's`);
         }
         if (nonce % 2 ** 51 === 0) console.log(count++);
     }

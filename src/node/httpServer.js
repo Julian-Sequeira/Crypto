@@ -8,7 +8,7 @@ const bodyParser = require("body-parser");
 
 // Custom modules
 const Transaction = require("@shared/transaction.js");
-const { getHash } = require("../shared/utils.js");
+const { getHash } = require("@shared/utils.js");
 const {
   broadcast,
   responseLatestMsg,
@@ -21,7 +21,7 @@ const http_port = process.env.HTTP_PORT || 3001;
 
 let blockchain;
 
-const initHttpServer = chain => {
+const initHttpServer = (chain) => {
   blockchain = chain;
   const app = express();
   app.use(cors());
@@ -50,6 +50,11 @@ const initHttpServer = chain => {
     };
     res.send(reponse);
   });
+
+  app.get('/difficulty', (req, res) => {
+      res.send({difficulty: blockchain.difficulty});
+      res.status(200);
+  })
 
   app.get("/getNewBlocks", (req, res) => {
     const blockHash = req.body.hash;
@@ -186,12 +191,12 @@ const initHttpServer = chain => {
 const verifyBlock = block => {
   // validate header
   const {
-    preHash, // previous block header hash
+    prevHash, // previous block header hash
     currHash, // current block body hash
     difficulty // number of zeros required
   } = block.header;
-  if (!(preHash in blockchain.getBlockChain())) {
-    console.log("preHash does not exist in the blockchain");
+  if (!(prevHash in blockchain.getBlockChain())) {
+    console.log("prevHash does not exist in the blockchain");
     return false;
   }
   const bodyHash = getHash(block.body);
@@ -267,7 +272,7 @@ const getAvailableTransactions = address => {
   const usedTransactions = [];
   const availableTransactions = [];
   let currBlock = blockchain.getLatestBlock();
-  let preHash = currBlock.header.preHash;
+  let prevHash = currBlock.header.prevHash;
   while (true) {
     // go through all transactions in currBlock
     currBlock.body.forEach(transaction => {
@@ -297,9 +302,9 @@ const getAvailableTransactions = address => {
         });
       }
     });
-    if (preHash in blockchain === false) break;
-    currBlock = blockchain[preHash];
-    preHash = currBlock.preHash;
+    if (prevHash in blockchain === false) break;
+    currBlock = blockchain[prevHash];
+    prevHash = currBlock.prevHash;
   }
   return availableTransactions.filter(trans => !(trans.id in usedTransactions));
 };
@@ -307,7 +312,7 @@ const getAvailableTransactions = address => {
 const getTransactions = address => {
   const transactions = [];
   let currBlock = blockchain.getLatestBlock();
-  let preHash = currBlock.header.preHash;
+  let prevHash = currBlock.header.prevHash;
   while (true) {
     // go through all transactions in currBlock
     currBlock.body.forEach(transaction => {
@@ -337,9 +342,9 @@ const getTransactions = address => {
         });
       }
     });
-    if (preHash in blockchain === false) break;
-    currBlock = blockchain[preHash];
-    preHash = currBlock.preHash;
+    if (prevHash in blockchain === false) break;
+    currBlock = blockchain[prevHash];
+    prevHash = currBlock.prevHash;
   }
   return transactions;
 };

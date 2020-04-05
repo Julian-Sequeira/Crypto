@@ -39,7 +39,7 @@ function getBlockTemplate(publicKey, prevHash, transactions) {
         prevHash,
         timestamp: Date.now(),
         currHash,
-        difficulty: 1, // TODO: difficulty may change
+        difficulty: 2, 
         nonce: 0, // This will be the value for miner to change and get currect hash
     }
 
@@ -62,8 +62,8 @@ function mineBlock(template) {
     let count = 0;
     while (nonce <= Number.MAX_SAFE_INTEGER) {
         template.header.nonce = nonce;
-        currHash = pubcrypto.getHash(template.header);
-        if (currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
+        template.header.currHash = pubcrypto.getHash(template);
+        if (template.header.currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
             return template;
         }
         nonce++;

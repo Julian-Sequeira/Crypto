@@ -22,8 +22,8 @@ class BlockChain {
         this.blockchain[genesisHash] = { block: genesisBlock, totalDifficulty: 1, nextHashes: [] };
         this.blockchain['longestChain'] = genesisHash; //stores the leaf node of the longest chain
         this.latestBlock = genesisBlock;
-        this.difficulty = 1; // The current difficulty needed to create a new block
-        this.longestDifficulty = 1; // The difficulty sum of all the blocks in the longest chain
+        this.difficulty = genesisBlock.header.difficulty; // The current difficulty needed to create a new block
+        this.longestDifficulty = genesisBlock.header.difficulty; // The difficulty sum of all the blocks in the longest chain
         this.numBlocks = 1;
         this.updatedTime = Date.now();
         this.memPool = {}; 
@@ -43,7 +43,7 @@ class BlockChain {
      * To keep things simple we just increase or decrease by 1 depending
      */
     updateDifficulty = () => {
-        if (numBlocks % 10 == 0) {
+        if (this.numBlocks % 10 == 0) {
             const currentTime = Date.now();
             const elapsed = currentTime - this.updatedTime;
             const seconds = parseInt(Math.floor(elapsed/1000));
@@ -59,32 +59,38 @@ class BlockChain {
 
     /**
      * Check if a block is valid or not, meaning:
-     * 1) The block's content's hash matches the listed hash and the difficulty
+     * 1) The block's content's hash matches the required difficulty
      * 2) The prevHash matches the hash header of the previous block
      * 3) All transactions within the block are valid (TO DO)
      */
     isValidBlock = (newBlock) => {
 
-        // Check the block's content's hash
-        const contentHash = getHash(newBlock.body);
-        if (contentHash != newBlock.header.currHash) return false;
-
-        // Check the block's difficulty
+        // Check the enforced difficulty is used
         const blockDifficulty = newBlock.header.difficulty;
-        if (blockDifficulty != this.difficulty) return false;
-        for (let i = 0; i < blockDifficulty; i++) {
-            if (contentHash[i] != '0') {
+        if (blockDifficulty != this.difficulty) {
+            console.log("Difficulty doesn't match posted one");
+            return false;
+        }
+
+        // Check that the block hashes to the right difficulty
+        const currHash = newBlock.header.currHash;
+        for (let i = 0; i < this.difficulty; i++) {
+            if (currHash[i] != '0') {
+                console.log(currHash);
+                console.log("0s don't match difficulty");
                 return false;
             }
         }
 
         // Check the hash header of the previous block
         const prevHash = newBlock.header.prevHash;
-        if (!(prevHash in this.blockchain)) return false;
-        const prevBlock = this.blockchain[prevHash];
-        if (getBlockHash(prevBlock) != prevHash) return false;
+        if (!(prevHash in this.blockchain)) {
+            console.log("prevHash not found");
+            return false;
+        }
 
         // Verify all transactions within the block (TO DO)
+        return true;
     }
 
     /** 
@@ -110,8 +116,8 @@ class BlockChain {
         }
 
         // Update the longest chain
-        if (chainDifficulty > this.longestDifficulty) {
-            this.longestDifficulty = chainDifficulty;
+        if (branchDifficulty > this.longestDifficulty) {
+            this.longestDifficulty = branchDifficulty;
             this.blockchain['longestChain'] = newBlockHash;
         }
     }
@@ -121,13 +127,15 @@ class BlockChain {
      */
     addBlock = (newBlock) => {
         // Verify the block, and make sure it adheres to the current difficulty
-        if (isValidBlock(newBlock) && (newBlock.header.difficulty == this.difficulty)) {
+        if (this.isValidBlock(newBlock) && (newBlock.header.difficulty == this.difficulty)) {
             console.log('Adding block to the chain');
             this.addBlockToBranch(newBlock);
             this.numBlocks++;
             this.updateDifficulty();
             return;
         } else {
+            console.log(newBlock.header.difficulty);
+            console.log(this.difficulty);
             console.log('New block is invalid and not accepted');
         } 
     }

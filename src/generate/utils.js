@@ -6,7 +6,7 @@ const fs = require('fs');
 
 // Custom modules
 const pubcrypto = require('@shared/public-crypto.js');
-const Transaction = require('@shared/cli-wallet/transaction.js');
+const Transaction = require('@shared/transaction.js');
 
 /**
  * The number of wallets we have to work with
