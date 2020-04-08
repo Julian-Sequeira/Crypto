@@ -60,15 +60,21 @@ class BlockChain {
     /**
      * Check if a block is valid or not, meaning:
      * 1) The block's content's hash matches the required difficulty
+     * 2) The block's bodyHash is a hash of all its transactions
      * 2) The prevHash matches the hash header of the previous block
      * 3) All transactions within the block are valid (TO DO)
      */
     isValidBlock = (newBlock) => {
 
         // Check the enforced difficulty is used
-        const blockDifficulty = newBlock.header.difficulty;
-        if (blockDifficulty != this.difficulty) {
+        if (newBlock.header.difficulty != this.difficulty) {
             console.log("Difficulty doesn't match posted one");
+            return false;
+        }
+
+        // Check the block's transaction hashes
+        if (newBlock.header.bodyHash != getHash(newBlock.body)) {
+            console.log("Transaction hashes don't match");
             return false;
         }
 

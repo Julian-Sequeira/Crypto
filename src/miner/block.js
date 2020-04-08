@@ -114,7 +114,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
     const body = [];
     body.push(transaction);
     transactions.forEach(t => body.push(t));
-    const currHash = getHash(body);
+    const bodyHash = getHash(body);
 
     // Get the hash of the previous block
     if (prevHash === undefined) {
@@ -132,7 +132,7 @@ const getBlockTemplate = async (publicKey, prevHash, transactions) => {
         version: '1.0.0',
         prevHash: prevHash,
         timestamp: Date.now(),
-        currHash,
+        bodyHash,
         difficulty, 
         nonce: 0, // This will be the value for miner to change and get currect hash
     }

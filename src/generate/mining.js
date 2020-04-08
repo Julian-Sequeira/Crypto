@@ -31,14 +31,14 @@ function getBlockTemplate(publicKey, prevHash, transactions) {
     const body = [];
     body.push(transaction);
     transactions.forEach(t => body.push(t));
-    const currHash = pubcrypto.getHash(body);
+    const bodyHash = pubcrypto.getHash(body);
 
     // TODO: construct block template here, need to update block structure and fields
     const header = {
         version: '1.0.0',
         prevHash,
         timestamp: Date.now(),
-        currHash,
+        bodyHash,
         difficulty: 2, 
         nonce: 0, // This will be the value for miner to change and get currect hash
     }
@@ -62,8 +62,8 @@ function mineBlock(template) {
     let count = 0;
     while (nonce <= Number.MAX_SAFE_INTEGER) {
         template.header.nonce = nonce;
-        template.header.currHash = pubcrypto.getHash(template);
-        if (template.header.currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
+        currHash = pubcrypto.getHash(template);
+        if (currHash.substring(0, difficulty) === '0'.repeat(difficulty)) {
             return template;
         }
         nonce++;
